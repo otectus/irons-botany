@@ -17,12 +17,6 @@ public class PacketHandler {
     private static int packetId = 0;
 
     public static void register() {
-        CHANNEL.messageBuilder(ManaTransferPacket.class, packetId++)
-                .encoder(ManaTransferPacket::encode)
-                .decoder(ManaTransferPacket::new)
-                .consumerMainThread(ManaTransferPacket::handle)
-                .add();
-
         CHANNEL.messageBuilder(SpellCastSyncPacket.class, packetId++)
                 .encoder(SpellCastSyncPacket::encode)
                 .decoder(SpellCastSyncPacket::new)

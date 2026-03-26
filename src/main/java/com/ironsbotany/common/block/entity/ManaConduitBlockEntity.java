@@ -1,6 +1,5 @@
 package com.ironsbotany.common.block.entity;
 
-import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.registry.IBBlockEntities;
 import com.ironsbotany.common.util.ManaHelper;
@@ -13,20 +12,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import vazkii.botania.api.mana.ManaPool;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 public class ManaConduitBlockEntity extends BlockEntity {
     private int storedISSMana = 0;
-    private static final int MANA_PER_PLAYER_PER_SECOND = 5;
-
-    // Cached reflection for Botania mana pool API
-    private static boolean reflectionInitialized = false;
-    private static boolean reflectionAvailable = false;
-    private static Class<?> manaPoolClass;
-    private static Method getCurrentManaMethod;
-    private static Method receiveManaMethod;
+    private static int getTransferRate() {
+        return CommonConfig.BLOCK_ENTITY_TRANSFER_RATE.get();
+    }
 
     public ManaConduitBlockEntity(BlockPos pos, BlockState state) {
         super(IBBlockEntities.MANA_CONDUIT.get(), pos, state);
@@ -44,20 +38,6 @@ public class ManaConduitBlockEntity extends BlockEntity {
         storedISSMana = tag.getInt("StoredMana");
     }
 
-    private static void initReflection() {
-        if (reflectionInitialized) return;
-        reflectionInitialized = true;
-        try {
-            manaPoolClass = Class.forName("vazkii.botania.api.mana.ManaPool");
-            getCurrentManaMethod = manaPoolClass.getMethod("getCurrentMana");
-            receiveManaMethod = manaPoolClass.getMethod("receiveMana", int.class);
-            reflectionAvailable = true;
-        } catch (Exception e) {
-            reflectionAvailable = false;
-            IronsBotany.LOGGER.debug("Botania mana pool API not available: {}", e.getMessage());
-        }
-    }
-
     public static void serverTick(Level level, BlockPos pos, BlockState state, ManaConduitBlockEntity blockEntity) {
         if (level.getGameTime() % 20 != 0) return;
 
@@ -67,25 +47,37 @@ public class ManaConduitBlockEntity extends BlockEntity {
 
         // Phase 1: Try to drain from adjacent Botania mana pools
         if (blockEntity.storedISSMana < maxCapacity) {
-            initReflection();
-            if (reflectionAvailable) {
-                for (Direction dir : Direction.values()) {
-                    BlockPos neighborPos = pos.relative(dir);
-                    BlockEntity neighbor = level.getBlockEntity(neighborPos);
-                    if (neighbor != null) {
-                        int toDrain = Math.min(conversionRate, maxCapacity - blockEntity.storedISSMana);
-                        if (tryDrainFromPool(neighbor, toDrain)) {
-                            int issGained = ManaHelper.convertBotaniaToISS(toDrain);
-                            blockEntity.storedISSMana = Math.min(blockEntity.storedISSMana + issGained, maxCapacity);
-                            blockEntity.setChanged();
-                            break; // Only drain from one pool per tick
-                        }
+            for (Direction dir : Direction.values()) {
+                BlockPos neighborPos = pos.relative(dir);
+                BlockEntity neighbor = level.getBlockEntity(neighborPos);
+                if (neighbor instanceof ManaPool pool) {
+                    int toDrain = Math.min(conversionRate, maxCapacity - blockEntity.storedISSMana);
+                    if (pool.getCurrentMana() >= toDrain) {
+                        pool.receiveMana(-toDrain);
+                        int issGained = ManaHelper.convertBotaniaToISS(toDrain);
+                        blockEntity.storedISSMana = Math.min(blockEntity.storedISSMana + issGained, maxCapacity);
+                        blockEntity.setChanged();
+                        break; // Only drain from one pool per tick
                     }
                 }
             }
         }
 
-        // Phase 2: Distribute ISS mana to nearby players
+        // Phase 2: Feed adjacent Spell Reservoirs
+        if (blockEntity.storedISSMana > 0) {
+            for (Direction dir : Direction.values()) {
+                BlockPos neighborPos = pos.relative(dir);
+                BlockEntity neighbor = level.getBlockEntity(neighborPos);
+                if (neighbor instanceof SpellReservoirBlockEntity reservoir && blockEntity.storedISSMana > 0) {
+                    int toTransfer = Math.min(getTransferRate(), blockEntity.storedISSMana);
+                    reservoir.addMana(toTransfer);
+                    blockEntity.storedISSMana -= toTransfer;
+                    blockEntity.setChanged();
+                }
+            }
+        }
+
+        // Phase 3: Distribute ISS mana to nearby players
         if (blockEntity.storedISSMana > 0) {
             AABB searchBox = new AABB(pos).inflate(radius);
             List<Player> nearbyPlayers = level.getEntitiesOfClass(Player.class, searchBox);
@@ -100,7 +92,7 @@ public class ManaConduitBlockEntity extends BlockEntity {
                             io.redspace.ironsspellbooks.api.registry.AttributeRegistry.MAX_MANA.get());
 
                     if (currentMana < maxMana) {
-                        int toTransfer = Math.min(MANA_PER_PLAYER_PER_SECOND, blockEntity.storedISSMana);
+                        int toTransfer = Math.min(getTransferRate(), blockEntity.storedISSMana);
                         toTransfer = Math.min(toTransfer, (int) (maxMana - currentMana));
 
                         magicData.addMana(toTransfer);
@@ -112,20 +104,8 @@ public class ManaConduitBlockEntity extends BlockEntity {
         }
     }
 
-    private static boolean tryDrainFromPool(BlockEntity poolEntity, int amount) {
-        if (!reflectionAvailable) return false;
-        try {
-            if (manaPoolClass.isInstance(poolEntity)) {
-                int currentMana = (int) getCurrentManaMethod.invoke(poolEntity);
-                if (currentMana >= amount) {
-                    receiveManaMethod.invoke(poolEntity, -amount);
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            IronsBotany.LOGGER.debug("Failed to drain from Botania mana pool: {}", e.getMessage());
-        }
-        return false;
+    public int getMaxCapacity() {
+        return CommonConfig.MANA_CONDUIT_CAPACITY.get();
     }
 
     public int getStoredMana() {

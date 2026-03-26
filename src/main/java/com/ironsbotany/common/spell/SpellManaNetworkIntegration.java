@@ -2,7 +2,7 @@ package com.ironsbotany.common.spell;
 
 import com.ironsbotany.common.event.ManaNetworkModifier;
 import com.ironsbotany.common.event.SpellTriggeredManaEvent;
-import com.ironsbotany.common.registry.IBSchools;
+import com.ironsbotany.common.util.BotaniaIntegration;
 import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import net.minecraft.core.BlockPos;
@@ -74,9 +74,6 @@ public class SpellManaNetworkIntegration {
      */
     private static SpellTriggeredManaEvent.SpellTriggerType getTriggerType(AbstractSpell spell) {
         // Check spell school
-        if (spell.getSchoolType() == IBSchools.BOTANICAL.get()) {
-            return SpellTriggeredManaEvent.SpellTriggerType.BOTANICAL;
-        }
         if (spell.getSchoolType() == SchoolRegistry.LIGHTNING.get()) {
             return SpellTriggeredManaEvent.SpellTriggerType.LIGHTNING;
         }
@@ -105,38 +102,8 @@ public class SpellManaNetworkIntegration {
         return null; // No trigger for this spell
     }
     
-    /**
-     * Check if a block is a Botania block entity
-     */
     private static boolean isBotaniaBlock(Level level, BlockPos pos) {
         BlockEntity be = level.getBlockEntity(pos);
-        if (be == null) return false;
-        
-        String className = be.getClass().getName();
-        return className.contains("vazkii.botania") || className.contains("botania");
-    }
-    
-    /**
-     * Represents an active modification to a Botania system
-     */
-    private static class ActiveModification {
-        final SpellTriggeredManaEvent.SpellTriggerType type;
-        final float intensity;
-        final int duration;
-        final long startTime;
-        final long expiryTime;
-        
-        ActiveModification(SpellTriggeredManaEvent.SpellTriggerType type, 
-                          float intensity, int duration, long currentTime) {
-            this.type = type;
-            this.intensity = intensity;
-            this.duration = duration;
-            this.startTime = currentTime;
-            this.expiryTime = currentTime + duration;
-        }
-        
-        boolean isExpired(long currentTime) {
-            return currentTime >= expiryTime;
-        }
+        return be != null && BotaniaIntegration.isBotaniaBlockEntity(be);
     }
 }

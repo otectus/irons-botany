@@ -39,6 +39,24 @@ public class ManaConduitBlock extends BaseEntityBlock {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
+    public boolean hasAnalogOutputSignal(BlockState state) {
+        return true;
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof ManaConduitBlockEntity conduit) {
+            int capacity = conduit.getMaxCapacity();
+            if (capacity <= 0) return 0;
+            return Math.min(15, conduit.getStoredMana() * 15 / capacity);
+        }
+        return 0;
+    }
+
+    @Override
     public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }

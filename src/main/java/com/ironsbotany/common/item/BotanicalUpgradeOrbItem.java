@@ -22,7 +22,7 @@ public class BotanicalUpgradeOrbItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         switch (orbType) {
             case "flora" -> {
-                tooltip.add(Component.literal("+10% Botanical Spell Power").withStyle(ChatFormatting.GREEN));
+                tooltip.add(Component.literal("+10% Nature Spell Power").withStyle(ChatFormatting.GREEN));
             }
             case "pool" -> {
                 tooltip.add(Component.literal("+100 Max ISS Mana").withStyle(ChatFormatting.BLUE));

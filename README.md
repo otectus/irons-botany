@@ -2,7 +2,7 @@
 
 **A Minecraft Forge 1.20.1 compatibility mod bridging Botania and Iron's Spells 'n Spellbooks.**
 
-Iron's Botany creates deep mechanical synergy between Botania's natural mana systems and ISS's arcane spellcasting. It introduces a new Botanical spell school, cross-mod equipment, a configurable mana unification system, and six stages of progressive integration that reward mastering both mods together.
+Iron's Botany creates deep mechanical synergy between Botania's natural mana systems and ISS's arcane spellcasting. It adds 9 Nature-school spells with dual mana costs, cross-mod equipment, a configurable mana unification system, and six stages of progressive integration that reward mastering both mods together.
 
 ## Features
 
@@ -20,12 +20,12 @@ Five configurable modes control how Botania and ISS mana interact:
 
 Key items:
 - **Botanical Focus** — Curio that enables passive Botania-to-ISS mana conversion
-- **Spell Reservoir** — Block that stores and distributes ISS mana to nearby players
-- **Mana Conduit** — Block that converts Botania mana pool energy into ISS mana for nearby players
+- **Spell Reservoir** — Block that stores and distributes ISS mana to nearby players. Right-click with mana items to deposit. Comparator output.
+- **Mana Conduit** — Block that converts Botania mana pool energy into ISS mana for nearby players. Feeds adjacent Reservoirs. Comparator output.
 
 ### Botanical Spell School
 
-9 spells with dual-cost mechanics (Botania + ISS mana):
+9 Nature-school spells with dual-cost mechanics (Botania + ISS mana):
 
 | Spell | Max Level | Rarity | Description |
 |-------|-----------|--------|-------------|
@@ -42,13 +42,14 @@ Key items:
 ### Equipment
 
 **Weapons:**
-- **Terrasteel Spell Blade** — +25% spell power, +200 max mana, -20% mana cost. Attacks generate Botania mana.
+- **Terrasteel Spell Blade** — +25% spell power, +200 max mana, -20% cooldown. Attacks generate Botania mana. Repairable with Terrasteel Ingots.
 - **Livingwood Staff** — +10% Botanical spell power, stores 500k Botania mana
 - **Dreamwood Scepter** — +20% Botanical spell power, converts ISS mana cost to Botania
 - **Gaia Spirit Wand** — +30% Botanical spell power, -25% cooldowns
 
 **Manasteel Wizard Armor (4-piece set):**
 - +15% spell power and +150 max mana per piece
+- Repairable with Manasteel Ingots
 - Set Bonus: Mana Shield absorbs 50% damage using Botania mana
 
 **Upgrade Orbs** (used in Arcane Anvil):
@@ -64,9 +65,13 @@ All stages are individually toggleable. Use `bareBonesMode` to disable everythin
 1. **Spell Catalysts** — Botania runes and lenses in your inventory modify spell behavior. 9 catalysts: elemental runes (+damage, AoE splash, pierce, speed), Terrasteel (crit chance), Gaia Spirit (+50% damage).
 2. **Casting Channels** — Livingwood Staff, Dreamwood Focus, and Terra Rod each provide unique casting profiles (speed, regen, burst damage).
 3. **Flower Auras** — Nearby Botania flowers passively buff spellcasting. Bellethorne (thorns/retaliation), Jaded Amaranthus, Heisei Dream, Rannuncarpus (ritual automation).
-4. **Spell-Triggered Mana Events** — Casting spells sends ripples through the Botania mana network, boosting nearby spreaders, pools, and flowers.
+4. **Spell-Triggered Mana Events** (Experimental, disabled by default) — Casting spells sends ripples through the Botania mana network, boosting nearby spreaders, pools, and flowers.
 5. **Corporea Logistics** — High-tier spells (level 5+) auto-request reagents from Corporea networks.
 6. **Alfheim Integration** — Spells gain power in the Alfheim dimension, scrolls gain dual-school properties, spellbooks gain attunement levels.
+
+## Localization
+
+Fully translated into 22 languages: Afrikaans, Arabic, Bengali, German, British English, Argentine Spanish, Spanish, Mexican Spanish, French, Hindi, Italian, Japanese, Korean, Dutch, Brazilian Portuguese, Russian, Turkish, Ukrainian, Vietnamese, Simplified Chinese, Traditional Chinese (HK), Traditional Chinese (TW).
 
 ## Dependencies
 
@@ -89,7 +94,7 @@ All stages are individually toggleable. Use `bareBonesMode` to disable everythin
 
 ## Configuration
 
-All settings are in the common config (`ironsbotany-common.toml`). 70+ options across 11 categories:
+All settings are in the common config (`ironsbotany-common.toml`). 80+ options across 13 categories:
 
 - **Master Toggles** — Bare-bones mode, deep synergy master switch
 - **Mana System** — Unification mode, conversion ratio (100–10000), bidirectional conversion, dual-cost, reservoir capacity
@@ -99,7 +104,7 @@ All settings are in the common config (`ironsbotany-common.toml`). 70+ options a
 - **Casting Channels** — Toggle + power multiplier
 - **Spell Catalysts** — Toggle, consumption chance, max stacking, power multiplier
 - **Flower Auras** — Toggle, range/strength multipliers, stacking limit, particles
-- **Mana Events** — Toggle, duration, intensity, radius
+- **Mana Events** — Toggle (disabled by default), duration, intensity, radius
 - **Corporea Logistics** — Toggle, auto-request, search radius
 - **Alfheim Integration** — Dimension boost, dual-school scrolls, attunement
 
@@ -137,7 +142,7 @@ src/main/java/com/ironsbotany/
     ├── recipe/                # Rune Scroll Fusion
     ├── registry/              # Deferred registers
     ├── spell/                 # 9 spells + catalyst system
-    └── util/                  # Mana conversion helpers
+    └── util/                  # ManaHelper, BotaniaIntegration, DataKeys
 ```
 
 ## Credits

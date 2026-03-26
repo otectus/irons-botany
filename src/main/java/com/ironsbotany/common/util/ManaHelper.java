@@ -11,31 +11,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import vazkii.botania.api.mana.ManaItemHandler;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
-
-import java.lang.reflect.Method;
+import vazkii.botania.api.mana.ManaPool;
 
 public class ManaHelper {
-
-    // Cached reflection for Botania mana pool API
-    private static boolean poolReflectionInitialized = false;
-    private static boolean poolReflectionAvailable = false;
-    private static Class<?> manaPoolClass;
-    private static Method getCurrentManaMethod;
-    private static Method receiveManaMethod;
-
-    private static void initPoolReflection() {
-        if (poolReflectionInitialized) return;
-        poolReflectionInitialized = true;
-        try {
-            manaPoolClass = Class.forName("vazkii.botania.api.mana.ManaPool");
-            getCurrentManaMethod = manaPoolClass.getMethod("getCurrentMana");
-            receiveManaMethod = manaPoolClass.getMethod("receiveMana", int.class);
-            poolReflectionAvailable = true;
-        } catch (Exception e) {
-            poolReflectionAvailable = false;
-            IronsBotany.LOGGER.debug("Botania mana pool API not available for direct access: {}", e.getMessage());
-        }
-    }
     
     /**
      * Converts Botania mana to ISS mana based on configured ratio and mode
@@ -159,8 +137,7 @@ public class ManaHelper {
     }
 
     private static boolean findAndDrainPool(Player player, int amount, boolean doDrain) {
-        initPoolReflection();
-        if (!poolReflectionAvailable) return false;
+        if (!BotaniaIntegration.isBotaniaLoaded()) return false;
 
         Level level = player.level();
         int radius = CommonConfig.MANA_POOL_SEARCH_RADIUS.get();
@@ -170,18 +147,12 @@ public class ManaHelper {
                 playerPos.offset(-radius, -radius / 2, -radius),
                 playerPos.offset(radius, radius / 2, radius))) {
             BlockEntity blockEntity = level.getBlockEntity(checkPos);
-            if (blockEntity != null && manaPoolClass.isInstance(blockEntity)) {
-                try {
-                    int currentMana = (int) getCurrentManaMethod.invoke(blockEntity);
-                    if (currentMana >= amount) {
-                        if (doDrain) {
-                            receiveManaMethod.invoke(blockEntity, -amount);
-                        }
-                        return true;
+            if (blockEntity instanceof ManaPool pool) {
+                if (pool.getCurrentMana() >= amount) {
+                    if (doDrain) {
+                        pool.receiveMana(-amount);
                     }
-                } catch (Exception e) {
-                    IronsBotany.LOGGER.debug("Failed to access Botania mana pool: {}", e.getMessage());
-                    return false;
+                    return true;
                 }
             }
         }

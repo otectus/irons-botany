@@ -170,4 +170,14 @@ public class SpellContext {
     public float getCastingSpeedMultiplier() {
         return castingSpeedMultiplier;
     }
+
+    /**
+     * Cap the damage multiplier to the given maximum.
+     * Used to prevent extreme multiplicative stacking from catalysts, auras, and environment.
+     */
+    public void capDamageMultiplier(float maxMultiplier) {
+        if (this.damageMultiplier > maxMultiplier) {
+            this.damageMultiplier = maxMultiplier;
+        }
+    }
 }

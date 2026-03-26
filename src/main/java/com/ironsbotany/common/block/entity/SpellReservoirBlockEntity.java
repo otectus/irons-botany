@@ -16,7 +16,9 @@ import java.util.List;
 public class SpellReservoirBlockEntity extends BlockEntity {
     private int storedISSMana = 0;
     private static final int TRANSFER_RADIUS = 5;
-    private static final int MANA_PER_SECOND = 5;
+    private static int getTransferRate() {
+        return CommonConfig.BLOCK_ENTITY_TRANSFER_RATE.get();
+    }
 
     public SpellReservoirBlockEntity(BlockPos pos, BlockState state) {
         super(IBBlockEntities.SPELL_RESERVOIR.get(), pos, state);
@@ -48,7 +50,7 @@ public class SpellReservoirBlockEntity extends BlockEntity {
                 float maxMana = (float) player.getAttributeValue(io.redspace.ironsspellbooks.api.registry.AttributeRegistry.MAX_MANA.get());
                 
                 if (currentMana < maxMana) {
-                    int toTransfer = Math.min(MANA_PER_SECOND, blockEntity.storedISSMana);
+                    int toTransfer = Math.min(getTransferRate(), blockEntity.storedISSMana);
                     toTransfer = Math.min(toTransfer, (int)(maxMana - currentMana));
                     
                     magicData.addMana(toTransfer);

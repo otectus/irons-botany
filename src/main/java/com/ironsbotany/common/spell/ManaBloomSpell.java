@@ -3,6 +3,7 @@ package com.ironsbotany.common.spell;
 import com.ironsbotany.IronsBotany;
 import io.redspace.ironsspellbooks.api.config.DefaultConfig;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
+import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.registry.SpellRegistry;
 import io.redspace.ironsspellbooks.api.spells.*;
 import io.redspace.ironsspellbooks.api.util.Utils;
@@ -48,7 +49,7 @@ public class ManaBloomSpell extends AbstractBotanicalSpell {
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.COMMON)
-                .setSchoolResource(ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "botanical"))
+                .setSchoolResource(SchoolRegistry.NATURE_RESOURCE)
                 .setMaxLevel(5)
                 .setCooldownSeconds(30)
                 .build();

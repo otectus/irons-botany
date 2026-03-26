@@ -17,7 +17,11 @@ public enum IBArmorMaterials implements ArmorMaterial {
         map.put(ArmorItem.Type.LEGGINGS, 5);
         map.put(ArmorItem.Type.CHESTPLATE, 7);
         map.put(ArmorItem.Type.HELMET, 2);
-    }), 18, SoundEvents.ARMOR_EQUIP_IRON, 1.0F, 0.0F, () -> Ingredient.EMPTY);
+    }), 18, SoundEvents.ARMOR_EQUIP_IRON, 1.0F, 0.0F, () -> {
+        net.minecraft.world.item.Item manasteel = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(
+                net.minecraft.resources.ResourceLocation.tryParse("botania:manasteel_ingot"));
+        return manasteel != null ? Ingredient.of(manasteel) : Ingredient.EMPTY;
+    });
 
     private final String name;
     private final int durabilityMultiplier;

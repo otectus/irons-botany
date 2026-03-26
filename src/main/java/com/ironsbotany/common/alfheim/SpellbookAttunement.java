@@ -1,5 +1,6 @@
 package com.ironsbotany.common.alfheim;
 
+import com.ironsbotany.common.util.DataKeys;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -10,16 +11,12 @@ import net.minecraft.world.item.ItemStack;
  */
 public class SpellbookAttunement {
     
-    private static final String ATTUNEMENT_TAG = "IronsBotany_AlfheimAttunement";
-    private static final String ATTUNEMENT_LEVEL_TAG = "IronsBotany_AttunementLevel";
-    private static final String ATTUNEMENT_TIME_TAG = "IronsBotany_AttunementTime";
-    
     /**
      * Check if a spellbook is attuned to Alfheim
      */
     public static boolean isAttuned(ItemStack spellbook) {
         CompoundTag tag = spellbook.getTag();
-        return tag != null && tag.getBoolean(ATTUNEMENT_TAG);
+        return tag != null && tag.getBoolean(DataKeys.ALFHEIM_ATTUNEMENT);
     }
     
     /**
@@ -28,7 +25,7 @@ public class SpellbookAttunement {
     public static int getAttunementLevel(ItemStack spellbook) {
         CompoundTag tag = spellbook.getTag();
         if (tag == null) return 0;
-        return tag.getInt(ATTUNEMENT_LEVEL_TAG);
+        return tag.getInt(DataKeys.ATTUNEMENT_LEVEL);
     }
     
     /**
@@ -41,19 +38,19 @@ public class SpellbookAttunement {
         CompoundTag tag = spellbook.getOrCreateTag();
         
         // Mark as attuned
-        tag.putBoolean(ATTUNEMENT_TAG, true);
+        tag.putBoolean(DataKeys.ALFHEIM_ATTUNEMENT, true);
         
         // Increase attunement level based on time
-        long currentTime = tag.getLong(ATTUNEMENT_TIME_TAG);
+        long currentTime = tag.getLong(DataKeys.ATTUNEMENT_TIME);
         long totalTime = currentTime + timeInAlfheim;
-        tag.putLong(ATTUNEMENT_TIME_TAG, totalTime);
+        tag.putLong(DataKeys.ATTUNEMENT_TIME, totalTime);
         
         // Calculate attunement level (1 hour per level)
         int newLevel = Math.min(3, (int)(totalTime / 72000)); // 72000 ticks = 1 hour
-        int oldLevel = tag.getInt(ATTUNEMENT_LEVEL_TAG);
+        int oldLevel = tag.getInt(DataKeys.ATTUNEMENT_LEVEL);
         
         if (newLevel > oldLevel) {
-            tag.putInt(ATTUNEMENT_LEVEL_TAG, newLevel);
+            tag.putInt(DataKeys.ATTUNEMENT_LEVEL, newLevel);
             return true; // Level increased
         }
         

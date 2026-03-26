@@ -2,6 +2,8 @@ package com.ironsbotany.common.event;
 
 import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.config.CommonConfig;
+import com.ironsbotany.common.util.BotaniaIntegration;
+import com.ironsbotany.common.util.DataKeys;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -76,8 +78,6 @@ public class ManaNetworkModifier {
      */
     private static void applyModification(BlockEntity blockEntity, ActiveModification mod) {
         try {
-            String blockName = blockEntity.getClass().getSimpleName();
-            
             switch (mod.type) {
                 case LIGHTNING -> applyLightningBoost(blockEntity, mod);
                 case EARTH -> applyEarthAcceleration(blockEntity, mod);
@@ -98,11 +98,10 @@ public class ManaNetworkModifier {
      * Lightning spell boosts mana pool throughput
      */
     private static void applyLightningBoost(BlockEntity be, ActiveModification mod) {
-        // Check if it's a mana pool
-        if (be.getClass().getSimpleName().contains("Pool")) {
+        if (BotaniaIntegration.isManaPool(be)) {
             CompoundTag tag = be.getPersistentData();
-            tag.putFloat("IronsBotany_ThroughputBoost", mod.intensity);
-            tag.putLong("IronsBotany_BoostExpiry", mod.expiryTime);
+            tag.putFloat(DataKeys.THROUGHPUT_BOOST, mod.intensity);
+            tag.putLong(DataKeys.BOOST_EXPIRY, mod.expiryTime);
         }
     }
     
@@ -110,12 +109,10 @@ public class ManaNetworkModifier {
      * Earth spell accelerates passive flower generation
      */
     private static void applyEarthAcceleration(BlockEntity be, ActiveModification mod) {
-        // Check if it's a generating flower
-        if (be.getClass().getSimpleName().contains("Flower") || 
-            be.getClass().getSimpleName().contains("Generating")) {
+        if (BotaniaIntegration.isGeneratingFlower(be)) {
             CompoundTag tag = be.getPersistentData();
-            tag.putFloat("IronsBotany_GenerationBoost", mod.intensity);
-            tag.putLong("IronsBotany_BoostExpiry", mod.expiryTime);
+            tag.putFloat(DataKeys.GENERATION_BOOST, mod.intensity);
+            tag.putLong(DataKeys.BOOST_EXPIRY, mod.expiryTime);
         }
     }
     
@@ -123,10 +120,10 @@ public class ManaNetworkModifier {
      * Nature spell boosts generating flower efficiency
      */
     private static void applyNatureBoost(BlockEntity be, ActiveModification mod) {
-        if (be.getClass().getSimpleName().contains("Flower")) {
+        if (BotaniaIntegration.isGeneratingFlower(be) || BotaniaIntegration.isFunctionalFlower(be)) {
             CompoundTag tag = be.getPersistentData();
-            tag.putFloat("IronsBotany_EfficiencyBoost", mod.intensity);
-            tag.putLong("IronsBotany_BoostExpiry", mod.expiryTime);
+            tag.putFloat(DataKeys.EFFICIENCY_BOOST, mod.intensity);
+            tag.putLong(DataKeys.BOOST_EXPIRY, mod.expiryTime);
         }
     }
     
@@ -134,10 +131,10 @@ public class ManaNetworkModifier {
      * Fire spell increases Endoflame burn rate
      */
     private static void applyFireBoost(BlockEntity be, ActiveModification mod) {
-        if (be.getClass().getSimpleName().contains("Endoflame")) {
+        if (BotaniaIntegration.isGeneratingFlower(be)) {
             CompoundTag tag = be.getPersistentData();
-            tag.putFloat("IronsBotany_BurnRateBoost", mod.intensity);
-            tag.putLong("IronsBotany_BoostExpiry", mod.expiryTime);
+            tag.putFloat(DataKeys.BURN_RATE_BOOST, mod.intensity);
+            tag.putLong(DataKeys.BOOST_EXPIRY, mod.expiryTime);
         }
     }
     
@@ -145,9 +142,9 @@ public class ManaNetworkModifier {
      * Water spell fills mana pools
      */
     private static void applyWaterFill(BlockEntity be, ActiveModification mod) {
-        if (be.getClass().getSimpleName().contains("Pool")) {
-            CompoundTag tag = be.getPersistentData();
-            tag.putInt("IronsBotany_ManaToAdd", (int)(1000 * mod.intensity));
+        if (BotaniaIntegration.isManaPool(be)) {
+            // Direct API call -- this actually works unlike the NBT approach
+            BotaniaIntegration.addPoolMana(be, (int)(1000 * mod.intensity));
         }
     }
     
@@ -155,10 +152,10 @@ public class ManaNetworkModifier {
      * Wind spell speeds up mana spreaders
      */
     private static void applyWindSpeed(BlockEntity be, ActiveModification mod) {
-        if (be.getClass().getSimpleName().contains("Spreader")) {
+        if (BotaniaIntegration.isManaSpreader(be)) {
             CompoundTag tag = be.getPersistentData();
-            tag.putFloat("IronsBotany_SpeedBoost", mod.intensity);
-            tag.putLong("IronsBotany_BoostExpiry", mod.expiryTime);
+            tag.putFloat(DataKeys.SPEED_BOOST, mod.intensity);
+            tag.putLong(DataKeys.BOOST_EXPIRY, mod.expiryTime);
         }
     }
     
@@ -167,8 +164,8 @@ public class ManaNetworkModifier {
      */
     private static void applyGenericResonance(BlockEntity be, ActiveModification mod) {
         CompoundTag tag = be.getPersistentData();
-        tag.putFloat("IronsBotany_ArcaneResonance", mod.intensity);
-        tag.putLong("IronsBotany_ResonanceExpiry", mod.expiryTime);
+        tag.putFloat(DataKeys.ARCANE_RESONANCE, mod.intensity);
+        tag.putLong(DataKeys.RESONANCE_EXPIRY, mod.expiryTime);
     }
     
     /**

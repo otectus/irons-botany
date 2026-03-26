@@ -27,7 +27,7 @@ Craft the **Chronicle of the Green Mage** (Patchouli guidebook) for a complete i
 
 ## The Botanical Spell School
 
-A new spell school with 9 dual-cost spells that consume both Botania and ISS mana. Three custom attributes — **Botanical Spell Power**, **Botanical Resistance**, and **Mana Efficiency** — govern the school's scaling.
+9 Nature-school spells with dual-cost mechanics that consume both Botania and ISS mana. Uses ISS's built-in Nature school with **Mana Efficiency** as a custom attribute.
 
 | Spell | Max Level | Type | Description |
 |-------|-----------|------|-------------|
@@ -49,12 +49,12 @@ All spell scrolls are crafted at the ISS Scroll Forge using Spell Petals and var
 
 ### Curios
 - **Botanical Focus** — Equip in a Curio slot to passively convert Botania mana to ISS mana. Toggle siphon mode on/off with right-click. The core item that bridges both mana systems.
-- **Botanical Ring** — +25 max mana, +5% Botanical spell power while worn. A simple passive boost.
+- **Botanical Ring** — +25 max mana, +5% spell power while worn. Stat bonuses applied via Curios attribute system.
 
 ### Weapons
 Four weapons that bridge both magic systems, each with a unique casting channel profile:
 
-- **Terrasteel Spell Blade** (3000 durability) — +25% spell power, +200 max mana, -20% mana cost. Melee attacks generate Botania mana. Crafted via smithing (Rune of Wrath + Terra Sword + Arcane Essence).
+- **Terrasteel Spell Blade** (3000 durability) — +25% spell power, +200 max mana, -20% cooldown. Melee attacks generate Botania mana. Crafted via smithing (Rune of Wrath + Terra Sword + Arcane Essence). Repairable with Terrasteel Ingots.
 - **Livingwood Staff** (1000 durability) — +10% Botanical spell power, stores 500k Botania mana. Casting Channel: speed-focused (1.2x cast speed, 1.1x range).
 - **Dreamwood Scepter** (2000 durability) — +20% Botanical spell power. Converts ISS mana costs to Botania mana — cast ISS spells using Botania power. Casting Channel: regen-focused (1.3x cast speed, +0.1 mana regen).
 - **Gaia Spirit Wand** (5000 durability) — +30% spell power, -25% cooldowns. The ultimate casting implement. Casting Channel: burst-focused (1.75x burst damage, 1.5x cooldown penalty).
@@ -65,6 +65,7 @@ A full 4-piece battle mage armor set smithed from Manasteel:
 - +150 max mana per piece
 - Protection: Helmet 2, Chestplate 7, Leggings 5, Boots 2
 - Enchantability: 18, Toughness: 1.0
+- Repairable with Manasteel Ingots
 - **Set Bonus (4 pieces):** Mana Shield — absorbs 50% of incoming damage using your Botania mana (10,000 mana per heart absorbed)
 
 ### Upgrade Orbs
@@ -84,8 +85,8 @@ Three core components used across many recipes:
 
 ## Blocks
 
-- **Spell Reservoir** — Stores ISS mana and distributes it to nearby players within a 5-block radius. Build it into your base for passive mana supply. Configurable capacity (default 1000).
-- **Mana Conduit** — Place adjacent to a Botania mana pool to automatically convert pool mana into ISS mana for nearby players within an 8-block radius. Creates a "spellcasting zone" around your mana infrastructure. Crafted from Manasteel Ingot + Botanical Crystal + Mana Tablet.
+- **Spell Reservoir** — Stores ISS mana and distributes it to nearby players within a 5-block radius. Right-click with any Botania mana item to deposit mana. Supports comparator output. Configurable capacity (default 1000).
+- **Mana Conduit** — Place adjacent to a Botania mana pool to automatically convert pool mana into ISS mana for nearby players within an 8-block radius. Also feeds ISS mana into any adjacent Spell Reservoirs. Supports comparator output. Crafted from Manasteel Ingot + Botanical Crystal + Mana Tablet.
 
 **Direct Pool Access:** Spells can draw Botania mana directly from nearby mana pools when your inventory runs dry (configurable, 8-block search radius by default). No special block needed — just stand near a pool.
 
@@ -129,8 +130,8 @@ Nearby Botania functional flowers passively enhance your spellcasting. Strength 
 
 Build a spell garden around your casting area for stacking bonuses (up to 5 auras by default).
 
-### Stage 4: Spell-Triggered Mana Events
-Your spells send ripples through the Botania mana network. 8 trigger types (Lightning, Earth, Nature, Fire, Water, Wind, Botanical, Arcane) that affect nearby Botania infrastructure based on the spell you cast. Distance-based intensity scaling with configurable duration and radius.
+### Stage 4: Spell-Triggered Mana Events (Experimental)
+Your spells send ripples through the Botania mana network. 8 trigger types (Lightning, Earth, Nature, Fire, Water, Wind, Botanical, Arcane) that affect nearby Botania infrastructure based on the spell you cast. Distance-based intensity scaling with configurable duration and radius. Disabled by default — enable via `enableSpellManaEvents` in config.
 
 ### Stage 5: Corporea Logistics
 High-tier spells (level 5+) automatically request reagent components from nearby Corporea networks. Level 8+ spells request Gaia Spirit components. Your spell infrastructure becomes self-sustaining — just keep the Corporea network stocked.
@@ -173,7 +174,7 @@ Default conversion ratio: 1000 Botania mana = 1 ISS mana (configurable from 100 
 
 ## Configuration
 
-All settings are in `ironsbotany-common.toml`. 80+ options across 12 categories:
+All settings are in `ironsbotany-common.toml`. 80+ options across 13 categories:
 
 | Category | Key Options |
 |----------|-------------|
@@ -189,6 +190,26 @@ All settings are in `ironsbotany-common.toml`. 80+ options across 12 categories:
 | **Spell Catalysts** | Toggle, consumption chance, durability damage, max stacking, power multiplier |
 | **Flower Auras** | Toggle, range/strength multipliers, stacking limit, particles |
 | **Deep Integration** | Mana events (duration/intensity/radius), Corporea (toggle/radius), Alfheim (boost/scrolls/attunement) |
+
+---
+
+## Supported Languages
+
+Iron's Botany is fully translated into 22 languages:
+
+| Language | Locale | Language | Locale |
+|----------|--------|----------|--------|
+| Afrikaans | af_za | Korean | ko_kr |
+| Arabic | ar_sa | Dutch | nl_nl |
+| Bengali | bn_bd | Brazilian Portuguese | pt_br |
+| German | de_de | Russian | ru_ru |
+| British English | en_gb | Turkish | tr_tr |
+| Argentine Spanish | es_ar | Ukrainian | uk_ua |
+| Spanish (Spain) | es_es | Vietnamese | vi_vn |
+| Mexican Spanish | es_mx | Simplified Chinese | zh_cn |
+| French | fr_fr | Traditional Chinese (HK) | zh_hk |
+| Hindi | hi_in | Traditional Chinese (TW) | zh_tw |
+| Italian | it_it | Japanese | ja_jp |
 
 ---
 

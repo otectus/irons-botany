@@ -23,6 +23,7 @@ public class CommonConfig {
 
     public static final ForgeConfigSpec.BooleanValue BIDIRECTIONAL_CONVERSION;
     public static final ForgeConfigSpec.IntValue REVERSE_CONVERSION_RATIO;
+    public static final ForgeConfigSpec.IntValue BLOCK_ENTITY_TRANSFER_RATE;
     // Mana Pool Access
     public static final ForgeConfigSpec.BooleanValue ENABLE_MANA_POOL_ACCESS;
     public static final ForgeConfigSpec.IntValue MANA_POOL_SEARCH_RADIUS;
@@ -197,6 +198,10 @@ public class CommonConfig {
         MANA_CONDUIT_RADIUS = BUILDER
                 .comment("Radius (in blocks) within which the Mana Conduit distributes ISS mana to players")
                 .defineInRange("manaConduitRadius", 8, 1, 32);
+
+        BLOCK_ENTITY_TRANSFER_RATE = BUILDER
+                .comment("ISS mana transferred per second from functional blocks (Conduit, Reservoir) to nearby players")
+                .defineInRange("blockEntityTransferRate", 5, 1, 100);
 
         ENABLE_MANA_POOL_ACCESS = BUILDER
                 .comment("Allow spells to draw Botania mana directly from nearby mana pools",
@@ -431,8 +436,8 @@ public class CommonConfig {
 
         BUILDER.push("Spell-Triggered Mana Events");
         ENABLE_SPELL_MANA_EVENTS = BUILDER
-                .comment("Enable spells to affect Botania mana networks")
-                .define("enableSpellManaEvents", true);
+                .comment("EXPERIMENTAL: Enable spells to affect Botania mana networks. Most effects are not yet fully functional except Water Fill.")
+                .define("enableSpellManaEvents", false);
         
         MANA_EVENT_DURATION = BUILDER
                 .comment("Duration of spell-triggered mana effects (ticks)")

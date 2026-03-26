@@ -3,7 +3,7 @@ package com.ironsbotany.common.item;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.ironsbotany.common.config.CommonConfig;
-import com.ironsbotany.common.registry.IBAttributes;
+import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -31,7 +31,7 @@ public class DreamwoodScepterItem extends Item {
             ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
             builder.putAll(super.getDefaultAttributeModifiers(slot));
 
-            builder.put(IBAttributes.BOTANICAL_SPELL_POWER.get(),
+            builder.put(AttributeRegistry.NATURE_SPELL_POWER.get(),
                     new AttributeModifier(SPELL_POWER_UUID, "Dreamwood Spell Power",
                             CommonConfig.DREAMWOOD_SCEPTER_SPELL_POWER.get(),
                             AttributeModifier.Operation.MULTIPLY_TOTAL));
@@ -44,8 +44,10 @@ public class DreamwoodScepterItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         int percent = (int) (CommonConfig.DREAMWOOD_SCEPTER_SPELL_POWER.get() * 100);
-        tooltip.add(Component.literal("+" + percent + "% Botanical Spell Power").withStyle(ChatFormatting.GREEN));
-        tooltip.add(Component.literal("Converts ISS mana costs to Botania mana").withStyle(ChatFormatting.AQUA));
+        tooltip.add(Component.literal("+" + percent + "% Nature Spell Power").withStyle(ChatFormatting.GREEN));
+        int conversionPercent = (int) (CommonConfig.DREAMWOOD_CONVERSION_PERCENT.get() * 100);
+        // Conversion logic implemented in DreamwoodConversionHandler
+        tooltip.add(Component.literal("Converts " + conversionPercent + "% of ISS mana costs to Botania mana").withStyle(ChatFormatting.AQUA));
         super.appendHoverText(stack, level, tooltip, flag);
     }
 }

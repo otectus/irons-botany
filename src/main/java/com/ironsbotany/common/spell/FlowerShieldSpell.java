@@ -1,9 +1,11 @@
 package com.ironsbotany.common.spell;
 
 import com.ironsbotany.IronsBotany;
+import com.ironsbotany.common.util.DataKeys;
 import com.ironsbotany.common.spell.catalyst.SpellContext;
 import io.redspace.ironsspellbooks.api.config.DefaultConfig;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
+import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -33,7 +35,7 @@ public class FlowerShieldSpell extends AbstractBotanicalSpell {
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.UNCOMMON)
-                .setSchoolResource(ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "botanical"))
+                .setSchoolResource(SchoolRegistry.NATURE_RESOURCE)
                 .setMaxLevel(10)
                 .setCooldownSeconds(20)
                 .build();
@@ -57,8 +59,8 @@ public class FlowerShieldSpell extends AbstractBotanicalSpell {
         // Apply custom petal barrier via persistent data
         int shieldHp = com.ironsbotany.common.config.CommonConfig.FLOWER_SHIELD_BASE_HP.get()
             + (spellLevel * com.ironsbotany.common.config.CommonConfig.FLOWER_SHIELD_HP_PER_LEVEL.get());
-        entity.getPersistentData().putInt("IronsBotany_FlowerShield_HP", shieldHp);
-        entity.getPersistentData().putLong("IronsBotany_FlowerShield_Expiry",
+        entity.getPersistentData().putInt(DataKeys.FLOWER_SHIELD_HP, shieldHp);
+        entity.getPersistentData().putLong(DataKeys.FLOWER_SHIELD_EXPIRY,
             level.getGameTime() + duration);
 
         // Apply resistance as secondary effect

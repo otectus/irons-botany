@@ -49,7 +49,6 @@ public class SpellTriggeredManaEvent extends Event {
         TELEPORT,       // Redirects mana bursts
         WATER,          // Fills mana pools
         WIND,           // Speeds up mana spreaders
-        BOTANICAL,      // Boosts mana generation from nearby flowers
         ARCANE          // Generic magical resonance
     }
 }

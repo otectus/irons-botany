@@ -1,6 +1,7 @@
 package com.ironsbotany.common.event;
 
 import com.ironsbotany.IronsBotany;
+import com.ironsbotany.common.util.DataKeys;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -20,32 +21,32 @@ public class FlowerShieldHandler {
         if (player.level().isClientSide()) return;
 
         // Check for active Flower Shield
-        if (!player.getPersistentData().contains("IronsBotany_FlowerShield_HP")) return;
+        if (!player.getPersistentData().contains(DataKeys.FLOWER_SHIELD_HP)) return;
 
-        long expiry = player.getPersistentData().getLong("IronsBotany_FlowerShield_Expiry");
+        long expiry = player.getPersistentData().getLong(DataKeys.FLOWER_SHIELD_EXPIRY);
         if (player.level().getGameTime() > expiry) {
             // Shield expired, clean up
-            player.getPersistentData().remove("IronsBotany_FlowerShield_HP");
-            player.getPersistentData().remove("IronsBotany_FlowerShield_Expiry");
+            player.getPersistentData().remove(DataKeys.FLOWER_SHIELD_HP);
+            player.getPersistentData().remove(DataKeys.FLOWER_SHIELD_EXPIRY);
             return;
         }
 
-        int shieldHp = player.getPersistentData().getInt("IronsBotany_FlowerShield_HP");
+        int shieldHp = player.getPersistentData().getInt(DataKeys.FLOWER_SHIELD_HP);
         if (shieldHp <= 0) {
-            player.getPersistentData().remove("IronsBotany_FlowerShield_HP");
-            player.getPersistentData().remove("IronsBotany_FlowerShield_Expiry");
+            player.getPersistentData().remove(DataKeys.FLOWER_SHIELD_HP);
+            player.getPersistentData().remove(DataKeys.FLOWER_SHIELD_EXPIRY);
             return;
         }
 
         float incomingDamage = event.getAmount();
         float absorbed = Math.min(incomingDamage, shieldHp);
         float remainingDamage = incomingDamage - absorbed;
-        int remainingShield = shieldHp - (int) absorbed;
+        int remainingShield = shieldHp - (int) Math.ceil(absorbed);
 
         if (remainingShield <= 0) {
             // Shield broke
-            player.getPersistentData().remove("IronsBotany_FlowerShield_HP");
-            player.getPersistentData().remove("IronsBotany_FlowerShield_Expiry");
+            player.getPersistentData().remove(DataKeys.FLOWER_SHIELD_HP);
+            player.getPersistentData().remove(DataKeys.FLOWER_SHIELD_EXPIRY);
 
             // Shield break visual
             if (player.level() instanceof ServerLevel serverLevel) {
@@ -64,7 +65,7 @@ public class FlowerShieldHandler {
             }
         } else {
             // Shield absorbing damage
-            player.getPersistentData().putInt("IronsBotany_FlowerShield_HP", remainingShield);
+            player.getPersistentData().putInt(DataKeys.FLOWER_SHIELD_HP, remainingShield);
 
             // Hit feedback particles
             if (player.level() instanceof ServerLevel serverLevel) {

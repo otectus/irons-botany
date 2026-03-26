@@ -3,7 +3,6 @@ package com.ironsbotany.common.event;
 import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.item.BotanicalUpgradeOrbItem;
-import com.ironsbotany.common.registry.IBAttributes;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -80,7 +79,7 @@ public class UpgradeOrbHandler {
             case "flora" -> {
                 // +10% Botanical spell power
                 addAttributeModifier(modifiers, 
-                    IBAttributes.BOTANICAL_SPELL_POWER.get().getDescriptionId(),
+                    AttributeRegistry.NATURE_SPELL_POWER.get().getDescriptionId(),
                     0.10 * effectiveness,
                     "multiply_total");
             }

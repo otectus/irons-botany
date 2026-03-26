@@ -3,7 +3,8 @@ package com.ironsbotany.common.item;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.ironsbotany.common.config.CommonConfig;
-import com.ironsbotany.common.registry.IBAttributes;
+import com.ironsbotany.common.util.DataKeys;
+import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -21,7 +22,6 @@ import java.util.UUID;
 
 public class LivingwoodStaffItem extends Item {
     private static final UUID SPELL_POWER_UUID = UUID.fromString("d1e2f3a4-b5c6-7890-1234-56789abcde01");
-    private static final String MANA_KEY = "IronsBotany_BotaniaMana";
 
     public LivingwoodStaffItem(Properties properties) {
         super(properties);
@@ -33,7 +33,7 @@ public class LivingwoodStaffItem extends Item {
             ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
             builder.putAll(super.getDefaultAttributeModifiers(slot));
 
-            builder.put(IBAttributes.BOTANICAL_SPELL_POWER.get(),
+            builder.put(AttributeRegistry.NATURE_SPELL_POWER.get(),
                     new AttributeModifier(SPELL_POWER_UUID, "Livingwood Spell Power",
                             CommonConfig.LIVINGWOOD_STAFF_SPELL_POWER.get(),
                             AttributeModifier.Operation.MULTIPLY_TOTAL));
@@ -49,13 +49,13 @@ public class LivingwoodStaffItem extends Item {
 
     public int getStoredMana(ItemStack stack) {
         if (stack.hasTag()) {
-            return stack.getTag().getInt(MANA_KEY);
+            return stack.getTag().getInt(DataKeys.BOTANIA_MANA);
         }
         return 0;
     }
 
     public void setStoredMana(ItemStack stack, int mana) {
-        stack.getOrCreateTag().putInt(MANA_KEY, Mth.clamp(mana, 0, getManaCapacity()));
+        stack.getOrCreateTag().putInt(DataKeys.BOTANIA_MANA, Mth.clamp(mana, 0, getManaCapacity()));
     }
 
     public int addMana(ItemStack stack, int amount) {
@@ -97,7 +97,7 @@ public class LivingwoodStaffItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         int percent = (int) (CommonConfig.LIVINGWOOD_STAFF_SPELL_POWER.get() * 100);
-        tooltip.add(Component.literal("+" + percent + "% Botanical Spell Power").withStyle(ChatFormatting.GREEN));
+        tooltip.add(Component.literal("+" + percent + "% Nature Spell Power").withStyle(ChatFormatting.GREEN));
         tooltip.add(Component.literal("Mana: " + getStoredMana(stack) + " / " + getManaCapacity())
                 .withStyle(ChatFormatting.AQUA));
         super.appendHoverText(stack, level, tooltip, flag);

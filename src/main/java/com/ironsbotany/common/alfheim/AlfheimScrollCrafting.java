@@ -1,6 +1,7 @@
 package com.ironsbotany.common.alfheim;
 
 import com.ironsbotany.IronsBotany;
+import com.ironsbotany.common.util.DataKeys;
 import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.SchoolType;
 import net.minecraft.nbt.CompoundTag;
@@ -17,10 +18,6 @@ import java.util.List;
  */
 public class AlfheimScrollCrafting {
     
-    private static final String DUAL_SCHOOL_TAG = "IronsBotany_DualSchool";
-    private static final String SECONDARY_SCHOOL_TAG = "IronsBotany_SecondarySchool";
-    private static final String ALFHEIM_CRAFTED_TAG = "IronsBotany_AlfheimCrafted";
-    
     /**
      * Mark a scroll as Alfheim-crafted with dual-school
      */
@@ -31,9 +28,9 @@ public class AlfheimScrollCrafting {
         }
         
         CompoundTag tag = scroll.getOrCreateTag();
-        tag.putBoolean(ALFHEIM_CRAFTED_TAG, true);
-        tag.putBoolean(DUAL_SCHOOL_TAG, true);
-        tag.putString(SECONDARY_SCHOOL_TAG, secondarySchool.getId().toString());
+        tag.putBoolean(DataKeys.ALFHEIM_CRAFTED, true);
+        tag.putBoolean(DataKeys.DUAL_SCHOOL, true);
+        tag.putString(DataKeys.SECONDARY_SCHOOL, secondarySchool.getId().toString());
     }
     
     /**
@@ -41,7 +38,7 @@ public class AlfheimScrollCrafting {
      */
     public static boolean isAlfheimCrafted(ItemStack scroll) {
         CompoundTag tag = scroll.getTag();
-        return tag != null && tag.getBoolean(ALFHEIM_CRAFTED_TAG);
+        return tag != null && tag.getBoolean(DataKeys.ALFHEIM_CRAFTED);
     }
     
     /**
@@ -49,7 +46,7 @@ public class AlfheimScrollCrafting {
      */
     public static boolean hasDualSchool(ItemStack scroll) {
         CompoundTag tag = scroll.getTag();
-        return tag != null && tag.getBoolean(DUAL_SCHOOL_TAG);
+        return tag != null && tag.getBoolean(DataKeys.DUAL_SCHOOL);
     }
     
     /**
@@ -57,11 +54,11 @@ public class AlfheimScrollCrafting {
      */
     public static SchoolType getSecondarySchool(ItemStack scroll) {
         CompoundTag tag = scroll.getTag();
-        if (tag == null || !tag.contains(SECONDARY_SCHOOL_TAG)) {
+        if (tag == null || !tag.contains(DataKeys.SECONDARY_SCHOOL)) {
             return null;
         }
         
-        String schoolId = tag.getString(SECONDARY_SCHOOL_TAG);
+        String schoolId = tag.getString(DataKeys.SECONDARY_SCHOOL);
         ResourceLocation rl = ResourceLocation.tryParse(schoolId);
         if (rl == null) {
             return null;
@@ -75,9 +72,8 @@ public class AlfheimScrollCrafting {
     public static List<SchoolType> getCompatibleSchools(SchoolType primarySchool) {
         List<SchoolType> compatible = new ArrayList<>();
         
-        // Botanical school is compatible with Nature
-        if (primarySchool.getId().toString().contains("botanical")) {
-            compatible.add(SchoolRegistry.NATURE.get());
+        // Nature school is compatible with Holy
+        if (primarySchool == SchoolRegistry.NATURE.get()) {
             compatible.add(SchoolRegistry.HOLY.get());
         }
         

@@ -1,7 +1,7 @@
 package com.ironsbotany.common.boss;
 
 import com.ironsbotany.IronsBotany;
-import com.ironsbotany.common.registry.IBSchools;
+import com.ironsbotany.common.util.DataKeys;
 import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
 import io.redspace.ironsspellbooks.api.registry.SpellRegistry;
@@ -73,7 +73,7 @@ public class GaiaSpellTrials {
     private static void applyPhase1Mechanics(LivingHurtEvent event, Player player, GaiaTrialData trialData) {
         // Check if player is using flower auras
         CompoundTag playerData = player.getPersistentData();
-        boolean hasActiveAuras = playerData.getBoolean("IronsBotany_ActiveAuras");
+        boolean hasActiveAuras = playerData.getBoolean(DataKeys.ACTIVE_AURAS);
         
         if (!hasActiveAuras) {
             // Reduce damage if not using environmental magic
@@ -106,15 +106,14 @@ public class GaiaSpellTrials {
         SchoolType school = lastSpell.getSchoolType();
         
         // Gaia resists certain schools in Phase 2
-        if (school == SchoolRegistry.FIRE.get()) {
-            event.setAmount(event.getAmount() * 0.3f); // 70% resistance to fire
-            trialData.resistedSchools.add("fire");
-        } else if (school == SchoolRegistry.ICE.get()) {
+        if (school == SchoolRegistry.ICE.get()) {
             event.setAmount(event.getAmount() * 0.3f); // 70% resistance to ice
             trialData.resistedSchools.add("ice");
-        } else if (school == IBSchools.BOTANICAL.get()) {
-            event.setAmount(event.getAmount() * 1.5f); // Vulnerable to Botanical
+        } else if (school == SchoolRegistry.NATURE.get()) {
+            event.setAmount(event.getAmount() * 1.25f); // Vulnerable to Nature
             trialData.botanicalSpellsUsed++;
+        } else if (school == SchoolRegistry.FIRE.get()) {
+            event.setAmount(event.getAmount() * 1.25f); // Vulnerable to Fire
         }
         
         // Hint system
@@ -163,11 +162,11 @@ public class GaiaSpellTrials {
 
         // Fall back to stored last-cast data from AbstractBotanicalSpell
         CompoundTag pdata = player.getPersistentData();
-        if (pdata.contains("IronsBotany_LastSpellId")) {
-            long castTime = pdata.getLong("IronsBotany_LastSpellTime");
+        if (pdata.contains(DataKeys.LAST_SPELL_ID)) {
+            long castTime = pdata.getLong(DataKeys.LAST_SPELL_TIME);
             // Only consider spells cast within last 5 seconds (100 ticks)
             if (player.level().getGameTime() - castTime < 100) {
-                String spellId = pdata.getString("IronsBotany_LastSpellId");
+                String spellId = pdata.getString(DataKeys.LAST_SPELL_ID);
                 return SpellRegistry.getSpell(spellId);
             }
         }

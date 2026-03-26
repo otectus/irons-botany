@@ -12,10 +12,11 @@ import com.ironsbotany.common.network.SpellCastSyncPacket;
 import com.ironsbotany.common.spell.SpellManaNetworkIntegration;
 import com.ironsbotany.common.flower.ActiveFlowerAura;
 import com.ironsbotany.common.flower.FlowerAuraRegistry;
-import com.ironsbotany.common.registry.IBSchools;
+import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import com.ironsbotany.common.spell.catalyst.CatalystEffect;
 import com.ironsbotany.common.spell.catalyst.SpellCatalystRegistry;
 import com.ironsbotany.common.spell.catalyst.SpellContext;
+import com.ironsbotany.common.util.DataKeys;
 import com.ironsbotany.common.util.ManaHelper;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
 import io.redspace.ironsspellbooks.api.spells.*;
@@ -59,113 +60,124 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
 
     @Override
     public void onCast(Level level, int spellLevel, LivingEntity entity, CastSource castSource, MagicData playerMagicData) {
-        if (!(entity instanceof Player player)) {
+        if (level.isClientSide) {
             return;
         }
 
         // Create spell context
         SpellContext context = new SpellContext(level, entity, spellLevel, castSource);
-        
-        // Get active catalysts from player inventory
-        List<CatalystEffect> catalysts = SpellCatalystRegistry.getActiveCatalysts(player);
-        
-        // Apply catalyst effects
-        SpellCatalystRegistry.applyCatalysts(this, context, catalysts);
 
-        // Consume or damage catalysts based on config
-        if (!level.isClientSide && !catalysts.isEmpty()) {
-            consumeCatalysts(player, catalysts);
-        }
+        // Track catalysts and auras for use in post-cast logic
+        List<CatalystEffect> catalysts = List.of();
+        List<ActiveFlowerAura> auras = List.of();
 
-        // Apply flower auras
-        List<ActiveFlowerAura> auras = FlowerAuraRegistry.getActiveAuras(player, 16);
-        for (ActiveFlowerAura activeAura : auras) {
-            if (activeAura.getAura().appliesTo(this)) {
-                activeAura.getAura().applyToSpell(context, activeAura.getStrength());
+        // Player-specific pre-cast logic
+        if (entity instanceof Player player) {
+            // Get active catalysts from player inventory
+            catalysts = SpellCatalystRegistry.getActiveCatalysts(player);
+
+            // Apply catalyst effects
+            SpellCatalystRegistry.applyCatalysts(this, context, catalysts);
+
+            // Consume or damage catalysts based on config
+            if (!catalysts.isEmpty()) {
+                consumeCatalysts(player, catalysts);
             }
-        }
-        
-        // Apply Alfheim boost if in Alfheim dimension
-        AlfheimSpellBoost.applyAlfheimBoost(context, this, player);
 
-        // Apply spellbook attunement bonuses
-        if (ConfigHelper.isAlfheimEnabled()) {
-            ItemStack mainHand = player.getMainHandItem();
-            ItemStack offHand = player.getOffhandItem();
-            ItemStack spellbook = SpellbookAttunement.isAttuned(mainHand) ? mainHand :
-                                  SpellbookAttunement.isAttuned(offHand) ? offHand : ItemStack.EMPTY;
-            if (!spellbook.isEmpty()) {
-                context.multiplyCooldown(1.0f - SpellbookAttunement.getCooldownReduction(spellbook));
-                context.multiplyManaCost(1.0f - SpellbookAttunement.getManaCostReduction(spellbook));
-                context.multiplyDamage(1.0f + SpellbookAttunement.getSpellPowerBonus(spellbook));
+            // Apply flower auras
+            auras = FlowerAuraRegistry.getActiveAuras(player, 16);
+            for (ActiveFlowerAura activeAura : auras) {
+                if (activeAura.getAura().appliesTo(this)) {
+                    activeAura.getAura().applyToSpell(context, activeAura.getStrength());
+                }
             }
-        }
 
-        // Check Corporea logistics for ritual spells
-        if (!SpellCircleReagentSystem.prepareSpellCircle(player, this, spellLevel)) {
-            player.displayClientMessage(
-                Component.translatable("ironsbotany.spell.missing_reagents"),
-                true);
-            return;
-        }
-        
-        // Handle mana costs based on unification mode
-        ManaUnificationMode manaMode = CommonConfig.MANA_UNIFICATION_MODE.get();
-        
-        if (manaMode == ManaUnificationMode.DISABLED) {
-            // No mana integration - spell proceeds normally with ISS mana only
-        } else if (manaMode == ManaUnificationMode.BOTANIA_PRIMARY) {
-            // ISS spells consume Botania mana directly
-            int botaniaRequired = context.getModifiedManaCost(getBotaniaManaCost(spellLevel));
-            if (!ManaHelper.hasBotaniaMana(player, botaniaRequired)) {
+            // Apply Alfheim boost if in Alfheim dimension
+            AlfheimSpellBoost.applyAlfheimBoost(context, this, player);
+
+            // Apply spellbook attunement bonuses
+            if (ConfigHelper.isAlfheimEnabled()) {
+                ItemStack mainHand = player.getMainHandItem();
+                ItemStack offHand = player.getOffhandItem();
+                ItemStack spellbook = SpellbookAttunement.isAttuned(mainHand) ? mainHand :
+                                      SpellbookAttunement.isAttuned(offHand) ? offHand : ItemStack.EMPTY;
+                if (!spellbook.isEmpty()) {
+                    context.multiplyCooldown(1.0f - SpellbookAttunement.getCooldownReduction(spellbook));
+                    context.multiplyManaCost(1.0f - SpellbookAttunement.getManaCostReduction(spellbook));
+                    context.multiplyDamage(1.0f + SpellbookAttunement.getSpellPowerBonus(spellbook));
+                }
+            }
+
+            // Check Corporea logistics for ritual spells
+            if (!SpellCircleReagentSystem.prepareSpellCircle(player, this, spellLevel)) {
                 player.displayClientMessage(
-                        Component.translatable("ironsbotany.spell.insufficient_botania_mana",
-                                botaniaRequired),
-                        true);
+                    Component.translatable("ironsbotany.spell.missing_reagents"),
+                    true);
                 return;
             }
-            if (!ManaHelper.drainBotaniaMana(player, botaniaRequired)) {
-                return;
+
+            // Handle mana costs based on unification mode
+            ManaUnificationMode manaMode = CommonConfig.MANA_UNIFICATION_MODE.get();
+
+            if (manaMode == ManaUnificationMode.DISABLED) {
+                // No mana integration - spell proceeds normally with ISS mana only
+            } else if (manaMode == ManaUnificationMode.BOTANIA_PRIMARY) {
+                // ISS spells consume Botania mana directly
+                int botaniaRequired = context.getModifiedManaCost(getBotaniaManaCost(spellLevel));
+                if (!ManaHelper.hasBotaniaMana(player, botaniaRequired)) {
+                    player.displayClientMessage(
+                            Component.translatable("ironsbotany.spell.insufficient_botania_mana",
+                                    botaniaRequired),
+                            true);
+                    return;
+                }
+                if (!ManaHelper.drainBotaniaMana(player, botaniaRequired)) {
+                    return;
+                }
+            } else if (manaMode == ManaUnificationMode.ISS_PRIMARY) {
+                // Botania mana is converted to ISS mana automatically
+                // No additional cost here - conversion happens passively
+            } else if (manaMode == ManaUnificationMode.SEPARATE ||
+                       (manaMode == ManaUnificationMode.HYBRID && CommonConfig.ENABLE_DUAL_COST_SPELLS.get())) {
+                // Dual-cost: require both Botania and ISS mana
+                int botaniaRequired = context.getModifiedManaCost(getBotaniaManaCost(spellLevel));
+                if (!ManaHelper.hasBotaniaMana(player, botaniaRequired)) {
+                    player.displayClientMessage(
+                            Component.translatable("ironsbotany.spell.insufficient_botania_mana",
+                                    botaniaRequired),
+                            true);
+                    return;
+                }
+                if (!ManaHelper.drainBotaniaMana(player, botaniaRequired)) {
+                    return;
+                }
             }
-        } else if (manaMode == ManaUnificationMode.ISS_PRIMARY) {
-            // Botania mana is converted to ISS mana automatically
-            // No additional cost here - conversion happens passively
-        } else if (manaMode == ManaUnificationMode.SEPARATE || 
-                   (manaMode == ManaUnificationMode.HYBRID && CommonConfig.ENABLE_DUAL_COST_SPELLS.get())) {
-            // Dual-cost: require both Botania and ISS mana
-            int botaniaRequired = context.getModifiedManaCost(getBotaniaManaCost(spellLevel));
-            if (!ManaHelper.hasBotaniaMana(player, botaniaRequired)) {
-                player.displayClientMessage(
-                        Component.translatable("ironsbotany.spell.insufficient_botania_mana",
-                                botaniaRequired),
-                        true);
-                return;
+
+            // Show catalyst activation effects
+            if (!catalysts.isEmpty()) {
+                showCatalystActivation(player, catalysts);
             }
-            if (!ManaHelper.drainBotaniaMana(player, botaniaRequired)) {
-                return;
+
+            // Show aura activation effects
+            if (!auras.isEmpty() && CommonConfig.SHOW_AURA_PARTICLES.get()) {
+                showAuraActivation(player, auras);
             }
-        }
-        
-        // Show catalyst activation effects
-        if (!catalysts.isEmpty() && !level.isClientSide) {
-            showCatalystActivation(player, catalysts);
-        }
-        
-        // Show aura activation effects
-        if (!auras.isEmpty() && !level.isClientSide && CommonConfig.SHOW_AURA_PARTICLES.get()) {
-            showAuraActivation(player, auras);
         }
 
-        // Execute spell effect with context
+        // Cap total damage multiplier to prevent extreme stacking from catalysts + auras + environment
+        context.capDamageMultiplier(5.0f);
+
+        // Execute spell effect for ANY LivingEntity
         executeBotanicalEffect(level, spellLevel, entity, castSource, playerMagicData, context);
 
-        // Store last spell cast for cross-system tracking (e.g., Gaia trials)
-        if (entity instanceof Player p && !level.isClientSide) {
-            p.getPersistentData().putString("IronsBotany_LastSpellId", this.getSpellId());
-            p.getPersistentData().putLong("IronsBotany_LastSpellTime", level.getGameTime());
+        // Player-specific post-cast logic
+        if (entity instanceof Player player) {
+            // Store last spell cast for cross-system tracking (e.g., Gaia trials)
+            player.getPersistentData().putString(DataKeys.LAST_SPELL_ID, this.getSpellId());
+            player.getPersistentData().putLong(DataKeys.LAST_SPELL_TIME, level.getGameTime());
 
             // Grant advancements based on spell state
-            if (p instanceof ServerPlayer serverPlayer) {
+            if (player instanceof ServerPlayer serverPlayer) {
                 grantAdvancement(serverPlayer, "first_spell", "cast_botanical_spell");
 
                 // Spell mastery: level 5+
@@ -174,9 +186,9 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
                 }
 
                 // Track unique spells for "Full Garden"
-                String uniqueKey = "IronsBotany_UniqueSpells";
+                String uniqueKey = DataKeys.UNIQUE_SPELLS;
                 String spellId = this.getSpellId();
-                net.minecraft.nbt.ListTag spellList = p.getPersistentData().getList(uniqueKey, net.minecraft.nbt.Tag.TAG_STRING);
+                net.minecraft.nbt.ListTag spellList = player.getPersistentData().getList(uniqueKey, net.minecraft.nbt.Tag.TAG_STRING);
                 boolean found = false;
                 for (int i = 0; i < spellList.size(); i++) {
                     if (spellList.getString(i).equals(spellId)) {
@@ -186,7 +198,7 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
                 }
                 if (!found) {
                     spellList.add(net.minecraft.nbt.StringTag.valueOf(spellId));
-                    p.getPersistentData().put(uniqueKey, spellList);
+                    player.getPersistentData().put(uniqueKey, spellList);
                     if (spellList.size() >= 9) {
                         grantAdvancement(serverPlayer, "all_spells", "cast_all_spells");
                     }
@@ -208,14 +220,12 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
                 }
 
                 // Alfheim advancement
-                if (AlfheimSpellBoost.isInAlfheim(p)) {
+                if (AlfheimSpellBoost.isInAlfheim(player)) {
                     grantAdvancement(serverPlayer, "alfheim_cast", "cast_in_alfheim");
                 }
             }
-        }
 
-        // Broadcast spell cast visuals to nearby players
-        if (!level.isClientSide) {
+            // Broadcast spell cast visuals to nearby players
             PacketHandler.CHANNEL.send(
                 PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(
                     player.getX(), player.getY(), player.getZ(), 32, level.dimension())),
@@ -341,6 +351,6 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
 
     @Override
     public SchoolType getSchoolType() {
-        return IBSchools.BOTANICAL.get();
+        return SchoolRegistry.NATURE.get();
     }
 }

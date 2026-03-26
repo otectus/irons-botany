@@ -1,10 +1,25 @@
 package com.ironsbotany.common.config;
 
+import com.ironsbotany.IronsBotany;
+
 /**
  * Helper class for checking configuration states.
  * Centralizes logic for master toggles and bare-bones mode.
  */
 public class ConfigHelper {
+
+    /**
+     * Validate configuration for problematic combinations and log warnings.
+     * Called during commonSetup.
+     */
+    public static void validateConfig() {
+        ManaUnificationMode mode = CommonConfig.MANA_UNIFICATION_MODE.get();
+        if (mode == ManaUnificationMode.SEPARATE) {
+            IronsBotany.LOGGER.warn("[Iron's Botany] SEPARATE mana mode is active. " +
+                    "All botanical spells require both ISS and Botania mana simultaneously. " +
+                    "High-tier spells like Gaia's Wrath may be extremely expensive.");
+        }
+    }
     
     /**
      * Check if deep synergy features are enabled

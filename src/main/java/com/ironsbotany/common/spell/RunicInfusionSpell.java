@@ -4,6 +4,7 @@ import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.config.CommonConfig;
 import io.redspace.ironsspellbooks.api.config.DefaultConfig;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
+import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -36,7 +37,7 @@ public class RunicInfusionSpell extends AbstractBotanicalSpell {
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.RARE)
-                .setSchoolResource(ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "botanical"))
+                .setSchoolResource(SchoolRegistry.NATURE_RESOURCE)
                 .setMaxLevel(10)
                 .setCooldownSeconds(60)
                 .build();
@@ -98,19 +99,19 @@ public class RunicInfusionSpell extends AbstractBotanicalSpell {
         // Apply base buffs (scaled by rune count)
         int bonusAmplifier = Math.min(runeBonus / 2, 2);
 
-        // Strength (base)
+        // Strength (capped at V to prevent +33 damage at max level)
         entity.addEffect(new net.minecraft.world.effect.MobEffectInstance(
             net.minecraft.world.effect.MobEffects.DAMAGE_BOOST,
             totalDuration,
-            amplifier + bonusAmplifier,
+            Math.min(amplifier + bonusAmplifier, 4),
             false, true
         ));
 
-        // Speed (base)
+        // Speed (capped at IV)
         entity.addEffect(new net.minecraft.world.effect.MobEffectInstance(
             net.minecraft.world.effect.MobEffects.MOVEMENT_SPEED,
             totalDuration,
-            amplifier + (hasAirRune ? 1 : 0),
+            Math.min(amplifier + (hasAirRune ? 1 : 0), 3),
             false, true
         ));
 

@@ -1,6 +1,7 @@
 package com.ironsbotany.common.progression;
 
 import com.ironsbotany.IronsBotany;
+import com.ironsbotany.common.util.DataKeys;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -70,7 +71,7 @@ public class UnifiedAdvancementSystem {
      * Unlock Tier 4 spell modifiers
      */
     private static void unlockTier4SpellModifiers(ServerPlayer player) {
-        player.getPersistentData().putBoolean("IronsBotany_Tier4Unlocked", true);
+        player.getPersistentData().putBoolean(DataKeys.TIER4_UNLOCKED, true);
         
         player.displayClientMessage(
             net.minecraft.network.chat.Component.translatable(
@@ -86,7 +87,7 @@ public class UnifiedAdvancementSystem {
      * Unlock dual-school casting
      */
     private static void unlockDualSchoolCasting(ServerPlayer player) {
-        player.getPersistentData().putBoolean("IronsBotany_DualSchoolUnlocked", true);
+        player.getPersistentData().putBoolean(DataKeys.DUAL_SCHOOL_UNLOCKED, true);
         
         player.displayClientMessage(
             net.minecraft.network.chat.Component.translatable(
@@ -102,7 +103,7 @@ public class UnifiedAdvancementSystem {
      * Unlock spell overcharge mechanic
      */
     private static void unlockSpellOvercharge(ServerPlayer player) {
-        player.getPersistentData().putBoolean("IronsBotany_OverchargeUnlocked", true);
+        player.getPersistentData().putBoolean(DataKeys.OVERCHARGE_UNLOCKED, true);
         
         player.displayClientMessage(
             net.minecraft.network.chat.Component.translatable(
@@ -118,20 +119,20 @@ public class UnifiedAdvancementSystem {
      * Check if player has unlocked Tier 4 modifiers
      */
     public static boolean hasTier4Unlocked(Player player) {
-        return player.getPersistentData().getBoolean("IronsBotany_Tier4Unlocked");
+        return player.getPersistentData().getBoolean(DataKeys.TIER4_UNLOCKED);
     }
     
     /**
      * Check if player has unlocked dual-school casting
      */
     public static boolean hasDualSchoolUnlocked(Player player) {
-        return player.getPersistentData().getBoolean("IronsBotany_DualSchoolUnlocked");
+        return player.getPersistentData().getBoolean(DataKeys.DUAL_SCHOOL_UNLOCKED);
     }
     
     /**
      * Check if player has unlocked spell overcharge
      */
     public static boolean hasOverchargeUnlocked(Player player) {
-        return player.getPersistentData().getBoolean("IronsBotany_OverchargeUnlocked");
+        return player.getPersistentData().getBoolean(DataKeys.OVERCHARGE_UNLOCKED);
     }
 }

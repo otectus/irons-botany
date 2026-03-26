@@ -2,6 +2,7 @@ package com.ironsbotany;
 
 import com.ironsbotany.common.config.ClientConfig;
 import com.ironsbotany.common.config.CommonConfig;
+import com.ironsbotany.common.config.ConfigHelper;
 import com.ironsbotany.common.flower.FlowerAuraRegistration;
 import com.ironsbotany.common.network.PacketHandler;
 import com.ironsbotany.common.registry.*;
@@ -28,7 +29,6 @@ public class IronsBotany {
         IBItems.register(modEventBus);
         IBBlocks.register(modEventBus);
         IBSpells.register(modEventBus);
-        IBSchools.register(modEventBus);
         IBAttributes.register(modEventBus);
         IBEntities.register(modEventBus);
         IBRecipeTypes.register(modEventBus);
@@ -60,7 +60,10 @@ public class IronsBotany {
             
             // Register flower auras
             FlowerAuraRegistration.registerFlowerAuras();
-            
+
+            // Validate config combinations
+            ConfigHelper.validateConfig();
+
             LOGGER.info("Iron's Botany common setup complete!");
         });
     }

@@ -1,8 +1,10 @@
 package com.ironsbotany.common.spell;
 
 import com.ironsbotany.IronsBotany;
+import com.ironsbotany.common.util.DataKeys;
 import io.redspace.ironsspellbooks.api.config.DefaultConfig;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
+import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -32,7 +34,7 @@ public class ManaRebirthSpell extends AbstractBotanicalSpell {
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.EPIC)
-                .setSchoolResource(ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "botanical"))
+                .setSchoolResource(SchoolRegistry.NATURE_RESOURCE)
                 .setMaxLevel(5)
                 .setCooldownSeconds(300)
                 .build();
@@ -82,8 +84,8 @@ public class ManaRebirthSpell extends AbstractBotanicalSpell {
         // Apply death prevention buff via persistent data
         if (com.ironsbotany.common.config.CommonConfig.MANA_REBIRTH_DEATH_PREVENTION.get()) {
             int buffDuration = 600 + (spellLevel * 600); // 30-90 seconds in ticks
-            entity.getPersistentData().putInt("IronsBotany_ManaRebirth_Level", spellLevel);
-            entity.getPersistentData().putLong("IronsBotany_ManaRebirth_Expiry",
+            entity.getPersistentData().putInt(DataKeys.MANA_REBIRTH_LEVEL, spellLevel);
+            entity.getPersistentData().putLong(DataKeys.MANA_REBIRTH_EXPIRY,
                 level.getGameTime() + buffDuration);
         }
 

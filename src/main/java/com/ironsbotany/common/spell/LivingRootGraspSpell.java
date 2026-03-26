@@ -4,13 +4,13 @@ import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.config.CommonConfig;
 import io.redspace.ironsspellbooks.api.config.DefaultConfig;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
+import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import com.ironsbotany.common.spell.catalyst.SpellContext;
 
 import java.util.List;
@@ -34,7 +34,7 @@ public class LivingRootGraspSpell extends AbstractBotanicalSpell {
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.COMMON)
-                .setSchoolResource(ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "botanical"))
+                .setSchoolResource(SchoolRegistry.NATURE_RESOURCE)
                 .setMaxLevel(6)
                 .setCooldownSeconds(15)
                 .build();
@@ -65,7 +65,7 @@ public class LivingRootGraspSpell extends AbstractBotanicalSpell {
         
         for (LivingEntity target : targets) {
             // Apply true immobilization or strong slowness
-            int slowLevel = CommonConfig.LIVING_ROOT_IMMOBILIZE.get() ? 255 : 3;
+            int slowLevel = CommonConfig.LIVING_ROOT_IMMOBILIZE.get() ? 10 : 3;
             target.addEffect(new net.minecraft.world.effect.MobEffectInstance(
                 net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN,
                 duration,
@@ -83,8 +83,7 @@ public class LivingRootGraspSpell extends AbstractBotanicalSpell {
                 true
             ));
 
-            // Snap-root: immediately halt movement and prevent jumping
-            target.setDeltaMovement(Vec3.ZERO);
+            // Sync the slowness effect immediately
             target.hurtMarked = true;
 
             // Spawn vine/root particles at feet in a ring

@@ -34,8 +34,8 @@ public class TerrasteelBladeHandler {
                             .requestManaExact(stack, player, -manaPerHit, true)) {
                         break;
                     }
-                } catch (Exception ignored) {
-                    // Item doesn't support mana operations
+                } catch (Exception e) {
+                    IronsBotany.LOGGER.debug("Mana operation on item {} failed: {}", stack.getItem(), e.getMessage());
                 }
             }
 

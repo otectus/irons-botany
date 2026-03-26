@@ -49,9 +49,9 @@ public class TerrasteelSpellBladeItem extends SwordItem {
                             CommonConfig.TERRASTEEL_BLADE_MAX_MANA.get(),
                             AttributeModifier.Operation.ADDITION));
 
-            // Add mana cost reduction (-20%) via cooldown reduction attribute
+            // Cooldown reduction (-20%)
             builder.put(AttributeRegistry.COOLDOWN_REDUCTION.get(),
-                    new AttributeModifier(MANA_COST_UUID, "Terrasteel Mana Cost",
+                    new AttributeModifier(MANA_COST_UUID, "Terrasteel Cooldown Reduction",
                             CommonConfig.TERRASTEEL_BLADE_MANA_COST_REDUCTION.get(),
                             AttributeModifier.Operation.MULTIPLY_TOTAL));
 
@@ -63,9 +63,12 @@ public class TerrasteelSpellBladeItem extends SwordItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal(""));
-        tooltip.add(Component.literal("+25% All Spell Power").withStyle(ChatFormatting.BLUE));
-        tooltip.add(Component.literal("+200 Max Mana").withStyle(ChatFormatting.BLUE));
-        tooltip.add(Component.literal("-20% Mana Cost").withStyle(ChatFormatting.BLUE));
+        int spellPowerPercent = (int) (CommonConfig.TERRASTEEL_BLADE_SPELL_POWER.get() * 100);
+        int maxMana = CommonConfig.TERRASTEEL_BLADE_MAX_MANA.get();
+        int cooldownPercent = (int) (CommonConfig.TERRASTEEL_BLADE_MANA_COST_REDUCTION.get() * 100);
+        tooltip.add(Component.literal("+" + spellPowerPercent + "% All Spell Power").withStyle(ChatFormatting.BLUE));
+        tooltip.add(Component.literal("+" + maxMana + " Max Mana").withStyle(ChatFormatting.BLUE));
+        tooltip.add(Component.literal("-" + cooldownPercent + "% Cooldown").withStyle(ChatFormatting.BLUE));
         tooltip.add(Component.literal(""));
         tooltip.add(Component.translatable("item.ironsbotany.terrasteel_spell_blade.tooltip")
                 .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
@@ -102,7 +105,9 @@ public class TerrasteelSpellBladeItem extends SwordItem {
 
         @Override
         public Ingredient getRepairIngredient() {
-            return Ingredient.EMPTY;
+            net.minecraft.world.item.Item terrasteel = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(
+                    net.minecraft.resources.ResourceLocation.tryParse("botania:terrasteel_ingot"));
+            return terrasteel != null ? Ingredient.of(terrasteel) : Ingredient.EMPTY;
         }
     }
 }

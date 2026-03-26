@@ -4,8 +4,8 @@ import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.casting.CastingChannel;
 import com.ironsbotany.common.casting.ChannelVisuals;
 import com.ironsbotany.common.casting.SpellCastContext;
-import com.ironsbotany.common.registry.IBSchools;
 import com.ironsbotany.common.spell.AbstractBotanicalSpell;
+import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
@@ -46,7 +46,7 @@ public class LivingwoodStaffChannel implements CastingChannel {
     public boolean canCast(AbstractSpell spell, Player player) {
         // Can cast all Botanical spells efficiently
         return spell instanceof AbstractBotanicalSpell ||
-               spell.getSchoolType() == IBSchools.BOTANICAL.get();
+               spell.getSchoolType() == SchoolRegistry.NATURE.get();
     }
     
     @Override

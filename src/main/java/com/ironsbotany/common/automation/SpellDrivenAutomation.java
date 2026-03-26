@@ -1,6 +1,7 @@
 package com.ironsbotany.common.automation;
 
 import com.ironsbotany.IronsBotany;
+import com.ironsbotany.common.util.DataKeys;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -91,8 +92,8 @@ public class SpellDrivenAutomation {
             BlockEntity be = level.getBlockEntity(pos);
             if (be != null && isBotaniaFlowerEntity(be)) {
                 CompoundTag tag = be.getPersistentData();
-                tag.putFloat("IronsBotany_GrowthBoost", 2.0f);
-                tag.putLong("IronsBotany_GrowthExpiry", level.getGameTime() + 200);
+                tag.putFloat(DataKeys.GROWTH_BOOST, 2.0f);
+                tag.putLong(DataKeys.GROWTH_EXPIRY, level.getGameTime() + 200);
             }
         }
     }
@@ -143,15 +144,15 @@ public class SpellDrivenAutomation {
      */
     private static void applyIllusionAutomation(Level level, BlockPos targetPos, Player player) {
         CompoundTag playerData = player.getPersistentData();
-        playerData.putBoolean("IronsBotany_IllusionActive", true);
-        playerData.putLong("IronsBotany_IllusionExpiry", level.getGameTime() + 200);
+        playerData.putBoolean(DataKeys.ILLUSION_ACTIVE, true);
+        playerData.putLong(DataKeys.ILLUSION_EXPIRY, level.getGameTime() + 200);
     }
 
     /**
      * Check if block entity is a Botania flower (generating or functional)
      */
     private static boolean isBotaniaFlowerEntity(BlockEntity be) {
-        return be.getClass().getName().startsWith("vazkii.botania");
+        return com.ironsbotany.common.util.BotaniaIntegration.isBotaniaBlockEntity(be);
     }
 
     /**
