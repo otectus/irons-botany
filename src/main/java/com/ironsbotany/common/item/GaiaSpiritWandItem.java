@@ -53,8 +53,8 @@ public class GaiaSpiritWandItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         int spellPower = (int) (CommonConfig.GAIA_WAND_SPELL_POWER.get() * 100);
         int cooldown = (int) (CommonConfig.GAIA_WAND_COOLDOWN_REDUCTION.get() * 100);
-        tooltip.add(Component.literal("+" + spellPower + "% Spell Power").withStyle(ChatFormatting.GOLD));
-        tooltip.add(Component.literal("-" + cooldown + "% Spell Cooldowns").withStyle(ChatFormatting.GOLD));
+        tooltip.add(Component.translatable("item.ironsbotany.gaia_spirit_wand.spell_power", spellPower).withStyle(ChatFormatting.GOLD));
+        tooltip.add(Component.translatable("item.ironsbotany.gaia_spirit_wand.cooldown", cooldown).withStyle(ChatFormatting.GOLD));
         super.appendHoverText(stack, level, tooltip, flag);
     }
 }

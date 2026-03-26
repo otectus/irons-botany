@@ -4,7 +4,7 @@
     "item": "irons_spellbooks:legendary_ink"
   },
   "focus": {
-    "item": "botania:petal_magenta"
+    "item": "ironsbotany:spell_petal"
   },
   "result": {
     "item": "irons_spellbooks:scroll"

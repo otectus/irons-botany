@@ -51,16 +51,16 @@ public class IBItems {
 
     // Upgrade Orbs
     public static final RegistryObject<Item> ORB_OF_FLORA = ITEMS.register("orb_of_flora",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), "flora"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.FLORA_ORB_TYPE, "flora"));
 
     public static final RegistryObject<Item> ORB_OF_THE_POOL = ITEMS.register("orb_of_the_pool",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), "pool"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.POOL_ORB_TYPE, "pool"));
 
     public static final RegistryObject<Item> ORB_OF_BURSTING = ITEMS.register("orb_of_bursting",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), "bursting"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.BURSTING_ORB_TYPE, "bursting"));
 
     public static final RegistryObject<Item> ORB_OF_TERRAN_MIGHT = ITEMS.register("orb_of_terran_might",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), "terran"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.TERRAN_ORB_TYPE, "terran"));
 
     // Crafting Components
     public static final RegistryObject<Item> MANA_INFUSED_ESSENCE = ITEMS.register("mana_infused_essence",

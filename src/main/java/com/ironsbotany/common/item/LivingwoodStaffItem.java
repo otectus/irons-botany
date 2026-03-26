@@ -97,8 +97,8 @@ public class LivingwoodStaffItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         int percent = (int) (CommonConfig.LIVINGWOOD_STAFF_SPELL_POWER.get() * 100);
-        tooltip.add(Component.literal("+" + percent + "% Nature Spell Power").withStyle(ChatFormatting.GREEN));
-        tooltip.add(Component.literal("Mana: " + getStoredMana(stack) + " / " + getManaCapacity())
+        tooltip.add(Component.translatable("item.ironsbotany.livingwood_staff.spell_power", percent).withStyle(ChatFormatting.GREEN));
+        tooltip.add(Component.translatable("item.ironsbotany.livingwood_staff.mana_stored", getStoredMana(stack), getManaCapacity())
                 .withStyle(ChatFormatting.AQUA));
         super.appendHoverText(stack, level, tooltip, flag);
     }

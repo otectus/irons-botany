@@ -44,10 +44,10 @@ public class DreamwoodScepterItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         int percent = (int) (CommonConfig.DREAMWOOD_SCEPTER_SPELL_POWER.get() * 100);
-        tooltip.add(Component.literal("+" + percent + "% Nature Spell Power").withStyle(ChatFormatting.GREEN));
+        tooltip.add(Component.translatable("item.ironsbotany.dreamwood_scepter.spell_power", percent).withStyle(ChatFormatting.GREEN));
         int conversionPercent = (int) (CommonConfig.DREAMWOOD_CONVERSION_PERCENT.get() * 100);
         // Conversion logic implemented in DreamwoodConversionHandler
-        tooltip.add(Component.literal("Converts " + conversionPercent + "% of ISS mana costs to Botania mana").withStyle(ChatFormatting.AQUA));
+        tooltip.add(Component.translatable("item.ironsbotany.dreamwood_scepter.conversion", conversionPercent).withStyle(ChatFormatting.AQUA));
         super.appendHoverText(stack, level, tooltip, flag);
     }
 }

@@ -4,7 +4,7 @@
     "item": "irons_spellbooks:epic_ink"
   },
   "focus": {
-    "item": "botania:petal_cyan"
+    "item": "ironsbotany:spell_petal"
   },
   "result": {
     "item": "irons_spellbooks:scroll"
