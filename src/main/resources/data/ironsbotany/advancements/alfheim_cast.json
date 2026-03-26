@@ -1,0 +1,17 @@
+{
+  "display": {
+    "icon": {"item": "ironsbotany:dreamwood_scepter"},
+    "title": {"translate": "advancements.ironsbotany.alfheim_cast.title"},
+    "description": {"translate": "advancements.ironsbotany.alfheim_cast.description"},
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "parent": "ironsbotany:first_spell",
+  "criteria": {
+    "cast_in_alfheim": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

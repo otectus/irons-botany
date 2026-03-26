@@ -1,0 +1,17 @@
+{
+  "display": {
+    "icon": {"item": "ironsbotany:botanical_crystal"},
+    "title": {"translate": "advancements.ironsbotany.first_catalyst.title"},
+    "description": {"translate": "advancements.ironsbotany.first_catalyst.description"},
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "ironsbotany:root",
+  "criteria": {
+    "used_catalyst": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "irons_spellbooks:scroll_forge",
+  "ink": {
+    "item": "irons_spellbooks:uncommon_ink"
+  },
+  "focus": {
+    "item": "botania:petal_pink"
+  },
+  "result": {
+    "item": "irons_spellbooks:scroll"
+  },
+  "spell": "ironsbotany:petal_storm"
+}

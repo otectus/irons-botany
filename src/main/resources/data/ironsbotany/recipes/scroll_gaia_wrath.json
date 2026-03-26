@@ -1,0 +1,13 @@
+{
+  "type": "irons_spellbooks:scroll_forge",
+  "ink": {
+    "item": "irons_spellbooks:legendary_ink"
+  },
+  "focus": {
+    "item": "botania:petal_magenta"
+  },
+  "result": {
+    "item": "irons_spellbooks:scroll"
+  },
+  "spell": "ironsbotany:gaia_wrath"
+}

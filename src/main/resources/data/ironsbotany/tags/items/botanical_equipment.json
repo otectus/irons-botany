@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "ironsbotany:botanical_focus",
+    "ironsbotany:botanical_ring",
+    "ironsbotany:terrasteel_spell_blade",
+    "ironsbotany:livingwood_staff",
+    "ironsbotany:dreamwood_scepter",
+    "ironsbotany:gaia_spirit_wand",
+    "ironsbotany:manasteel_wizard_helmet",
+    "ironsbotany:manasteel_wizard_chestplate",
+    "ironsbotany:manasteel_wizard_leggings",
+    "ironsbotany:manasteel_wizard_boots"
+  ]
+}

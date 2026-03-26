@@ -1,0 +1,17 @@
+{
+  "display": {
+    "icon": {"item": "ironsbotany:manasteel_wizard_helmet"},
+    "title": {"translate": "advancements.ironsbotany.mana_shield.title"},
+    "description": {"translate": "advancements.ironsbotany.mana_shield.description"},
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "ironsbotany:armor_complete",
+  "criteria": {
+    "shield_proc": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

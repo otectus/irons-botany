@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  M",
+    " L ",
+    "L  "
+  ],
+  "key": {
+    "M": {
+      "item": "ironsbotany:mana_infused_essence"
+    },
+    "L": {
+      "item": "botania:livingwood_twig"
+    }
+  },
+  "result": {
+    "item": "ironsbotany:livingwood_staff",
+    "count": 1
+  }
+}

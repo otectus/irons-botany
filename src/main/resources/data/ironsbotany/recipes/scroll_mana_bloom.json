@@ -1,0 +1,13 @@
+{
+  "type": "irons_spellbooks:scroll_forge",
+  "ink": {
+    "item": "irons_spellbooks:common_ink"
+  },
+  "focus": {
+    "item": "botania:petal_white"
+  },
+  "result": {
+    "item": "irons_spellbooks:scroll"
+  },
+  "spell": "ironsbotany:mana_bloom"
+}

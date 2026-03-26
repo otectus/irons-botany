@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " M ",
+    "BCB",
+    " M "
+  ],
+  "key": {
+    "M": {
+      "item": "botania:manasteel_ingot"
+    },
+    "B": {
+      "item": "ironsbotany:botanical_crystal"
+    },
+    "C": {
+      "item": "botania:mana_tablet"
+    }
+  },
+  "result": {
+    "item": "ironsbotany:mana_conduit",
+    "count": 1
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Spark Swarm",
+  "icon": "ironsbotany:spell_petal",
+  "category": "ironsbotany:spells",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Spark Swarm$() summons a swarm of combat Sparks that seek out and attack nearby enemies.$(br2)$(l)Max Level:$() 7$(br)$(l)Type:$() Summon$(br)$(l)Botania Mana Cost:$() 40,000 + 15,000/level$(br2)Summons 3-9 homing spark entities (scaling with level) that last 5-13 seconds. The sparks pulse with cyan energy and deal damage on contact."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:scroll_spark_swarm"
+    }
+  ]
+}

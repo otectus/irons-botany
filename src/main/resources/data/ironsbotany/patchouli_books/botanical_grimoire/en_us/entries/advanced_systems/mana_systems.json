@@ -1,0 +1,19 @@
+{
+  "name": "Mana & Integration",
+  "icon": "ironsbotany:dreamwood_scepter",
+  "category": "ironsbotany:advanced_systems",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Mana Unification Modes$(br2)Iron's Botany supports 5 modes for how Botania and ISS mana interact:$(br2)$(li)$(l)Hybrid$() (default): Both systems coexist with conversion at a configurable ratio (default 1000:1)$(br)$(li)$(l)Botania Primary$(): ISS spells consume Botania mana directly$(br)$(li)$(l)ISS Primary$(): Botania items passively generate ISS mana$(br)$(li)$(l)Separate$(): No conversion — spells require both mana types$(br)$(li)$(l)Disabled$(): No mana integration"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Corporea Logistics$(br)High-tier spells (level 5+) can auto-request reagent components from nearby Corporea networks. Place a Corporea Index within 16 blocks.$(br2)$(l)Alfheim Integration$(br)Spells cast in the Alfheim dimension gain +25-50% power. Botanical spells get the full +50% bonus.$(br2)$(l)Spellbook Attunement$(br)Spellbooks gain attunement levels over time spent in Alfheim (1 hour per level, max 3). Each level grants: -5% cooldown, -3% mana cost, +4% spell power."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Mana Conduit$(br)Place a Mana Conduit block adjacent to a Botania mana pool to automatically convert pool mana into ISS mana for nearby players. This creates a \"spellcasting zone\" around your mana infrastructure.$(br2)$(l)Direct Pool Access$(br)When enabled (default), spells can draw Botania mana directly from nearby mana pools — not just from mana items in your inventory. This dramatically improves the flow of combat near your base."
+    }
+  ]
+}

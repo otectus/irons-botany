@@ -1,0 +1,15 @@
+{
+  "name": "Spell Catalysts",
+  "icon": "ironsbotany:botanical_crystal",
+  "category": "ironsbotany:deep_synergy",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Spell Catalysts$() are Botania items that modify your spells when carried in your inventory or Curios slots.$(br2)$(l)Rune Catalysts (5):$(br)$(li)Rune of Fire: +25% fire damage, lingering burn$(br)$(li)Rune of Water: AoE healing splash$(br)$(li)Rune of Earth: +30% shield, knockback resist$(br)$(li)Rune of Air: +30% cast/projectile speed$(br)$(li)Rune of Mana: -25% mana cost"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Lens Catalysts (2):$(br)$(li)Velocity Lens: +50% projectile speed, +30% range$(br)$(li)Bore Lens: Pierce up to 3 targets$(br2)$(l)Material Catalysts (2):$(br)$(li)Terrasteel: 20% crit chance, -15% cooldown$(br)$(li)Gaia Spirit: +50% damage, -30% cooldown$(br2)Catalysts can stack (configurable). They may be consumed on use depending on server settings."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": {
+    "item": "botania:rune_mana"
+  },
+  "base": {
+    "item": "irons_spellbooks:wandering_magician_chestplate"
+  },
+  "addition": {
+    "item": "botania:manasteel_ingot"
+  },
+  "result": {
+    "item": "ironsbotany:manasteel_wizard_chestplate"
+  }
+}

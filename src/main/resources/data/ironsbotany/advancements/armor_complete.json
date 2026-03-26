@@ -1,0 +1,31 @@
+{
+  "display": {
+    "icon": {"item": "ironsbotany:manasteel_wizard_chestplate"},
+    "title": {"translate": "advancements.ironsbotany.armor_complete.title"},
+    "description": {"translate": "advancements.ironsbotany.armor_complete.description"},
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "ironsbotany:root",
+  "criteria": {
+    "has_helmet": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{"items": ["ironsbotany:manasteel_wizard_helmet"]}]}
+    },
+    "has_chestplate": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{"items": ["ironsbotany:manasteel_wizard_chestplate"]}]}
+    },
+    "has_leggings": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{"items": ["ironsbotany:manasteel_wizard_leggings"]}]}
+    },
+    "has_boots": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{"items": ["ironsbotany:manasteel_wizard_boots"]}]}
+    }
+  },
+  "requirements": [["has_helmet", "has_chestplate", "has_leggings", "has_boots"]]
+}

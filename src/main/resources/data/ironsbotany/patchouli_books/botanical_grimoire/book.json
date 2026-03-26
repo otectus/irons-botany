@@ -1,0 +1,11 @@
+{
+  "name": "Chronicle of the Green Mage",
+  "landing_text": "Discover the ancient art of combining natural mana with arcane spellcasting. This tome contains the secrets of Botanical Magic, a discipline that bridges the gap between Botania's living mana and the arcane powers of spellcasting.",
+  "version": 1,
+  "creative_tab": "ironsbotany:ironsbotany_tab",
+  "advancements_tab": "ironsbotany:root",
+  "model": "ironsbotany:botanical_grimoire",
+  "show_progress": true,
+  "index_icon": "ironsbotany:botanical_focus",
+  "use_blocky_font": false
+}

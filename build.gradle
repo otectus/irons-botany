@@ -1,0 +1,118 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+version = '1.1.2'
+group = 'com.ironsbotany'
+
+base {
+    archivesName = 'ironsbotany'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', 'ironsbotany'
+
+            mods {
+                ironsbotany {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', 'ironsbotany'
+
+            mods {
+                ironsbotany {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            args '--mod', 'ironsbotany', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                ironsbotany {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+    maven {
+        name = "Curios maven"
+        url = "https://maven.theillusivec4.top/"
+    }
+    maven {
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
+        name = "ModMaven"
+        url = "https://modmaven.dev/"
+    }
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.16'
+    
+    // Use local JARs from libs folder - compileOnly to avoid deobf issues
+    compileOnly files('libs/Botania-1.20.1-450-FORGE.jar')
+    compileOnly files('libs/irons_spellbooks-1.20.1-3.15.2.jar')
+    compileOnly files('libs/curios-forge-5.14.1+1.20.1.jar')
+
+    compileOnly files('libs/Patchouli-1.20.1-84.1-FORGE.jar')
+    compileOnly files('libs/player-animation-lib-forge-1.0.2-rc1+1.20.jar')
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version: '1.20.1',
+            minecraft_version_range: '[1.20.1,1.21)',
+            forge_version: '47.4.16',
+            forge_version_range: '[47,)',
+            loader_version_range: '[47,)',
+            mod_id: 'ironsbotany',
+            mod_name: "Iron's Botany",
+            mod_license: 'MIT',
+            mod_version: version,
+            mod_authors: 'IronsBotany Team',
+            mod_description: 'A compatibility mod bridging Botania and Iron\'s Spells \'n Spellbooks'
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

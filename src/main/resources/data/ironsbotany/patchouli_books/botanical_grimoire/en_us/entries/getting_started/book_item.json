@@ -1,0 +1,17 @@
+{
+  "name": "The Chronicle",
+  "icon": "patchouli:guide_book",
+  "category": "ironsbotany:getting_started",
+  "priority": true,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "This book contains all the knowledge you need to master Botanical Magic.$(br2)Keep it handy as you progress through your journey!$(br2)You can craft additional copies if needed."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:botanical_grimoire",
+      "text": "Craft the Chronicle of the Green Mage to access all Botanical Magic knowledge."
+    }
+  ]
+}

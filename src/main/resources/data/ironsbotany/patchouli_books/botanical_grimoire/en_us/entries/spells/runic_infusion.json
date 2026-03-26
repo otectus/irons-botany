@@ -1,0 +1,15 @@
+{
+  "name": "Runic Infusion",
+  "icon": "ironsbotany:spell_petal",
+  "category": "ironsbotany:spells",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Runic Infusion$() channels the power of Botania runes in your inventory to buff your spell power.$(br2)$(l)Max Level:$() 10$(br)$(l)Type:$() Buff$(br)$(l)Botania Mana Cost:$() 50,000 + 20,000/level$(br2)The more Botania runes you carry, the stronger the buff. With $(o)runicInfusionRuneScaling$() enabled (default), each unique rune type adds additional power. This synergizes heavily with the Spell Catalyst system."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:scroll_runic_infusion"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Casting Channels",
+  "icon": "ironsbotany:livingwood_staff",
+  "category": "ironsbotany:deep_synergy",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Casting Channels$() are unique casting profiles provided by botanical weapons. Each weapon changes how your spells behave.$(br2)$(l)Livingwood Staff Channel$(br)Focus: Evocation$(br)$(li)Casting Speed: 1.2x$(br)$(li)Range: 1.1x$(br)Best for rapid-fire spell casting.$(br2)$(l)Dreamwood Focus Channel$(br)Focus: Holy$(br)$(li)Casting Speed: 1.3x$(br)$(li)Mana Regen: +0.1$(br)$(li)Range: 0.9x (reduced)$(br)Best for sustained casting with mana recovery."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Terra Rod Channel$(br)Focus: Heavy Burst$(br)$(li)Burst Damage: 1.75x$(br)$(li)Cooldown: 1.5x (heavy penalty)$(br)$(li)Casting Speed: 0.8x (slower)$(br)$(li)Mana Cost: 1.3x (expensive)$(br)Best for alpha-strike builds that maximize single-hit damage.$(br2)Choose your weapon based on your playstyle. The Livingwood Staff favors sustained DPS, the Dreamwood Focus favors efficiency, and the Terra Rod favors burst damage."
+    }
+  ]
+}

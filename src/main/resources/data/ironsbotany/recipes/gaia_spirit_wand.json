@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  G",
+    " T ",
+    "T  "
+  ],
+  "key": {
+    "G": {
+      "item": "botania:life_essence"
+    },
+    "T": {
+      "item": "botania:terrasteel_ingot"
+    }
+  },
+  "result": {
+    "item": "ironsbotany:gaia_spirit_wand",
+    "count": 1
+  }
+}

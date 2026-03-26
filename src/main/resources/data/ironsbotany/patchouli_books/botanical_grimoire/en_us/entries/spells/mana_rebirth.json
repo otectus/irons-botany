@@ -1,0 +1,15 @@
+{
+  "name": "Mana Rebirth",
+  "icon": "ironsbotany:botanical_focus",
+  "category": "ironsbotany:spells",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Mana Rebirth$() grants a resurrection effect similar to a Totem of Undying, powered by Botania mana.$(br2)$(l)Max Level:$() 5$(br)$(l)Type:$() Healing/Utility$(br)$(l)Botania Mana Cost:$() 50,000 + 25,000/level$(br2)When active, prevents death by consuming Botania mana (configurable cost, default 100,000). Heals you to 30% HP (configurable) with a dramatic visual effect. The buff lasts until triggered or it expires."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:scroll_mana_rebirth"
+    }
+  ]
+}

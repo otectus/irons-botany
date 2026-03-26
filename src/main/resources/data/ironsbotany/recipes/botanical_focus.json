@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PRP",
+    "RMR",
+    "PRP"
+  ],
+  "key": {
+    "P": {
+      "item": "botania:mana_pearl"
+    },
+    "R": {
+      "item": "botania:rune_spring"
+    },
+    "M": {
+      "item": "botania:mana_ring"
+    }
+  },
+  "result": {
+    "item": "ironsbotany:botanical_focus",
+    "count": 1
+  }
+}

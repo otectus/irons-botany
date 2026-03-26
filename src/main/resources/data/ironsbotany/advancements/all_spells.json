@@ -1,0 +1,17 @@
+{
+  "display": {
+    "icon": {"item": "irons_spellbooks:scroll"},
+    "title": {"translate": "advancements.ironsbotany.all_spells.title"},
+    "description": {"translate": "advancements.ironsbotany.all_spells.description"},
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "ironsbotany:first_spell",
+  "criteria": {
+    "cast_all_spells": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "display": {
+    "icon": {
+      "item": "ironsbotany:terrasteel_spell_blade"
+    },
+    "title": {
+      "translate": "advancements.ironsbotany.terrasteel_power.title"
+    },
+    "description": {
+      "translate": "advancements.ironsbotany.terrasteel_power.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "ironsbotany:first_spell",
+  "criteria": {
+    "has_terrasteel_blade": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": ["ironsbotany:terrasteel_spell_blade"]
+          }
+        ]
+      }
+    }
+  }
+}

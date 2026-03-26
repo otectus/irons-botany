@@ -1,0 +1,44 @@
+# Gradle
+.gradle/
+build/
+out/
+classes/
+
+# Eclipse
+*.launch
+.settings/
+.metadata
+.classpath
+.project
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Minecraft
+run/
+logs/
+crash-reports/
+
+# Forge
+src/generated/
+
+# Blackbox
+.blackbox/
+.blackboxcli/
+
+# Misc
+*.log
+*.swp
+*.bak
