@@ -53,10 +53,10 @@ Key items:
 - Set Bonus: Mana Shield absorbs 50% damage using Botania mana
 
 **Upgrade Orbs** (used in Arcane Anvil):
-- Orb of Flora (+10% Botanical spell power)
+- Orb of Flora (+10% Nature spell power)
 - Orb of the Pool (+100 max ISS mana)
-- Orb of Bursting (Mana Burst damage bonus)
-- Orb of Terran Might (+5% all spell power, +5% cooldown reduction)
+- Orb of Bursting (+5% all spell power)
+- Orb of Terran Might (+5% all spell power)
 
 ### Deep Synergy (6 Stages)
 
@@ -134,7 +134,7 @@ src/main/java/com/ironsbotany/
     ├── config/                # 70+ config options
     ├── corporea/              # Corporea logistics
     ├── entity/                # Projectiles and summons
-    ├── event/                 # Armor set bonus, upgrade orbs
+    ├── event/                 # Armor set bonus
     ├── flower/                # Flower aura system
     ├── item/                  # Weapons, armor, curios, orbs
     ├── network/               # Client-server sync

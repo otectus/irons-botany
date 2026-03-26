@@ -64,17 +64,17 @@ public class IBItems {
 
     // Crafting Components
     public static final RegistryObject<Item> MANA_INFUSED_ESSENCE = ITEMS.register("mana_infused_essence",
-            () -> new Item(new Item.Properties()));
+            () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.mana_infused_essence.tooltip"));
 
     public static final RegistryObject<Item> BOTANICAL_CRYSTAL = ITEMS.register("botanical_crystal",
-            () -> new Item(new Item.Properties()));
+            () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.botanical_crystal.tooltip"));
 
     public static final RegistryObject<Item> SPELL_PETAL = ITEMS.register("spell_petal",
-            () -> new Item(new Item.Properties()));
+            () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.spell_petal.tooltip"));
 
     // Patchouli Book - using simple item for now (Patchouli API changed)
     public static final RegistryObject<Item> BOTANICAL_GRIMOIRE = ITEMS.register("botanical_grimoire",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new TooltipItem(new Item.Properties().stacksTo(1), "item.ironsbotany.botanical_grimoire.tooltip"));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

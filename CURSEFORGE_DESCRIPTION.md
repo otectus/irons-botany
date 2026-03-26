@@ -70,10 +70,10 @@ A full 4-piece battle mage armor set smithed from Manasteel:
 
 ### Upgrade Orbs
 Enhance your equipment at the Arcane Anvil. Each orb can only be applied once per item:
-- **Orb of Flora** — +10% Botanical spell power
+- **Orb of Flora** — +10% Nature spell power
 - **Orb of the Pool** — +100 max ISS mana
-- **Orb of Bursting** — Spells deal bonus Mana Burst damage
-- **Orb of Terran Might** — +5% all spell power, +5% cooldown reduction
+- **Orb of Bursting** — +5% all spell power
+- **Orb of Terran Might** — +5% all spell power
 
 ### Crafting Components
 Three core components used across many recipes:
