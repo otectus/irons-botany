@@ -19,7 +19,7 @@ import org.joml.Matrix4f;
 @OnlyIn(Dist.CLIENT)
 public class BotanicalBurstRenderer extends EntityRenderer<BotanicalBurstProjectile> {
     private static final ResourceLocation TEXTURE = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "textures/entity/botanical_burst.png");
+        new ResourceLocation(IronsBotany.MODID, "textures/entity/botanical_burst.png");
     private static final RenderType RENDER_TYPE = RenderType.entityCutoutNoCull(TEXTURE);
 
     public BotanicalBurstRenderer(EntityRendererProvider.Context context) {

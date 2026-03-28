@@ -113,7 +113,7 @@ public class LivingRootGraspSpell extends AbstractBotanicalSpell {
 
     @Override
     public ResourceLocation getSpellResource() {
-        return ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "living_root_grasp");
+        return new ResourceLocation(IronsBotany.MODID, "living_root_grasp");
     }
 
 }

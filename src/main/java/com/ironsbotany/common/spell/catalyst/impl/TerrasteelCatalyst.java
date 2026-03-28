@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class TerrasteelCatalyst implements CatalystEffect {
     private static final ResourceLocation ID = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "terrasteel");
+        new ResourceLocation(IronsBotany.MODID, "terrasteel");
     
     @Override
     public ResourceLocation getId() {

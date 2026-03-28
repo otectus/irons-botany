@@ -180,7 +180,7 @@ public class RunicInfusionSpell extends AbstractBotanicalSpell {
 
     @Override
     public ResourceLocation getSpellResource() {
-        return ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "runic_infusion");
+        return new ResourceLocation(IronsBotany.MODID, "runic_infusion");
     }
 
 }

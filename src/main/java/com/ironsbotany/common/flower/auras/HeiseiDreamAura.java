@@ -17,7 +17,7 @@ import net.minecraft.world.effect.MobEffects;
  */
 public class HeiseiDreamAura implements FlowerAura {
     private static final ResourceLocation ID = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "heisei_dream");
+        new ResourceLocation(IronsBotany.MODID, "heisei_dream");
     
     @Override
     public ResourceLocation getId() {

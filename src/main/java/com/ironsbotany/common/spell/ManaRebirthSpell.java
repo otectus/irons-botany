@@ -108,7 +108,7 @@ public class ManaRebirthSpell extends AbstractBotanicalSpell {
 
     @Override
     public ResourceLocation getSpellResource() {
-        return ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "mana_rebirth");
+        return new ResourceLocation(IronsBotany.MODID, "mana_rebirth");
     }
 
 }

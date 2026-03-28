@@ -18,16 +18,16 @@ public class BotanicalUpgradeOrbItem extends UpgradeOrbItem {
 
     public static final ResourceKey<UpgradeOrbType> FLORA_ORB_TYPE = ResourceKey.create(
             UpgradeOrbTypeRegistry.UPGRADE_ORB_REGISTRY_KEY,
-            ResourceLocation.fromNamespaceAndPath("ironsbotany", "flora"));
+            new ResourceLocation("ironsbotany", "flora"));
     public static final ResourceKey<UpgradeOrbType> POOL_ORB_TYPE = ResourceKey.create(
             UpgradeOrbTypeRegistry.UPGRADE_ORB_REGISTRY_KEY,
-            ResourceLocation.fromNamespaceAndPath("ironsbotany", "pool"));
+            new ResourceLocation("ironsbotany", "pool"));
     public static final ResourceKey<UpgradeOrbType> BURSTING_ORB_TYPE = ResourceKey.create(
             UpgradeOrbTypeRegistry.UPGRADE_ORB_REGISTRY_KEY,
-            ResourceLocation.fromNamespaceAndPath("ironsbotany", "bursting"));
+            new ResourceLocation("ironsbotany", "bursting"));
     public static final ResourceKey<UpgradeOrbType> TERRAN_ORB_TYPE = ResourceKey.create(
             UpgradeOrbTypeRegistry.UPGRADE_ORB_REGISTRY_KEY,
-            ResourceLocation.fromNamespaceAndPath("ironsbotany", "terran"));
+            new ResourceLocation("ironsbotany", "terran"));
 
     private final String orbType;
 

@@ -12,7 +12,7 @@ import net.minecraft.world.effect.MobEffects;
 
 public class RuneOfEarthCatalyst implements CatalystEffect {
     private static final ResourceLocation ID = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "rune_of_earth");
+        new ResourceLocation(IronsBotany.MODID, "rune_of_earth");
     
     @Override
     public ResourceLocation getId() {

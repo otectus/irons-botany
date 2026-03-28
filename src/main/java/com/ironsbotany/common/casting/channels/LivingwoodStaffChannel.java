@@ -20,7 +20,7 @@ import net.minecraft.world.entity.player.Player;
  */
 public class LivingwoodStaffChannel implements CastingChannel {
     private static final ResourceLocation ID = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "livingwood_staff");
+        new ResourceLocation(IronsBotany.MODID, "livingwood_staff");
     
     @Override
     public ResourceLocation getId() {

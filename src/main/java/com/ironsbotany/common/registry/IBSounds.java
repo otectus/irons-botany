@@ -19,7 +19,7 @@ public class IBSounds {
 
     private static RegistryObject<SoundEvent> registerSound(String name) {
         return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(
-                ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, name)));
+                new ResourceLocation(IronsBotany.MODID, name)));
     }
 
     public static void register(IEventBus eventBus) {

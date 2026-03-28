@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
  */
 public class TerraRodChannel implements CastingChannel {
     private static final ResourceLocation ID = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "terra_rod");
+        new ResourceLocation(IronsBotany.MODID, "terra_rod");
     
     @Override
     public ResourceLocation getId() {

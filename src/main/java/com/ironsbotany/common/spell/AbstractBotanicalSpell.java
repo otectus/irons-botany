@@ -338,7 +338,7 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
      */
     private static void grantAdvancement(ServerPlayer player, String advancementId, String criterionKey) {
         var advancement = player.server.getAdvancements()
-            .getAdvancement(ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, advancementId));
+            .getAdvancement(new ResourceLocation(IronsBotany.MODID, advancementId));
         if (advancement != null) {
             player.getAdvancements().award(advancement, criterionKey);
         }

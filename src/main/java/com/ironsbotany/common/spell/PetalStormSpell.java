@@ -129,7 +129,7 @@ public class PetalStormSpell extends AbstractBotanicalSpell {
 
     @Override
     public ResourceLocation getSpellResource() {
-        return ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "petal_storm");
+        return new ResourceLocation(IronsBotany.MODID, "petal_storm");
     }
 
 }

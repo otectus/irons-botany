@@ -124,6 +124,6 @@ public class ManaBloomSpell extends AbstractBotanicalSpell {
 
     @Override
     public ResourceLocation getSpellResource() {
-        return ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "mana_bloom");
+        return new ResourceLocation(IronsBotany.MODID, "mana_bloom");
     }
 }

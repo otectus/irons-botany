@@ -58,7 +58,7 @@ public class SpellLogisticsSystem {
         // Grant corporea_link advancement on first successful request
         if (anyRequested && player instanceof ServerPlayer serverPlayer) {
             var advancement = serverPlayer.server.getAdvancements()
-                .getAdvancement(ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "corporea_link"));
+                .getAdvancement(new ResourceLocation(IronsBotany.MODID, "corporea_link"));
             if (advancement != null) {
                 serverPlayer.getAdvancements().award(advancement, "corporea_request");
             }

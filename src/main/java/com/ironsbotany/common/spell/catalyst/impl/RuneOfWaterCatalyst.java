@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class RuneOfWaterCatalyst implements CatalystEffect {
     private static final ResourceLocation ID = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "rune_of_water");
+        new ResourceLocation(IronsBotany.MODID, "rune_of_water");
     
     @Override
     public ResourceLocation getId() {

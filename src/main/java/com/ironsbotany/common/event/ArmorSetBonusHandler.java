@@ -46,7 +46,7 @@ public class ArmorSetBonusHandler {
             // Grant mana_shield advancement
             if (player instanceof ServerPlayer serverPlayer) {
                 var advancement = serverPlayer.server.getAdvancements()
-                    .getAdvancement(ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "mana_shield"));
+                    .getAdvancement(new ResourceLocation(IronsBotany.MODID, "mana_shield"));
                 if (advancement != null) {
                     serverPlayer.getAdvancements().award(advancement, "shield_proc");
                 }

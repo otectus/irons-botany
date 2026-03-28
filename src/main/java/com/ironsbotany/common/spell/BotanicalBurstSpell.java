@@ -100,7 +100,7 @@ public class BotanicalBurstSpell extends AbstractBotanicalSpell {
 
     @Override
     public ResourceLocation getSpellResource() {
-        return ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "botanical_burst");
+        return new ResourceLocation(IronsBotany.MODID, "botanical_burst");
     }
 
 }

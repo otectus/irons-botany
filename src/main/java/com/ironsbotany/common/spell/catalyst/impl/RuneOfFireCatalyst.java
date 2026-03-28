@@ -16,7 +16,7 @@ import net.minecraft.world.effect.MobEffects;
  */
 public class RuneOfFireCatalyst implements CatalystEffect {
     private static final ResourceLocation ID = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "rune_of_fire");
+        new ResourceLocation(IronsBotany.MODID, "rune_of_fire");
     
     @Override
     public ResourceLocation getId() {

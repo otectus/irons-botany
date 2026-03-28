@@ -82,7 +82,7 @@ public class SparkSwarmSpell extends AbstractBotanicalSpell {
 
     @Override
     public ResourceLocation getSpellResource() {
-        return ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "spark_swarm");
+        return new ResourceLocation(IronsBotany.MODID, "spark_swarm");
     }
 
 }

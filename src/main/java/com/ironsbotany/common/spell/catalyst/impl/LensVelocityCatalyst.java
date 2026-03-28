@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class LensVelocityCatalyst implements CatalystEffect {
     private static final ResourceLocation ID = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "lens_velocity");
+        new ResourceLocation(IronsBotany.MODID, "lens_velocity");
     
     @Override
     public ResourceLocation getId() {

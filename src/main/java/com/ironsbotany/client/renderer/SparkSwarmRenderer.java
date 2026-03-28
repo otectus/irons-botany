@@ -19,7 +19,7 @@ import org.joml.Matrix4f;
 @OnlyIn(Dist.CLIENT)
 public class SparkSwarmRenderer extends EntityRenderer<SparkSwarmEntity> {
     private static final ResourceLocation TEXTURE = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "textures/entity/spark_swarm.png");
+        new ResourceLocation(IronsBotany.MODID, "textures/entity/spark_swarm.png");
     private static final RenderType RENDER_TYPE = RenderType.entityTranslucent(TEXTURE);
 
     public SparkSwarmRenderer(EntityRendererProvider.Context context) {

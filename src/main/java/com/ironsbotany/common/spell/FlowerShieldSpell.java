@@ -95,7 +95,7 @@ public class FlowerShieldSpell extends AbstractBotanicalSpell {
 
     @Override
     public ResourceLocation getSpellResource() {
-        return ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "flower_shield");
+        return new ResourceLocation(IronsBotany.MODID, "flower_shield");
     }
 
 }

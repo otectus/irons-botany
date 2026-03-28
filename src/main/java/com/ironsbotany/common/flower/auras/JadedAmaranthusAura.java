@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class JadedAmaranthusAura implements FlowerAura {
     private static final ResourceLocation ID = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "jaded_amaranthus");
+        new ResourceLocation(IronsBotany.MODID, "jaded_amaranthus");
     
     @Override
     public ResourceLocation getId() {

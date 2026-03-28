@@ -12,7 +12,7 @@ import net.minecraft.world.effect.MobEffects;
 
 public class GaiaSpiritCatalyst implements CatalystEffect {
     private static final ResourceLocation ID = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "gaia_spirit");
+        new ResourceLocation(IronsBotany.MODID, "gaia_spirit");
     
     @Override
     public ResourceLocation getId() {

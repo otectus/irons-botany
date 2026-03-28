@@ -145,7 +145,7 @@ public class GaiaWrathSpell extends AbstractBotanicalSpell {
 
     @Override
     public ResourceLocation getSpellResource() {
-        return ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "gaia_wrath");
+        return new ResourceLocation(IronsBotany.MODID, "gaia_wrath");
     }
 
 }

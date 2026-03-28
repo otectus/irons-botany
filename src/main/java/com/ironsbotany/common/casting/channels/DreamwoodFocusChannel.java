@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
  */
 public class DreamwoodFocusChannel implements CastingChannel {
     private static final ResourceLocation ID = 
-        ResourceLocation.fromNamespaceAndPath(IronsBotany.MODID, "dreamwood_focus");
+        new ResourceLocation(IronsBotany.MODID, "dreamwood_focus");
     
     @Override
     public ResourceLocation getId() {
