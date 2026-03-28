@@ -72,9 +72,9 @@ public class IBItems {
     public static final RegistryObject<Item> SPELL_PETAL = ITEMS.register("spell_petal",
             () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.spell_petal.tooltip"));
 
-    // Patchouli Book - using simple item for now (Patchouli API changed)
+    // Patchouli Book - opens guidebook GUI when right-clicked (if Patchouli is present)
     public static final RegistryObject<Item> BOTANICAL_GRIMOIRE = ITEMS.register("botanical_grimoire",
-            () -> new TooltipItem(new Item.Properties().stacksTo(1), "item.ironsbotany.botanical_grimoire.tooltip"));
+            () -> new com.ironsbotany.common.item.BotanicalGrimoireItem(new Item.Properties().stacksTo(1)));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

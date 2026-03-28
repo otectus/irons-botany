@@ -1,5 +1,6 @@
 package com.ironsbotany.common.block;
 
+import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.block.entity.SpellReservoirBlockEntity;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.registry.IBBlockEntities;
@@ -50,20 +51,48 @@ public class SpellReservoirBlock extends BaseEntityBlock {
         if (!(be instanceof SpellReservoirBlockEntity reservoir)) return InteractionResult.PASS;
 
         ItemStack held = player.getItemInHand(hand);
-        if (held.isEmpty()) return InteractionResult.PASS;
+        if (held.isEmpty()) {
+            // Show stored mana info on empty-hand right-click
+            int capacity = CommonConfig.SPELL_RESERVOIR_CAPACITY.get();
+            player.displayClientMessage(
+                Component.translatable("block.ironsbotany.spell_reservoir.info",
+                    reservoir.getStoredMana(), capacity),
+                true);
+            return InteractionResult.SUCCESS;
+        }
 
         int transferRate = CommonConfig.MANA_TRANSFER_RATE.get();
         try {
-            if (ManaItemHandler.instance().requestManaExact(held, player, transferRate, true)) {
-                int issGained = ManaHelper.convertBotaniaToISS(transferRate);
-                if (issGained > 0) {
-                    reservoir.addMana(issGained);
-                    level.playSound(null, pos, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.5f, 1.2f);
-                    return InteractionResult.CONSUME;
-                }
+            // Check conversion yields something before draining
+            int issGained = ManaHelper.convertBotaniaToISS(transferRate);
+            if (issGained <= 0) {
+                return InteractionResult.PASS;
             }
-        } catch (Exception ignored) {
-            // Item doesn't support mana operations
+
+            // Check reservoir has room
+            int capacity = CommonConfig.SPELL_RESERVOIR_CAPACITY.get();
+            int currentMana = reservoir.getStoredMana();
+            if (currentMana >= capacity) {
+                return InteractionResult.PASS;
+            }
+
+            // Clamp to available capacity
+            int roomLeft = capacity - currentMana;
+            if (issGained > roomLeft) {
+                issGained = roomLeft;
+                // Only drain the exact Botania amount needed for the clamped ISS gain
+                int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
+                transferRate = issGained * ratio;
+            }
+
+            // Now drain — we know it will convert cleanly
+            if (ManaItemHandler.instance().requestManaExact(held, player, transferRate, true)) {
+                reservoir.addMana(issGained);
+                level.playSound(null, pos, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.5f, 1.2f);
+                return InteractionResult.CONSUME;
+            }
+        } catch (Exception e) {
+            IronsBotany.LOGGER.debug("Reservoir mana transfer failed: {}", e.getMessage());
         }
         return InteractionResult.PASS;
     }

@@ -1,20 +1,29 @@
 package com.ironsbotany.common.recipe;
 
 import com.google.gson.JsonObject;
+import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.registry.IBRecipeTypes;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class RuneScrollFusionRecipe extends CustomRecipe {
-    
+    private static final TagKey<Item> SPELL_SCROLLS = TagKey.create(
+        ForgeRegistries.Keys.ITEMS, new ResourceLocation(IronsBotany.MODID, "spell_scrolls"));
+    private static final TagKey<Item> BOTANIA_RUNES = TagKey.create(
+        ForgeRegistries.Keys.ITEMS, new ResourceLocation(IronsBotany.MODID, "botania_runes"));
+
     public RuneScrollFusionRecipe(ResourceLocation id, CraftingBookCategory category) {
         super(id, category);
     }
@@ -29,14 +38,10 @@ public class RuneScrollFusionRecipe extends CustomRecipe {
             ItemStack stack = container.getItem(i);
             if (!stack.isEmpty()) {
                 itemCount++;
-                
-                // Check for scroll
-                if (stack.getItem().toString().contains("scroll")) {
+
+                if (stack.is(SPELL_SCROLLS)) {
                     scroll = stack;
-                }
-                
-                // Check for rune
-                if (stack.getItem().toString().contains("rune")) {
+                } else if (stack.is(BOTANIA_RUNES)) {
                     rune = stack;
                 }
             }
@@ -54,10 +59,9 @@ public class RuneScrollFusionRecipe extends CustomRecipe {
         for (int i = 0; i < container.getContainerSize(); i++) {
             ItemStack stack = container.getItem(i);
             if (!stack.isEmpty()) {
-                if (stack.getItem().toString().contains("scroll")) {
+                if (stack.is(SPELL_SCROLLS)) {
                     scroll = stack;
-                }
-                if (stack.getItem().toString().contains("rune")) {
+                } else if (stack.is(BOTANIA_RUNES)) {
                     rune = stack;
                 }
             }
@@ -70,14 +74,15 @@ public class RuneScrollFusionRecipe extends CustomRecipe {
         // Create enhanced scroll
         ItemStack result = scroll.copy();
         CompoundTag tag = result.getOrCreateTag();
-        
-        // Store rune type
-        String runeName = rune.getItem().toString();
-        tag.putString("runeType", runeName);
+
+        // Store rune registry name
+        ResourceLocation runeId = ForgeRegistries.ITEMS.getKey(rune.getItem());
+        tag.putString("runeType", runeId != null ? runeId.toString() : "unknown");
         tag.putBoolean("runeEnhanced", true);
-        
-        // Add visual indicator
-        result.setHoverName(scroll.getHoverName().copy().append(" (Rune Enhanced)"));
+
+        // Add translatable visual indicator
+        result.setHoverName(scroll.getHoverName().copy()
+            .append(Component.translatable("item.ironsbotany.rune_enhanced_suffix")));
 
         return result;
     }

@@ -65,16 +65,29 @@ public class SpellReservoirBlockEntity extends BlockEntity {
         return storedISSMana;
     }
 
-    public void addMana(int amount) {
+    /**
+     * Add mana to the reservoir.
+     * @return the amount of mana actually accepted (clamped by remaining capacity)
+     */
+    public int addMana(int amount) {
         int maxCapacity = CommonConfig.SPELL_RESERVOIR_CAPACITY.get();
-        this.storedISSMana = Math.min(this.storedISSMana + amount, maxCapacity);
-        setChanged();
+        int accepted = Math.min(amount, maxCapacity - this.storedISSMana);
+        this.storedISSMana += accepted;
+        notifyChanged();
+        return accepted;
     }
 
     public int drainMana(int amount) {
         int drained = Math.min(amount, this.storedISSMana);
         this.storedISSMana -= drained;
-        setChanged();
+        notifyChanged();
         return drained;
+    }
+
+    private void notifyChanged() {
+        setChanged();
+        if (level != null) {
+            level.updateNeighbourForOutputSignal(worldPosition, getBlockState().getBlock());
+        }
     }
 }

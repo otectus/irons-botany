@@ -104,38 +104,26 @@ public class SpellDrivenAutomation {
     private static void applyGravityAutomation(Level level, BlockPos targetPos, Player player) {
         AABB searchBox = new AABB(targetPos).inflate(8);
 
-        try {
-            @SuppressWarnings("unchecked")
-            Class<? extends net.minecraft.world.entity.Entity> burstClass =
-                (Class<? extends net.minecraft.world.entity.Entity>)
-                    Class.forName("vazkii.botania.common.entity.ManaBurstEntity");
-            List<? extends net.minecraft.world.entity.Entity> bursts =
-                level.getEntitiesOfClass(burstClass, searchBox);
+        for (net.minecraft.world.entity.Entity entity : level.getEntities((net.minecraft.world.entity.Entity) null, searchBox, e -> e instanceof ManaBurst)) {
+            ManaBurst burst = (ManaBurst) entity;
+            // Use Botania's built-in magnetize mechanic
+            burst.setMagnetizePos(targetPos);
 
-            for (var obj : bursts) {
-                if (obj instanceof ManaBurst burst) {
-                    // Use Botania's built-in magnetize mechanic
-                    burst.setMagnetizePos(targetPos);
+            // Blend velocity toward target for smooth gravity-well effect
+            net.minecraft.world.entity.Entity burstEntity = burst.entity();
+            if (burstEntity != null) {
+                Vec3 entityPos = burstEntity.position();
+                Vec3 target = new Vec3(
+                    targetPos.getX() + 0.5,
+                    targetPos.getY() + 0.5,
+                    targetPos.getZ() + 0.5);
+                Vec3 direction = target.subtract(entityPos).normalize();
+                double speed = burstEntity.getDeltaMovement().length();
 
-                    // Blend velocity toward target for smooth gravity-well effect
-                    net.minecraft.world.entity.Entity entity = burst.entity();
-                    if (entity != null) {
-                        Vec3 entityPos = entity.position();
-                        Vec3 target = new Vec3(
-                            targetPos.getX() + 0.5,
-                            targetPos.getY() + 0.5,
-                            targetPos.getZ() + 0.5);
-                        Vec3 direction = target.subtract(entityPos).normalize();
-                        double speed = entity.getDeltaMovement().length();
-
-                        Vec3 currentVel = entity.getDeltaMovement();
-                        Vec3 newVel = currentVel.scale(0.3).add(direction.scale(speed * 0.7));
-                        entity.setDeltaMovement(newVel);
-                    }
-                }
+                Vec3 currentVel = burstEntity.getDeltaMovement();
+                Vec3 newVel = currentVel.scale(0.3).add(direction.scale(speed * 0.7));
+                burstEntity.setDeltaMovement(newVel);
             }
-        } catch (ClassNotFoundException e) {
-            IronsBotany.LOGGER.debug("ManaBurstEntity class not found: {}", e.getMessage());
         }
     }
 

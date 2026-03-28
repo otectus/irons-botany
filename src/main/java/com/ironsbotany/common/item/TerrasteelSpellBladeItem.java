@@ -29,7 +29,7 @@ public class TerrasteelSpellBladeItem extends SwordItem {
         super(TerrasteelTier.INSTANCE, 3, -2.4F, properties);
     }
 
-    private static final UUID MANA_COST_UUID = UUID.fromString("c0d5e6f7-a8b9-0123-4567-89abcdef0123");
+    private static final UUID COOLDOWN_UUID = UUID.fromString("c0d5e6f7-a8b9-0123-4567-89abcdef0123");
 
     @Override
     public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
@@ -51,7 +51,7 @@ public class TerrasteelSpellBladeItem extends SwordItem {
 
             // Cooldown reduction (-20%)
             builder.put(AttributeRegistry.COOLDOWN_REDUCTION.get(),
-                    new AttributeModifier(MANA_COST_UUID, "Terrasteel Cooldown Reduction",
+                    new AttributeModifier(COOLDOWN_UUID, "Terrasteel Cooldown Reduction",
                             CommonConfig.TERRASTEEL_BLADE_MANA_COST_REDUCTION.get(),
                             AttributeModifier.Operation.MULTIPLY_TOTAL));
 

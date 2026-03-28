@@ -116,15 +116,15 @@ public class GaiaWrathSpell extends AbstractBotanicalSpell {
             }
         }
         
-        // Massive particle effect at caster
+        // Particle shockwave at caster (reduced density for server performance)
         if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-            // Ground shockwave
-            for (int i = 0; i < 100; i++) {
-                double angle = (i / 100.0) * Math.PI * 2;
-                for (int r = 1; r <= radius; r++) {
+            // Ground shockwave — 36 angles, every other radius step
+            for (int i = 0; i < 36; i++) {
+                double angle = (i / 36.0) * Math.PI * 2;
+                for (int r = 1; r <= radius; r += 2) {
                     double x = entity.getX() + Math.cos(angle) * r;
                     double z = entity.getZ() + Math.sin(angle) * r;
-                    
+
                     serverLevel.sendParticles(
                         net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME,
                         x, entity.getY() + 0.1, z,
@@ -132,12 +132,12 @@ public class GaiaWrathSpell extends AbstractBotanicalSpell {
                     );
                 }
             }
-            
+
             // Upward explosion
             serverLevel.sendParticles(
                 net.minecraft.core.particles.ParticleTypes.EXPLOSION_EMITTER,
                 entity.getX(), entity.getY() + 1, entity.getZ(),
-                5, 0.0, 0.0, 0.0, 0.0
+                3, 0.0, 0.0, 0.0, 0.0
             );
         }
         

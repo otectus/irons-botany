@@ -63,14 +63,8 @@ public class FlowerShieldSpell extends AbstractBotanicalSpell {
         entity.getPersistentData().putLong(DataKeys.FLOWER_SHIELD_EXPIRY,
             level.getGameTime() + duration);
 
-        // Apply resistance as secondary effect
-        entity.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-            net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE,
-            duration,
-            Math.min(spellLevel - 1, 2),
-            false,
-            true
-        ));
+        // Shield is the petal HP absorption buffer only — no Resistance stacking
+        // Breaking the shield returns the player to full damage exposure
 
         // Spawn petal barrier particles
         if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {

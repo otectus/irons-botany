@@ -141,7 +141,7 @@ public class SpellCatalystRegistry {
                 }
             }
         } catch (Exception e) {
-            // Curios not available or error occurred
+            com.ironsbotany.IronsBotany.LOGGER.debug("Curios catalyst scan failed: {}", e.getMessage());
         }
         
         return effects;

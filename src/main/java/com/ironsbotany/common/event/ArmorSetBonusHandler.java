@@ -13,27 +13,35 @@ import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = IronsBotany.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ArmorSetBonusHandler {
-    
+
     private static final int MANA_PER_DAMAGE = 10000; // 10k Botania mana per heart absorbed
-    
+    private static final int COOLDOWN_TICKS = 40; // 2-second internal cooldown
+    private static final String LAST_SHIELD_TIME_KEY = "IronsBotany_ManaShieldCooldown";
+
     @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         if (player.level().isClientSide) return;
-        
+
         // Check if player has full Manasteel Wizard Armor set
         if (!hasFullManasteelSet(player)) return;
-        
+
+        // Check internal cooldown
+        long lastProc = player.getPersistentData().getLong(LAST_SHIELD_TIME_KEY);
+        long currentTime = player.level().getGameTime();
+        if (currentTime - lastProc < COOLDOWN_TICKS) return;
+
         float damage = event.getAmount();
         float absorbAmount = damage * 0.5f; // Absorb 50% of damage
-        
+
         // Calculate mana cost
         int manaCost = (int) (absorbAmount * MANA_PER_DAMAGE);
-        
+
         // Try to drain Botania mana
         if (ManaHelper.drainBotaniaMana(player, manaCost)) {
             // Reduce damage by 50%
             event.setAmount(damage * 0.5f);
+            player.getPersistentData().putLong(LAST_SHIELD_TIME_KEY, currentTime);
             
             // Grant mana_shield advancement
             if (player instanceof ServerPlayer serverPlayer) {

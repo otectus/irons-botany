@@ -176,5 +176,10 @@
   "advancements.ironsbotany.corporea_link.title": "Supply Chain Magic",
   "advancements.ironsbotany.corporea_link.description": "Auto-request spell reagents from a Corporea network",
   "advancements.ironsbotany.alfheim_cast.title": "Otherworldly Power",
-  "advancements.ironsbotany.alfheim_cast.description": "Cast an Iron's Botany spell in the Alfheim dimension"
+  "advancements.ironsbotany.alfheim_cast.description": "Cast an Iron's Botany spell near an Alfheim portal",
+  "item.ironsbotany.rune_enhanced_suffix": " (Rune Enhanced)",
+  "item.ironsbotany.botanical_focus.siphon_on": "Siphon Mode: ON",
+  "item.ironsbotany.botanical_focus.siphon_off": "Siphon Mode: OFF",
+  "block.ironsbotany.spell_reservoir.info": "Stored Mana: %s / %s",
+  "block.ironsbotany.mana_conduit.info": "Stored Mana: %s / %s"
 }

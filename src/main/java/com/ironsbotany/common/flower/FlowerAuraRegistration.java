@@ -24,7 +24,7 @@ public class FlowerAuraRegistration {
         
         try {
             // Register Botania functional flower auras
-            registerAuraSafe("botania:bellethorne", new BellethorneAura());
+            registerAuraSafe("botania:bellethorn", new BellethorneAura());
             registerAuraSafe("botania:jaded_amaranthus", new JadedAmaranthusAura());
             registerAuraSafe("botania:heisei_dream", new HeiseiDreamAura());
             registerAuraSafe("botania:rannuncarpus", new RannuncarpusAura());

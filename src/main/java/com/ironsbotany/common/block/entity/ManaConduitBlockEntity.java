@@ -51,12 +51,21 @@ public class ManaConduitBlockEntity extends BlockEntity {
                 BlockPos neighborPos = pos.relative(dir);
                 BlockEntity neighbor = level.getBlockEntity(neighborPos);
                 if (neighbor instanceof ManaPool pool) {
-                    int toDrain = Math.min(conversionRate, maxCapacity - blockEntity.storedISSMana);
-                    if (pool.getCurrentMana() >= toDrain) {
-                        pool.receiveMana(-toDrain);
-                        int issGained = ManaHelper.convertBotaniaToISS(toDrain);
-                        blockEntity.storedISSMana = Math.min(blockEntity.storedISSMana + issGained, maxCapacity);
-                        blockEntity.setChanged();
+                    // Compute how much ISS mana we can accept
+                    int issRoom = maxCapacity - blockEntity.storedISSMana;
+                    // Compute maximum Botania mana to drain for that ISS room
+                    int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
+                    int issFromConversion = ManaHelper.convertBotaniaToISS(conversionRate);
+                    if (issFromConversion <= 0) break; // Conversion not allowed in this mode
+
+                    int issToGain = Math.min(issFromConversion, issRoom);
+                    // Only drain the exact Botania amount that converts cleanly
+                    int botaniaToConsume = issToGain * ratio;
+
+                    if (botaniaToConsume > 0 && pool.getCurrentMana() >= botaniaToConsume) {
+                        pool.receiveMana(-botaniaToConsume);
+                        blockEntity.storedISSMana += issToGain;
+                        notifyChanged(blockEntity);
                         break; // Only drain from one pool per tick
                     }
                 }
@@ -70,9 +79,9 @@ public class ManaConduitBlockEntity extends BlockEntity {
                 BlockEntity neighbor = level.getBlockEntity(neighborPos);
                 if (neighbor instanceof SpellReservoirBlockEntity reservoir && blockEntity.storedISSMana > 0) {
                     int toTransfer = Math.min(getTransferRate(), blockEntity.storedISSMana);
-                    reservoir.addMana(toTransfer);
-                    blockEntity.storedISSMana -= toTransfer;
-                    blockEntity.setChanged();
+                    int accepted = reservoir.addMana(toTransfer);
+                    blockEntity.storedISSMana -= accepted;
+                    notifyChanged(blockEntity);
                 }
             }
         }
@@ -97,7 +106,7 @@ public class ManaConduitBlockEntity extends BlockEntity {
 
                         magicData.addMana(toTransfer);
                         blockEntity.storedISSMana -= toTransfer;
-                        blockEntity.setChanged();
+                        notifyChanged(blockEntity);
                     }
                 }
             }
@@ -110,5 +119,13 @@ public class ManaConduitBlockEntity extends BlockEntity {
 
     public int getStoredMana() {
         return storedISSMana;
+    }
+
+    private static void notifyChanged(ManaConduitBlockEntity blockEntity) {
+        blockEntity.setChanged();
+        if (blockEntity.level != null) {
+            blockEntity.level.updateNeighbourForOutputSignal(
+                blockEntity.worldPosition, blockEntity.getBlockState().getBlock());
+        }
     }
 }

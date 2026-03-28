@@ -2,14 +2,12 @@ package com.ironsbotany.common.spell;
 
 import com.ironsbotany.common.event.ManaNetworkModifier;
 import com.ironsbotany.common.event.SpellTriggeredManaEvent;
-import com.ironsbotany.common.util.BotaniaIntegration;
 import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.phys.AABB;
 import net.minecraftforge.fml.ModList;
 
 /**
@@ -45,23 +43,28 @@ public class SpellManaNetworkIntegration {
         if (triggerType == null) {
             return; // Spell doesn't trigger mana network effects
         }
-        
-        // Find nearby Botania blocks and apply effects
+
+        // Only WATER trigger has a real effect (direct pool.receiveMana API call).
+        // Other trigger types wrote NBT tags that Botania never reads — skip the
+        // expensive cuboid scan for those until proper implementations are added.
+        if (triggerType != SpellTriggeredManaEvent.SpellTriggerType.WATER) {
+            return;
+        }
+
+        // Find nearby Botania mana pools and apply water fill
         int radius = DEFAULT_SEARCH_RADIUS + spellLevel;
-        AABB searchBox = new AABB(casterPos).inflate(radius);
-        
         for (BlockPos pos : BlockPos.betweenClosed(
-            (int)searchBox.minX, (int)searchBox.minY, (int)searchBox.minZ,
-            (int)searchBox.maxX, (int)searchBox.maxY, (int)searchBox.maxZ)) {
-            
-            if (isBotaniaBlock(level, pos)) {
-                // Calculate distance-based intensity
+            casterPos.offset(-radius, -radius / 2, -radius),
+            casterPos.offset(radius, radius / 2, radius))) {
+
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof vazkii.botania.api.mana.ManaPool) {
                 double distance = Math.sqrt(casterPos.distSqr(pos));
                 float distanceIntensity = intensity * (1.0f - (float)(distance / radius));
-                
+
                 if (distanceIntensity > 0.1f) {
                     ManaNetworkModifier.registerModification(
-                        level, pos.immutable(), triggerType, 
+                        level, pos.immutable(), triggerType,
                         distanceIntensity, DEFAULT_DURATION
                     );
                 }
@@ -100,10 +103,5 @@ public class SpellManaNetworkIntegration {
         }
         
         return null; // No trigger for this spell
-    }
-    
-    private static boolean isBotaniaBlock(Level level, BlockPos pos) {
-        BlockEntity be = level.getBlockEntity(pos);
-        return be != null && BotaniaIntegration.isBotaniaBlockEntity(be);
     }
 }

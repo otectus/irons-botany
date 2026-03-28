@@ -9,8 +9,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class BotanicalBurstProjectile extends ThrowableProjectile {
     private float damage = 8.0f;
+    private int pierceCount = 0;
+    private final Set<Integer> hitEntities = new HashSet<>();
 
     public BotanicalBurstProjectile(EntityType<? extends BotanicalBurstProjectile> type, Level level) {
         super(type, level);
@@ -29,7 +34,7 @@ public class BotanicalBurstProjectile extends ThrowableProjectile {
     @Override
     public void tick() {
         super.tick();
-        
+
         if (this.level().isClientSide) {
             // Spawn trail particles
             for (int i = 0; i < 2; i++) {
@@ -42,7 +47,7 @@ public class BotanicalBurstProjectile extends ThrowableProjectile {
                 );
             }
         }
-        
+
         // Remove after 10 seconds
         if (this.tickCount > 200) {
             this.discard();
@@ -52,34 +57,63 @@ public class BotanicalBurstProjectile extends ThrowableProjectile {
     @Override
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
-        
+
         if (!this.level().isClientSide && result.getEntity() instanceof LivingEntity target) {
-            // Deal damage
-            target.hurt(this.damageSources().magic(), this.damage);
-            
-            // Spawn impact particles
-            for (int i = 0; i < 20; i++) {
-                double angle = (i / 20.0) * Math.PI * 2;
-                double speed = 0.3;
-                this.level().addParticle(
-                    ParticleTypes.CHERRY_LEAVES,
-                    this.getX(),
-                    this.getY(),
-                    this.getZ(),
-                    Math.cos(angle) * speed,
-                    0.2,
-                    Math.sin(angle) * speed
-                );
+            boolean isPiercing = this.getPersistentData().getBoolean("piercing");
+
+            if (isPiercing) {
+                // Skip entities we already hit
+                int targetId = target.getId();
+                if (hitEntities.contains(targetId)) {
+                    return;
+                }
+                hitEntities.add(targetId);
+
+                int maxPierce = this.getPersistentData().getInt("max_pierce");
+                if (maxPierce <= 0) {
+                    maxPierce = 3;
+                }
+
+                // Reduce damage by 20% per pierce
+                float effectiveDamage = this.damage * (1.0f - 0.2f * pierceCount);
+                target.hurt(this.damageSources().magic(), effectiveDamage);
+
+                // Spawn impact particles
+                spawnImpactParticles();
+
+                pierceCount++;
+                if (pierceCount >= maxPierce) {
+                    this.discard();
+                }
+            } else {
+                // Non-piercing: original behavior
+                target.hurt(this.damageSources().magic(), this.damage);
+                spawnImpactParticles();
+                this.discard();
             }
-            
-            this.discard();
+        }
+    }
+
+    private void spawnImpactParticles() {
+        for (int i = 0; i < 20; i++) {
+            double angle = (i / 20.0) * Math.PI * 2;
+            double speed = 0.3;
+            this.level().addParticle(
+                ParticleTypes.CHERRY_LEAVES,
+                this.getX(),
+                this.getY(),
+                this.getZ(),
+                Math.cos(angle) * speed,
+                0.2,
+                Math.sin(angle) * speed
+            );
         }
     }
 
     @Override
     protected void onHit(HitResult result) {
         super.onHit(result);
-        
+
         if (!this.level().isClientSide) {
             // Spawn impact particles
             for (int i = 0; i < 15; i++) {
@@ -93,7 +127,7 @@ public class BotanicalBurstProjectile extends ThrowableProjectile {
                     (this.random.nextDouble() - 0.5) * 0.5
                 );
             }
-            
+
             this.discard();
         }
     }

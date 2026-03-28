@@ -92,7 +92,24 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
                 }
             }
 
-            // Apply Alfheim boost if in Alfheim dimension
+            // Write ACTIVE_AURAS flag for GaiaSpellTrials
+            player.getPersistentData().putBoolean(DataKeys.ACTIVE_AURAS, !auras.isEmpty());
+
+            // Apply casting channel modifiers from held items
+            if (ConfigHelper.areChannelsEnabled()) {
+                com.ironsbotany.common.casting.CastingChannel channel =
+                    com.ironsbotany.common.casting.CastingChannelRegistry.getChannelForItem(player.getMainHandItem());
+                if (channel == null) {
+                    channel = com.ironsbotany.common.casting.CastingChannelRegistry.getChannelForItem(player.getOffhandItem());
+                }
+                if (channel != null && channel.canCast(this, player)) {
+                    context.multiplyDamage(channel.getBurstDamageMultiplier());
+                    context.multiplyCooldown(channel.getCooldownMultiplier());
+                    context.multiplyCastingSpeed(channel.getCastingSpeedMultiplier());
+                }
+            }
+
+            // Apply Alfheim portal proximity boost
             AlfheimSpellBoost.applyAlfheimBoost(context, this, player);
 
             // Apply spellbook attunement bonuses
@@ -170,6 +187,11 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
         // Execute spell effect for ANY LivingEntity
         executeBotanicalEffect(level, spellLevel, entity, castSource, playerMagicData, context);
 
+        // Apply additional effects from catalysts/auras to caster
+        for (net.minecraft.world.effect.MobEffectInstance effect : context.getAdditionalEffects()) {
+            entity.addEffect(new net.minecraft.world.effect.MobEffectInstance(effect));
+        }
+
         // Player-specific post-cast logic
         if (entity instanceof Player player) {
             // Store last spell cast for cross-system tracking (e.g., Gaia trials)
@@ -220,7 +242,7 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
                 }
 
                 // Alfheim advancement
-                if (AlfheimSpellBoost.isInAlfheim(player)) {
+                if (AlfheimSpellBoost.isNearAlfheimPortal(player)) {
                     grantAdvancement(serverPlayer, "alfheim_cast", "cast_in_alfheim");
                 }
             }

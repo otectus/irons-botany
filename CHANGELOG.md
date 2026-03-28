@@ -5,6 +5,52 @@ All notable changes to Iron's Botany will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-03-27
+
+### Critical Fixes
+- **Dependencies now mandatory** — Botania, Iron's Spells 'n Spellbooks, and Curios are declared `mandatory=true` in `mods.toml`, matching actual hard requirements. Version ranges tightened to tested baselines
+- **Catalyst registration completely rewritten** — Replaced all `Class.forName` reflection with `ForgeRegistries.ITEMS.getValue()` registry lookups. Fixed stale Botania field names: `lensVelocity`→`lens_speed`, `lensBore`→`lens_mine`, `gaiaSpirit`→`gaia_ingot`, `terrasteel`→`terrasteel_ingot`. Catalysts now register reliably
+- **Corporea reagent duplication fixed** — `SpellCircleReagentSystem` was adding items to player inventory AND dropping them as world entities. Refactored to use new `extractFromCorporea()` that returns stacks without inventory insertion. `autoPlaceComponents()` now correctly returns `false` when reagents are unavailable
+- **Mana deletion eliminated in all conversion paths** — ManaConduit, SpellReservoir, and ManaHelper now verify conversion yields a result before draining Botania mana. Integer division remainder is preserved by only draining the exact amount that converts cleanly. `SpellReservoirBlockEntity.addMana()` now returns the accepted amount so the conduit only subtracts what was actually inserted
+- **Stage 4 non-functional NBT writes removed** — Only the WATER trigger (direct `pool.receiveMana()`) was functional; all other triggers wrote NBT tags that Botania never reads. Removed dead NBT writes for LIGHTNING, EARTH, NATURE, FIRE, WIND, and ARCANE. Expensive cuboid scan now skipped for non-WATER triggers
+
+### Compatibility
+- **Bellethorn aura typo fixed** — `FlowerAuraRegistration` used `"botania:bellethorne"` (wrong) instead of `"botania:bellethorn"`. Aura now registers correctly
+- **Alfheim integration redesigned** — Replaced nonexistent `botania:alfheim` dimension check with Alfheim portal block proximity detection. Boost now scales by distance to nearest portal (full at 0, fading at 16 blocks)
+- **Patchouli guidebook now opens** — Chronicle of the Green Mage right-click now calls `PatchouliAPI.get().openBookGUI()`. Falls back gracefully if Patchouli is absent
+- **Broken `runData` target removed** — No data providers exist; the Gradle data task has been commented out with a TODO
+
+### Integration Fixes
+- **Casting channels wired into spell execution** — `CastingChannelRegistry` was fully implemented but never called. Channels now apply damage, cooldown, and casting speed modifiers during `AbstractBotanicalSpell.onCast()`
+- **SpellContext additional effects now applied** — Catalyst/aura-granted `MobEffectInstance` effects from `context.getAdditionalEffects()` are applied to the caster after spell execution
+- **ACTIVE_AURAS flag now written** — `AbstractBotanicalSpell` writes `DataKeys.ACTIVE_AURAS` to player persistent data after scanning for auras, enabling Gaia trial Phase 1
+- **Gaia trial Phase 1 aura check fixed** — Now queries `FlowerAuraRegistry.getActiveAuras()` directly instead of reading a stale NBT flag that was never written
+- **Mana payment unified with HUD** — `ManaHelper.hasBotaniaMana()`/`drainBotaniaMana()` now use `ManaItemHandler.getManaItems()`/`getManaAccesories()` to include Curios-slot mana items, matching what the mana HUD displays
+- **BotanicalFocusItem fully functional** — Added right-click siphon toggle (`use()` override), Curios attribute modifiers (+50 Max Mana, +10% Mana Regen), and fixed `curioTick()` to siphon from player's inventory mana items instead of the focus stack itself. Rate-limited to once per second
+- **Projectile pierce implemented** — `BotanicalBurstProjectile` now reads `max_pierce`/`piercing` from persistent data. Piercing projectiles track hit entities, apply 20% damage reduction per pierce, and only discard after reaching max pierce count
+- **Spark swarm follows owner** — `SparkSwarmEntity` now uses stored `ownerUUID` for follow-owner behavior: teleports if >16 blocks away, navigates toward owner if >4 blocks, targets only monsters within 8 blocks of owner. Wander goal reduced to fallback priority
+- **Rune Scroll Fusion uses item tags** — Replaced fragile `toString().contains("scroll")`/`contains("rune")` matching with `ironsbotany:spell_scrolls` and `ironsbotany:botania_runes` item tags. Hardcoded English " (Rune Enhanced)" suffix replaced with translatable component
+- **ManaNetworkModifier dimension-safe** — Map key changed from `BlockPos` to `DimBlockPos(ResourceKey<Level>, BlockPos)` record. Modifications now only apply to the correct dimension
+- **All remaining reflection eliminated** — `SpellDrivenAutomation` no longer uses `Class.forName` for `ManaBurstEntity`; uses direct entity iteration with `instanceof ManaBurst`
+
+### Balance
+- **Gaia's Wrath particle density reduced ~85%** — Shockwave loop cut from 100 angles × full radius to 36 angles × half radius steps. Explosion emitter count reduced from 5 to 3
+- **Flower Shield single-axis** — Removed Resistance effect stacking. Shield is now purely a petal HP absorption buffer; breaking it returns the player to full damage exposure
+- **Manasteel armor set bonus has cooldown** — Added 40-tick (2-second) internal cooldown to the 50% mana shield, preventing permanent damage reduction
+- **TerrasteelSpellBlade naming fixed** — Renamed `MANA_COST_UUID` to `COOLDOWN_UUID` to match the actual `COOLDOWN_REDUCTION` attribute
+
+### Added
+- `BotanicalGrimoireItem.java` — Dedicated item class for the Chronicle of the Green Mage with Patchouli integration
+- `data/ironsbotany/tags/items/spell_scrolls.json` — Item tag for ISS spell scrolls
+- `data/ironsbotany/tags/items/botania_runes.json` — Item tag for all 16 Botania runes
+- Right-click info display on Spell Reservoir and Mana Conduit (shows stored mana / capacity)
+- Comparator output notifications — blocks now call `updateNeighbourForOutputSignal()` when stored mana changes
+- New lang keys: block info display, siphon mode toggle, rune enhanced suffix, updated Alfheim advancement description
+
+### Improved
+- Swallowed `catch (Exception ignored)` in `SpellCatalystRegistry` now logs at debug level
+- `SpellReservoirBlock` exception handler logs at debug instead of silently swallowing
+
 ## [1.2.1] - 2026-03-26
 
 ### Fixed

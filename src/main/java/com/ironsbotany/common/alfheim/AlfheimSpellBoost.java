@@ -3,66 +3,92 @@ package com.ironsbotany.common.alfheim;
 import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.spell.catalyst.SpellContext;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.registries.ForgeRegistries;
 
 /**
- * Alfheim spell dimension system.
- * Alfheim becomes the "arcane firmware update realm" where spells reach full power.
+ * Alfheim spell boost system.
+ * Players casting spells near an active Alfheim portal receive scaling power boosts.
+ * Botania 1.20.1 does not have an Alfheim dimension — boosts are proximity-based.
  */
 public class AlfheimSpellBoost {
-    
-    // Alfheim dimension key (Botania's dimension)
-    private static final ResourceKey<Level> ALFHEIM = 
-        ResourceKey.create(Registries.DIMENSION, 
-            ResourceLocation.tryParse("botania:alfheim"));
-    
+
+    private static final int PORTAL_SEARCH_RADIUS = 16;
+    private static final ResourceLocation ALFHEIM_PORTAL_ID =
+        new ResourceLocation("botania", "alfheim_portal");
+
     /**
-     * Check if player is in Alfheim
+     * Check if player is near an Alfheim portal
+     * @return distance to nearest portal, or -1 if none found
      */
-    public static boolean isInAlfheim(Player player) {
+    public static double distanceToAlfheimPortal(Player player) {
         if (!ModList.get().isLoaded("botania")) {
-            return false;
+            return -1;
         }
-        
-        try {
-            return player.level().dimension().equals(ALFHEIM);
-        } catch (Exception e) {
-            return false;
+
+        Block portalBlock = ForgeRegistries.BLOCKS.getValue(ALFHEIM_PORTAL_ID);
+        if (portalBlock == null) {
+            return -1;
         }
+
+        Level level = player.level();
+        BlockPos playerPos = player.blockPosition();
+        double closestDistSq = Double.MAX_VALUE;
+
+        for (BlockPos pos : BlockPos.betweenClosed(
+                playerPos.offset(-PORTAL_SEARCH_RADIUS, -PORTAL_SEARCH_RADIUS / 2, -PORTAL_SEARCH_RADIUS),
+                playerPos.offset(PORTAL_SEARCH_RADIUS, PORTAL_SEARCH_RADIUS / 2, PORTAL_SEARCH_RADIUS))) {
+            if (level.getBlockState(pos).is(portalBlock)) {
+                double distSq = playerPos.distSqr(pos);
+                if (distSq < closestDistSq) {
+                    closestDistSq = distSq;
+                }
+            }
+        }
+
+        return closestDistSq < Double.MAX_VALUE ? Math.sqrt(closestDistSq) : -1;
     }
-    
+
     /**
-     * Apply Alfheim spell boost to context
-     * @param context The spell context to modify
-     * @param spell The spell being cast
-     * @param player The caster
+     * Check if player is near an Alfheim portal (convenience method)
+     */
+    public static boolean isNearAlfheimPortal(Player player) {
+        return distanceToAlfheimPortal(player) >= 0;
+    }
+
+    /**
+     * Apply Alfheim spell boost to context, scaled by distance to portal
      */
     public static void applyAlfheimBoost(SpellContext context, AbstractSpell spell, Player player) {
-        if (!isInAlfheim(player)) {
+        double distance = distanceToAlfheimPortal(player);
+        if (distance < 0) {
             return;
         }
+
+        // Scale boost by proximity (full at distance 0, fading to 0 at PORTAL_SEARCH_RADIUS)
+        float proximityFactor = Math.max(0, 1.0f - (float)(distance / PORTAL_SEARCH_RADIUS));
         
-        // Alfheim boosts all spells
-        float powerBoost = getAlfheimPowerBoost(spell);
+        // Scale boost by proximity and spell type
+        float powerBoost = getAlfheimPowerBoost(spell) * proximityFactor;
         context.multiplyDamage(1.0f + powerBoost);
-        
-        // Reduce cooldowns in Alfheim
-        context.multiplyCooldown(0.8f); // -20% cooldown
-        
-        // Increase range
-        context.multiplyRange(1.3f); // +30% range
-        
-        // Add Alfheim resonance
+
+        // Reduce cooldowns (scaled by proximity)
+        context.multiplyCooldown(1.0f - (0.2f * proximityFactor)); // Up to -20% cooldown
+
+        // Increase range (scaled by proximity)
+        context.multiplyRange(1.0f + (0.3f * proximityFactor)); // Up to +30% range
+
+        // Add Alfheim resonance flags
         context.setCustomData("alfheim_resonance", true);
         context.setCustomData("alfheim_power_boost", powerBoost);
-        
-        IronsBotany.LOGGER.debug("Applied Alfheim boost to {}: +{}% power", 
-            spell.getSpellId(), (int)(powerBoost * 100));
+
+        IronsBotany.LOGGER.debug("Applied Alfheim portal boost to {}: +{}% power (proximity: {}%)",
+            spell.getSpellId(), (int)(powerBoost * 100), (int)(proximityFactor * 100));
     }
     
     /**

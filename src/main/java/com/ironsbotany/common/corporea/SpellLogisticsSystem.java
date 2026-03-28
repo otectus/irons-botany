@@ -15,7 +15,6 @@ import vazkii.botania.api.corporea.CorporeaHelper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * Integrates spell casting with Botania's Corporea system.
@@ -94,68 +93,46 @@ public class SpellLogisticsSystem {
     }
 
     /**
-     * Get appropriate rune for spell school via reflection on BotaniaItems
+     * Get appropriate rune for spell school via Forge registry
      */
     private static ItemStack getRuneForSpell(AbstractSpell spell) {
-        try {
-            String runeFieldName;
-            var school = spell.getSchoolType();
+        String registryName;
+        var school = spell.getSchoolType();
 
-            if (school == SchoolRegistry.FIRE.get()) {
-                runeFieldName = "runeFire";
-            } else if (school == SchoolRegistry.ICE.get()) {
-                runeFieldName = "runeWater";
-            } else if (school == SchoolRegistry.LIGHTNING.get()) {
-                runeFieldName = "runeAir";
-            } else if (school == SchoolRegistry.NATURE.get()) {
-                runeFieldName = "runeEarth";
-            } else if (school == SchoolRegistry.HOLY.get()) {
-                runeFieldName = "runeMana";
-            } else {
-                // Botanical school and others default to Rune of Mana
-                runeFieldName = "runeMana";
-            }
-
-            return getBotaniaItem(runeFieldName);
-        } catch (Exception e) {
-            IronsBotany.LOGGER.debug("Failed to resolve rune for spell: {}", e.getMessage());
-            return ItemStack.EMPTY;
+        if (school == SchoolRegistry.FIRE.get()) {
+            registryName = "botania:rune_fire";
+        } else if (school == SchoolRegistry.ICE.get()) {
+            registryName = "botania:rune_water";
+        } else if (school == SchoolRegistry.LIGHTNING.get()) {
+            registryName = "botania:rune_air";
+        } else if (school == SchoolRegistry.NATURE.get()) {
+            registryName = "botania:rune_earth";
+        } else {
+            registryName = "botania:rune_mana";
         }
+
+        return getBotaniaItem(registryName);
     }
 
     /**
      * Get Gaia component for ultimate spells
      */
     private static ItemStack getGaiaComponent(AbstractSpell spell) {
-        try {
-            return getBotaniaItem("gaiaIngot");
-        } catch (Exception e) {
-            IronsBotany.LOGGER.debug("Failed to resolve Gaia Spirit: {}", e.getMessage());
-            return ItemStack.EMPTY;
-        }
+        return getBotaniaItem("botania:gaia_ingot");
     }
 
     /**
-     * Resolve a Botania item by field name using reflection.
-     * BotaniaItems fields are Supplier<Item>, following the pattern in CatalystRegistration.
+     * Resolve a Botania item by registry name (e.g. "botania:rune_fire").
      */
-    static ItemStack getBotaniaItem(String fieldName) {
-        try {
-            Class<?> botaniaItems = Class.forName("vazkii.botania.common.item.BotaniaItems");
-            Object fieldValue = botaniaItems.getField(fieldName).get(null);
-            if (fieldValue instanceof Supplier<?> supplier) {
-                Object item = supplier.get();
-                if (item instanceof Item i) {
-                    return new ItemStack(i);
-                }
+    static ItemStack getBotaniaItem(String registryName) {
+        ResourceLocation rl = ResourceLocation.tryParse(registryName);
+        if (rl != null) {
+            Item item = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(rl);
+            if (item != null && item != net.minecraft.world.item.Items.AIR) {
+                return new ItemStack(item);
             }
-            // Some fields may be Item directly rather than Supplier
-            if (fieldValue instanceof Item i) {
-                return new ItemStack(i);
-            }
-        } catch (Exception e) {
-            IronsBotany.LOGGER.debug("Failed to resolve Botania item '{}': {}", fieldName, e.getMessage());
         }
+        IronsBotany.LOGGER.debug("Failed to resolve Botania item '{}'", registryName);
         return ItemStack.EMPTY;
     }
 
@@ -180,11 +157,29 @@ public class SpellLogisticsSystem {
     }
 
     /**
-     * Request an item from Corporea network
+     * Request an item from Corporea network and add to player inventory.
      */
     static boolean requestFromCorporea(Player player, BlockPos sparkPos, ItemStack requested) {
+        List<ItemStack> extracted = extractFromCorporea(player, sparkPos, requested);
+        if (extracted == null) {
+            return false;
+        }
+        for (ItemStack stack : extracted) {
+            if (!player.getInventory().add(stack)) {
+                player.drop(stack, false);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Extract items from Corporea network without adding to inventory.
+     * Returns the extracted stacks, or null if the request could not be fulfilled.
+     * Checks player inventory first — if the player already has a matching item, returns empty list (success).
+     */
+    static List<ItemStack> extractFromCorporea(Player player, BlockPos sparkPos, ItemStack requested) {
         if (requested.isEmpty()) {
-            return true; // Nothing to request
+            return List.of();
         }
 
         try {
@@ -193,19 +188,20 @@ public class SpellLogisticsSystem {
             // Check if player already has the item
             for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
                 ItemStack stack = player.getInventory().getItem(i);
-                if (!stack.isEmpty() && ItemStack.isSameItemSameTags(stack, requested)) {
-                    return true;
+                if (!stack.isEmpty() && ItemStack.isSameItemSameTags(stack, requested)
+                        && stack.getCount() >= requested.getCount()) {
+                    return List.of(); // Already has enough
                 }
             }
 
             // Try to request from Corporea network
             if (!CorporeaHelper.instance().doesBlockHaveSpark(level, sparkPos)) {
-                return false;
+                return null;
             }
 
             var spark = CorporeaHelper.instance().getSparkForBlock(level, sparkPos);
             if (spark == null) {
-                return false;
+                return null;
             }
 
             var matcher = CorporeaHelper.instance().createMatcher(requested, true);
@@ -213,18 +209,13 @@ public class SpellLogisticsSystem {
                 matcher, requested.getCount(), spark, player, false);
 
             if (result.extractedCount() >= requested.getCount()) {
-                for (ItemStack stack : result.stacks()) {
-                    if (!player.getInventory().add(stack)) {
-                        player.drop(stack, false);
-                    }
-                }
-                return true;
+                return new ArrayList<>(result.stacks());
             }
 
-            return false;
+            return null;
         } catch (Exception e) {
             IronsBotany.LOGGER.warn("Corporea request failed: {}", e.getMessage());
-            return false;
+            return null;
         }
     }
 }

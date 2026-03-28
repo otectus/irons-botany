@@ -56,43 +56,49 @@ public class ManaHelper {
      */
     public static boolean tryConvertManaToISS(Player player, ItemStack stack) {
         if (player.level().isClientSide()) return false;
-        
+
         MagicData magicData = MagicData.getPlayerMagicData(player);
         if (magicData == null) return false;
-        
+
         float currentMana = magicData.getMana();
         float maxMana = (float) player.getAttributeValue(io.redspace.ironsspellbooks.api.registry.AttributeRegistry.MAX_MANA.get());
-        
+
         if (currentMana >= maxMana) return false; // Already at max
-        
+
         int transferRate = CommonConfig.MANA_TRANSFER_RATE.get();
-        int botaniaNeeded = transferRate;
-        
-        // Try to extract Botania mana from the item
-        boolean extracted = ManaItemHandler.instance().requestManaExact(stack, player, botaniaNeeded, true);
-        
+
+        // Check conversion yields something before draining
+        int issToAdd = convertBotaniaToISS(transferRate);
+        if (issToAdd <= 0) return false;
+
+        // Clamp to available ISS room
+        int issRoom = (int) (maxMana - currentMana);
+        if (issToAdd > issRoom) {
+            issToAdd = issRoom;
+            // Only drain the exact Botania amount for the clamped ISS gain
+            int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
+            transferRate = issToAdd * ratio;
+        }
+
+        // Now drain — we know it converts cleanly and there's room
+        boolean extracted = ManaItemHandler.instance().requestManaExact(stack, player, transferRate, true);
         if (extracted) {
-            int issToAdd = convertBotaniaToISS(botaniaNeeded);
             magicData.addMana(issToAdd);
             return true;
         }
-        
+
         return false;
     }
 
     /**
-     * Checks if a player has enough Botania mana in their inventory/curios
-     * @param player The player to check
-     * @param amount Amount of Botania mana needed
-     * @return true if player has enough mana
+     * Checks if a player has enough Botania mana across all sources
+     * (inventory, Curios slots, accessories — same sources the mana HUD shows)
      */
     public static boolean hasBotaniaMana(Player player, int amount) {
-        // Check all items in player's inventory for mana
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            ItemStack stack = player.getInventory().getItem(i);
-            if (ManaItemHandler.instance().requestManaExact(stack, player, amount, false)) {
-                return true;
-            }
+        // Use ManaItemHandler to check all mana items + accessories (matches HUD)
+        // requestManaExactForTool with simulate=false just checks availability
+        if (requestManaFromAllSources(player, amount, false)) {
+            return true;
         }
         // Fallback: check nearby mana pools
         if (CommonConfig.ENABLE_MANA_POOL_ACCESS.get()) {
@@ -102,22 +108,37 @@ public class ManaHelper {
     }
 
     /**
-     * Drains Botania mana from a player's items
-     * @param player The player
-     * @param amount Amount to drain
-     * @return true if successfully drained
+     * Drains Botania mana from a player's items and accessories
+     * (uses the same aggregation as the mana HUD for consistency)
      */
     public static boolean drainBotaniaMana(Player player, int amount) {
-        // Try to drain from each item in inventory
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            ItemStack stack = player.getInventory().getItem(i);
-            if (ManaItemHandler.instance().requestManaExact(stack, player, amount, true)) {
-                return true;
-            }
+        // Use ManaItemHandler to drain from all sources (matches HUD)
+        if (requestManaFromAllSources(player, amount, true)) {
+            return true;
         }
         // Fallback: drain from nearby mana pools
         if (CommonConfig.ENABLE_MANA_POOL_ACCESS.get()) {
             return drainBotaniaManaFromPools(player, amount);
+        }
+        return false;
+    }
+
+    /**
+     * Request mana from all Botania mana sources (items + accessories).
+     * Uses ManaItemHandler which aggregates inventory, Curios, and other mana providers.
+     */
+    private static boolean requestManaFromAllSources(Player player, int amount, boolean doExtract) {
+        // Check mana items (main inventory)
+        for (ItemStack stack : ManaItemHandler.instance().getManaItems(player)) {
+            if (ManaItemHandler.instance().requestManaExact(stack, player, amount, doExtract)) {
+                return true;
+            }
+        }
+        // Check mana accessories (Curios, Baubles, etc.)
+        for (ItemStack stack : ManaItemHandler.instance().getManaAccesories(player)) {
+            if (ManaItemHandler.instance().requestManaExact(stack, player, amount, doExtract)) {
+                return true;
+            }
         }
         return false;
     }

@@ -5,7 +5,7 @@ plugins {
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
 
-version = '1.2.1'
+version = '1.3.0'
 group = 'com.ironsbotany'
 
 base {
@@ -44,19 +44,12 @@ minecraft {
             }
         }
 
-        data {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            args '--mod', 'ironsbotany', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                ironsbotany {
-                    source sourceSets.main
-                }
-            }
-        }
+        // TODO: Add datagen run config once GatherDataEvent providers are implemented
+        // data {
+        //     workingDirectory project.file('run')
+        //     args '--mod', 'ironsbotany', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+        //     mods { ironsbotany { source sourceSets.main } }
+        // }
     }
 }
 

@@ -13,15 +13,19 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class SparkSwarmEntity extends PathfinderMob {
-    private static final EntityDataAccessor<Integer> LIFETIME = 
+    private static final EntityDataAccessor<Integer> LIFETIME =
         SynchedEntityData.defineId(SparkSwarmEntity.class, EntityDataSerializers.INT);
-    
+
     private UUID ownerUUID;
     private int maxLifetime = 200; // 10 seconds
 
@@ -46,11 +50,19 @@ public class SparkSwarmEntity extends PathfinderMob {
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.5D, false));
-        this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, LivingEntity.class, 8.0F));
         this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
-        
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Monster.class, true));
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0D));
+
+        // Only target monsters within 8 blocks of the owner
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Monster.class, 10, true, false,
+            (target) -> {
+                if (ownerUUID == null) return false;
+                Player owner = level().getPlayerByUUID(ownerUUID);
+                if (owner == null || !owner.isAlive()) return false;
+                return target.distanceTo(owner) <= 8.0;
+            }
+        ));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -64,10 +76,35 @@ public class SparkSwarmEntity extends PathfinderMob {
     @Override
     public void tick() {
         super.tick();
-        
+
         int currentLifetime = this.entityData.get(LIFETIME);
         this.entityData.set(LIFETIME, currentLifetime + 1);
-        
+
+        // Follow-owner logic (server side only)
+        if (!this.level().isClientSide && ownerUUID != null) {
+            Player owner = this.level().getPlayerByUUID(ownerUUID);
+
+            if (owner == null || !owner.isAlive()) {
+                this.discard();
+                return;
+            }
+
+            double distToOwner = this.distanceTo(owner);
+
+            // Teleport near owner if too far away
+            if (distToOwner > 16.0) {
+                double tx = owner.getX() + (this.random.nextDouble() - 0.5) * 4.0;
+                double ty = owner.getY();
+                double tz = owner.getZ() + (this.random.nextDouble() - 0.5) * 4.0;
+                this.teleportTo(tx, ty, tz);
+                this.getNavigation().stop();
+            }
+            // Navigate toward owner if drifting too far and not currently attacking
+            else if (distToOwner > 4.0 && this.getTarget() == null) {
+                this.getNavigation().moveTo(owner, 1.2D);
+            }
+        }
+
         // Spawn particles
         if (this.level().isClientSide) {
             for (int i = 0; i < 3; i++) {
@@ -80,7 +117,7 @@ public class SparkSwarmEntity extends PathfinderMob {
                 );
             }
         }
-        
+
         // Remove after lifetime expires
         if (currentLifetime > maxLifetime) {
             if (!this.level().isClientSide) {
@@ -104,7 +141,7 @@ public class SparkSwarmEntity extends PathfinderMob {
     @Override
     public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
         boolean hit = super.doHurtTarget(target);
-        
+
         if (hit && !this.level().isClientSide) {
             // Spawn attack particles
             for (int i = 0; i < 10; i++) {
@@ -119,7 +156,7 @@ public class SparkSwarmEntity extends PathfinderMob {
                 );
             }
         }
-        
+
         return hit;
     }
 

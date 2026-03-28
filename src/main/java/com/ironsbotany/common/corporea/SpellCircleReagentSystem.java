@@ -114,11 +114,13 @@ public class SpellCircleReagentSystem {
     }
 
     /**
-     * Auto-place ritual components in a circle pattern
+     * Auto-place ritual components in a circle pattern.
+     * Returns false if any required reagent could not be obtained.
      */
     private static boolean autoPlaceComponents(Player player, AbstractSpell spell, List<ItemStack> components) {
         Level level = player.level();
         BlockPos center = player.blockPosition();
+        BlockPos sparkPos = findNearestSpark(player);
 
         // Place components in a circle pattern
         int radius = 3;
@@ -131,17 +133,30 @@ public class SpellCircleReagentSystem {
             BlockPos pos = new BlockPos(x, center.getY(), z);
 
             // Check if position is valid
-            if (level.getBlockState(pos).isAir() &&
-                level.getBlockState(pos.below()).isSolidRender(level, pos.below())) {
+            if (!level.getBlockState(pos).isAir() ||
+                !level.getBlockState(pos.below()).isSolidRender(level, pos.below())) {
+                return false;
+            }
 
-                ItemStack requested = components.get(i);
-                if (!requested.isEmpty() && SpellLogisticsSystem.requestFromCorporea(
-                        player, findNearestSpark(player), requested)) {
-                    // Drop item as entity at the position (simulating placement)
+            ItemStack requested = components.get(i);
+            if (requested.isEmpty()) {
+                continue;
+            }
+
+            // Extract from Corporea without adding to inventory
+            java.util.List<ItemStack> extracted = SpellLogisticsSystem.extractFromCorporea(
+                    player, sparkPos, requested);
+            if (extracted == null) {
+                return false; // Could not obtain reagent
+            }
+
+            // Place extracted stacks as entities at the target position
+            for (ItemStack stack : extracted) {
+                if (!stack.isEmpty()) {
                     net.minecraft.world.entity.item.ItemEntity itemEntity =
                         new net.minecraft.world.entity.item.ItemEntity(
                             level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                            requested.copy());
+                            stack);
                     itemEntity.setNoPickUpDelay();
                     level.addFreshEntity(itemEntity);
                 }
@@ -176,25 +191,25 @@ public class SpellCircleReagentSystem {
     }
 
     /**
-     * Get rune stack for spell school
+     * Get rune stack for spell school via Forge registry
      */
     private static ItemStack getRuneStack(AbstractSpell spell, int spellLevel) {
-        String runeFieldName;
+        String registryName;
         var school = spell.getSchoolType();
 
         if (school == SchoolRegistry.FIRE.get()) {
-            runeFieldName = "runeFire";
+            registryName = "botania:rune_fire";
         } else if (school == SchoolRegistry.ICE.get()) {
-            runeFieldName = "runeWater";
+            registryName = "botania:rune_water";
         } else if (school == SchoolRegistry.LIGHTNING.get()) {
-            runeFieldName = "runeAir";
+            registryName = "botania:rune_air";
         } else if (school == SchoolRegistry.NATURE.get()) {
-            runeFieldName = "runeEarth";
+            registryName = "botania:rune_earth";
         } else {
-            runeFieldName = "runeMana";
+            registryName = "botania:rune_mana";
         }
 
-        ItemStack rune = SpellLogisticsSystem.getBotaniaItem(runeFieldName);
+        ItemStack rune = SpellLogisticsSystem.getBotaniaItem(registryName);
         if (!rune.isEmpty()) {
             rune.setCount(Math.min(spellLevel / 2, 4));
             if (rune.getCount() < 1) rune.setCount(1);
@@ -220,6 +235,6 @@ public class SpellCircleReagentSystem {
      * Get Terrasteel stack
      */
     private static ItemStack getTerrasteelStack() {
-        return SpellLogisticsSystem.getBotaniaItem("terrasteel");
+        return SpellLogisticsSystem.getBotaniaItem("botania:terrasteel_ingot");
     }
 }

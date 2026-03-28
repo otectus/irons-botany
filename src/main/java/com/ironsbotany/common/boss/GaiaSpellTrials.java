@@ -71,9 +71,9 @@ public class GaiaSpellTrials {
      * Phase 1: Requires environmental spell usage
      */
     private static void applyPhase1Mechanics(LivingHurtEvent event, Player player, GaiaTrialData trialData) {
-        // Check if player is using flower auras
-        CompoundTag playerData = player.getPersistentData();
-        boolean hasActiveAuras = playerData.getBoolean(DataKeys.ACTIVE_AURAS);
+        // Check if player has active flower auras nearby (direct query, not stale flag)
+        boolean hasActiveAuras = !com.ironsbotany.common.flower.FlowerAuraRegistry
+            .getActiveAuras(player, 16).isEmpty();
         
         if (!hasActiveAuras) {
             // Reduce damage if not using environmental magic

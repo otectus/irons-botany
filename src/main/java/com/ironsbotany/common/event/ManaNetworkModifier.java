@@ -1,11 +1,9 @@
 package com.ironsbotany.common.event;
 
 import com.ironsbotany.IronsBotany;
-import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.util.BotaniaIntegration;
-import com.ironsbotany.common.util.DataKeys;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -23,24 +21,27 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Mod.EventBusSubscriber(modid = IronsBotany.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ManaNetworkModifier {
-    
-    // Track active modifications
-    private static final Map<BlockPos, ActiveModification> ACTIVE_MODIFICATIONS = new ConcurrentHashMap<>();
-    
+
+    /** Dimension-aware block position key to prevent cross-dimension collisions */
+    private record DimBlockPos(ResourceKey<Level> dimension, BlockPos pos) {}
+
+    // Track active modifications keyed by dimension + position
+    private static final Map<DimBlockPos, ActiveModification> ACTIVE_MODIFICATIONS = new ConcurrentHashMap<>();
+
     /**
      * Register a spell-triggered modification
      */
-    public static void registerModification(Level level, BlockPos pos, 
-                                           SpellTriggeredManaEvent.SpellTriggerType type, 
+    public static void registerModification(Level level, BlockPos pos,
+                                           SpellTriggeredManaEvent.SpellTriggerType type,
                                            float intensity, int duration) {
         if (!ModList.get().isLoaded("botania")) {
             return;
         }
-        
+
         ActiveModification mod = new ActiveModification(type, intensity, duration, level.getGameTime());
-        ACTIVE_MODIFICATIONS.put(pos, mod);
+        ACTIVE_MODIFICATIONS.put(new DimBlockPos(level.dimension(), pos), mod);
     }
-    
+
     /**
      * Apply modifications to Botania block entities
      */
@@ -48,24 +49,25 @@ public class ManaNetworkModifier {
     public static void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         if (!ModList.get().isLoaded("botania")) return;
-        
-        Iterator<Map.Entry<BlockPos, ActiveModification>> iterator = 
+
+        Iterator<Map.Entry<DimBlockPos, ActiveModification>> iterator =
             ACTIVE_MODIFICATIONS.entrySet().iterator();
-        
+
         while (iterator.hasNext()) {
-            Map.Entry<BlockPos, ActiveModification> entry = iterator.next();
-            BlockPos pos = entry.getKey();
+            Map.Entry<DimBlockPos, ActiveModification> entry = iterator.next();
+            DimBlockPos key = entry.getKey();
             ActiveModification mod = entry.getValue();
-            
+
             // Check if modification expired
             if (mod.isExpired(event.getServer().overworld().getGameTime())) {
                 iterator.remove();
                 continue;
             }
-            
-            // Apply modification to block entity
-            for (ServerLevel level : event.getServer().getAllLevels()) {
-                BlockEntity be = level.getBlockEntity(pos);
+
+            // Apply modification only to the correct dimension
+            ServerLevel level = event.getServer().getLevel(key.dimension());
+            if (level != null) {
+                BlockEntity be = level.getBlockEntity(key.pos());
                 if (be != null) {
                     applyModification(be, mod);
                 }
@@ -74,98 +76,31 @@ public class ManaNetworkModifier {
     }
     
     /**
-     * Apply modification to a Botania block entity
+     * Apply modification to a Botania block entity.
+     * Currently only WATER trigger has a real effect (direct pool.receiveMana API call).
+     * Other trigger types (LIGHTNING, EARTH, NATURE, FIRE, WIND, ARCANE) previously wrote
+     * custom NBT tags to Botania block entities, but Botania never reads those tags.
+     * TODO: Implement other trigger types via Botania API when feasible.
      */
     private static void applyModification(BlockEntity blockEntity, ActiveModification mod) {
         try {
-            switch (mod.type) {
-                case LIGHTNING -> applyLightningBoost(blockEntity, mod);
-                case EARTH -> applyEarthAcceleration(blockEntity, mod);
-                case NATURE -> applyNatureBoost(blockEntity, mod);
-                case FIRE -> applyFireBoost(blockEntity, mod);
-                case WATER -> applyWaterFill(blockEntity, mod);
-                case WIND -> applyWindSpeed(blockEntity, mod);
-                default -> applyGenericResonance(blockEntity, mod);
+            if (mod.type == SpellTriggeredManaEvent.SpellTriggerType.WATER) {
+                applyWaterFill(blockEntity, mod);
             }
+            // Other trigger types are not yet functional — see TODO above
         } catch (Exception e) {
-            // Safe failure - log and continue
-            IronsBotany.LOGGER.debug("Could not apply modification to {}: {}", 
+            IronsBotany.LOGGER.debug("Could not apply modification to {}: {}",
                 blockEntity.getClass().getSimpleName(), e.getMessage());
         }
     }
-    
+
     /**
-     * Lightning spell boosts mana pool throughput
-     */
-    private static void applyLightningBoost(BlockEntity be, ActiveModification mod) {
-        if (BotaniaIntegration.isManaPool(be)) {
-            CompoundTag tag = be.getPersistentData();
-            tag.putFloat(DataKeys.THROUGHPUT_BOOST, mod.intensity);
-            tag.putLong(DataKeys.BOOST_EXPIRY, mod.expiryTime);
-        }
-    }
-    
-    /**
-     * Earth spell accelerates passive flower generation
-     */
-    private static void applyEarthAcceleration(BlockEntity be, ActiveModification mod) {
-        if (BotaniaIntegration.isGeneratingFlower(be)) {
-            CompoundTag tag = be.getPersistentData();
-            tag.putFloat(DataKeys.GENERATION_BOOST, mod.intensity);
-            tag.putLong(DataKeys.BOOST_EXPIRY, mod.expiryTime);
-        }
-    }
-    
-    /**
-     * Nature spell boosts generating flower efficiency
-     */
-    private static void applyNatureBoost(BlockEntity be, ActiveModification mod) {
-        if (BotaniaIntegration.isGeneratingFlower(be) || BotaniaIntegration.isFunctionalFlower(be)) {
-            CompoundTag tag = be.getPersistentData();
-            tag.putFloat(DataKeys.EFFICIENCY_BOOST, mod.intensity);
-            tag.putLong(DataKeys.BOOST_EXPIRY, mod.expiryTime);
-        }
-    }
-    
-    /**
-     * Fire spell increases Endoflame burn rate
-     */
-    private static void applyFireBoost(BlockEntity be, ActiveModification mod) {
-        if (BotaniaIntegration.isGeneratingFlower(be)) {
-            CompoundTag tag = be.getPersistentData();
-            tag.putFloat(DataKeys.BURN_RATE_BOOST, mod.intensity);
-            tag.putLong(DataKeys.BOOST_EXPIRY, mod.expiryTime);
-        }
-    }
-    
-    /**
-     * Water spell fills mana pools
+     * Water spell fills mana pools via direct Botania API call
      */
     private static void applyWaterFill(BlockEntity be, ActiveModification mod) {
         if (BotaniaIntegration.isManaPool(be)) {
-            // Direct API call -- this actually works unlike the NBT approach
             BotaniaIntegration.addPoolMana(be, (int)(1000 * mod.intensity));
         }
-    }
-    
-    /**
-     * Wind spell speeds up mana spreaders
-     */
-    private static void applyWindSpeed(BlockEntity be, ActiveModification mod) {
-        if (BotaniaIntegration.isManaSpreader(be)) {
-            CompoundTag tag = be.getPersistentData();
-            tag.putFloat(DataKeys.SPEED_BOOST, mod.intensity);
-            tag.putLong(DataKeys.BOOST_EXPIRY, mod.expiryTime);
-        }
-    }
-    
-    /**
-     * Generic arcane resonance
-     */
-    private static void applyGenericResonance(BlockEntity be, ActiveModification mod) {
-        CompoundTag tag = be.getPersistentData();
-        tag.putFloat(DataKeys.ARCANE_RESONANCE, mod.intensity);
-        tag.putLong(DataKeys.RESONANCE_EXPIRY, mod.expiryTime);
     }
     
     /**
