@@ -8,7 +8,7 @@ import io.redspace.ironsspellbooks.api.events.SpellPreCastEvent;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
 import io.redspace.ironsspellbooks.api.registry.SpellRegistry;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
-import net.minecraft.core.particles.ParticleTypes;
+import com.ironsbotany.common.registry.IBParticles;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -59,7 +59,7 @@ public class DreamwoodConversionHandler {
         // Visual feedback
         if (player.level() instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(
-                ParticleTypes.ENCHANT,
+                IBParticles.MANA_TRANSFER.get(),
                 player.getX(), player.getY() + 1, player.getZ(),
                 10, 0.3, 0.5, 0.3, 0.2
             );

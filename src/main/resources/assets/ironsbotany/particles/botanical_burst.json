@@ -1,12 +1,8 @@
 {
   "textures": [
-    "minecraft:particle/spark_0",
-    "minecraft:particle/spark_1",
-    "minecraft:particle/spark_2",
-    "minecraft:particle/spark_3",
-    "minecraft:particle/spark_4",
-    "minecraft:particle/spark_5",
-    "minecraft:particle/spark_6",
-    "minecraft:particle/spark_7"
+    "ironsbotany:particle/botanical_spark_0",
+    "ironsbotany:particle/botanical_spark_1",
+    "ironsbotany:particle/botanical_spark_2",
+    "ironsbotany:particle/botanical_spark_3"
   ]
 }

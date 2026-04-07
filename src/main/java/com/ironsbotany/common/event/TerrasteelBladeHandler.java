@@ -4,7 +4,7 @@ import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.item.TerrasteelSpellBladeItem;
 import com.ironsbotany.common.util.ManaHelper;
-import net.minecraft.core.particles.ParticleTypes;
+import com.ironsbotany.common.registry.IBParticles;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -42,7 +42,7 @@ public class TerrasteelBladeHandler {
             // Visual feedback
             if (player.level() instanceof ServerLevel serverLevel) {
                 serverLevel.sendParticles(
-                    ParticleTypes.ENCHANT,
+                    IBParticles.BOTANICAL_BURST.get(),
                     event.getEntity().getX(),
                     event.getEntity().getY() + event.getEntity().getBbHeight() / 2,
                     event.getEntity().getZ(),

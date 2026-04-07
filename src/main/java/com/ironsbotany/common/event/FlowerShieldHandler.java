@@ -2,6 +2,7 @@ package com.ironsbotany.common.event;
 
 import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.util.DataKeys;
+import com.ironsbotany.common.registry.IBParticles;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -15,6 +16,8 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = IronsBotany.MODID)
 public class FlowerShieldHandler {
 
+    // HIGH priority: Flower Shield absorbs damage before ArmorSetBonusHandler (NORMAL).
+    // When both are active, shield absorbs first, then armor reduces the remainder.
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLivingHurt(LivingHurtEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
@@ -51,7 +54,7 @@ public class FlowerShieldHandler {
             // Shield break visual
             if (player.level() instanceof ServerLevel serverLevel) {
                 serverLevel.sendParticles(
-                    ParticleTypes.CHERRY_LEAVES,
+                    IBParticles.PETAL_MAGIC.get(),
                     player.getX(), player.getY() + 1, player.getZ(),
                     60, 1.0, 1.0, 1.0, 0.3
                 );
@@ -70,7 +73,7 @@ public class FlowerShieldHandler {
             // Hit feedback particles
             if (player.level() instanceof ServerLevel serverLevel) {
                 serverLevel.sendParticles(
-                    ParticleTypes.CHERRY_LEAVES,
+                    IBParticles.PETAL_MAGIC.get(),
                     player.getX(), player.getY() + 1, player.getZ(),
                     15, 0.5, 0.5, 0.5, 0.15
                 );

@@ -8,6 +8,7 @@ import com.ironsbotany.common.spell.AbstractBotanicalSpell;
 import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import net.minecraft.ChatFormatting;
+import com.ironsbotany.common.registry.IBParticles;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -52,7 +53,7 @@ public class LivingwoodStaffChannel implements CastingChannel {
     @Override
     public ChannelVisuals getVisuals() {
         return new ChannelVisuals(
-            ParticleTypes.HAPPY_VILLAGER,
+            IBParticles.PETAL_MAGIC.get(),
             ParticleTypes.COMPOSTER,
             0x00FF00,
             SoundEvents.GRASS_BREAK

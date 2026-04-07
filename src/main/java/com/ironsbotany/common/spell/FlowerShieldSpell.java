@@ -73,7 +73,7 @@ public class FlowerShieldSpell extends AbstractBotanicalSpell {
                 double x = entity.getX() + Math.cos(angle) * 1.5;
                 double z = entity.getZ() + Math.sin(angle) * 1.5;
                 serverLevel.sendParticles(
-                    net.minecraft.core.particles.ParticleTypes.CHERRY_LEAVES,
+                    com.ironsbotany.common.registry.IBParticles.PETAL_MAGIC.get(),
                     x, entity.getY() + 1, z,
                     8, 0.1, 0.5, 0.1, 0.02
                 );

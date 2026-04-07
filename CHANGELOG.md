@@ -5,6 +5,35 @@ All notable changes to Iron's Botany will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2026-04-07
+
+### Critical Fixes
+- **Dedicated server crash fixed** — Four call sites in `BotanicalBurstProjectile` and `SparkSwarmEntity` called `Level.addParticle()` inside server-side `!isClientSide` blocks. Replaced with `ServerLevel.sendParticles()` which correctly sends particle packets to nearby clients
+- **Memory leak in GaiaSpellTrials fixed** — Static `ACTIVE_TRIALS` HashMap was never cleaned up, causing unbounded memory growth on long-running servers. Added death event cleanup, 10-minute staleness purge, and server-stop clear
+- **Botanical Focus and Ring can now be equipped** — Missing Curios slot tag files prevented equipping despite `ICurioItem` implementation. Added `data/curios/tags/items/charm.json` (focus) and `ring.json` (ring)
+
+### Bug Fixes
+- **Null safety in FlowerAura.appliesTo()** — `HeiseiDreamAura`, `RannuncarpusAura`, and `JadedAmaranthusAura` now guard against null spell parameter (BellethorneAura already had this)
+- **SpellDrivenAutomation API safety** — `ManaSpreader.commitRedirection()` call wrapped in try-catch to handle Botania API version differences gracefully
+- **GaiaSpellTrials spell lookup hardened** — `SpellRegistry.getSpell()` results now checked against both null and `SpellRegistry.none()` before use
+- **SparkSwarmEntity particle throttle** — Client-side ambient particles now spawn every other tick instead of every tick, preventing FPS degradation with multiple swarms active
+
+### Visual Overhaul
+- **Custom particle behaviors** — All three particle classes rewritten with distinct character:
+  - `ManaTransferParticle`: size grow/shrink animation, blue-to-purple gradient, quadratic alpha easing, gentle rotation
+  - `BotanicalBurstParticle`: starts large and rapidly shrinks, green-to-gold color shift, upward drift, 12-tick lifetime
+  - `PetalMagicParticle`: flutter rotation, sinusoidal horizontal drift, size pulse, pink-to-coral color shift
+- **Custom particle textures** — Created 12 original 16×16 particle textures replacing vanilla sprite references: soft glow gradients (mana), star/diamond shapes (bursts), petal silhouettes (spells)
+- **Emissive entity rendering** — `BotanicalBurstRenderer` and `SparkSwarmRenderer` upgraded with fullbright lighting (`LightTexture.FULL_BRIGHT`), dual-layer glow rendering, pulsing scale animation, and Z-axis spin
+- **SparkSwarmRenderer orbital sparks** — 3 orbiting spark quads with trig-based positioning and color cycling for a true "swarm" visual
+- **Interpolated projectile trail** — `BotanicalBurstProjectile` trail replaced from random scattered dots to a smooth 4-step interpolated chain with spiral offset perpendicular to velocity
+- **Mod-wide custom particle usage** — Replaced vanilla `CHERRY_LEAVES` and `ELECTRIC_SPARK` with `IBParticles.BOTANICAL_BURST`, `PETAL_MAGIC`, and `MANA_TRANSFER` across all entities, spells, event handlers, and casting channels
+
+### Improved
+- Event priority ordering documented — `FlowerShieldHandler` (HIGH) processes before `ArmorSetBonusHandler` (NORMAL) with comments explaining intended stacking
+- `ManaHelper.getManaAccesories()` call annotated as Botania API's spelling
+- Orphaned `scroll_botanical.json` model and `scroll_botanical.png` texture removed (no corresponding item registration)
+
 ## [1.3.0] - 2026-03-27
 
 ### Critical Fixes

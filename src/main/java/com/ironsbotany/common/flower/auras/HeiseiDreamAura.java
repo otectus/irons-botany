@@ -59,6 +59,7 @@ public class HeiseiDreamAura implements FlowerAura {
     
     @Override
     public boolean appliesTo(AbstractSpell spell) {
+        if (spell == null) return false;
         // Check for illusion/mind school or keywords
         return spell.getSpellId().contains("illusion") ||
                spell.getSpellId().contains("mind") ||

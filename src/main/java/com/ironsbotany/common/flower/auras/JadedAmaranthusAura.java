@@ -59,6 +59,7 @@ public class JadedAmaranthusAura implements FlowerAura {
     
     @Override
     public boolean appliesTo(AbstractSpell spell) {
+        if (spell == null) return false;
         return spell.getSpellId().contains("summon") ||
                spell.getSpellId().contains("communion") ||
                spell.getSpellId().contains("swarm");

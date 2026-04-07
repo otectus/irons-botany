@@ -1,7 +1,7 @@
 package com.ironsbotany.common.network;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
+import com.ironsbotany.common.registry.IBParticles;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
@@ -42,7 +42,7 @@ public class SpellCastSyncPacket {
 
         BlockPos pos = packet.pos;
         for (int i = 0; i < 20; i++) {
-            level.addParticle(ParticleTypes.CHERRY_LEAVES,
+            level.addParticle(IBParticles.PETAL_MAGIC.get(),
                 pos.getX() + 0.5 + level.random.nextGaussian() * 0.5,
                 pos.getY() + 1.0 + level.random.nextDouble(),
                 pos.getZ() + 0.5 + level.random.nextGaussian() * 0.5,

@@ -1,11 +1,13 @@
 package com.ironsbotany.common.entity;
 
 import com.ironsbotany.common.registry.IBEntities;
+import com.ironsbotany.common.registry.IBParticles;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
@@ -105,11 +107,11 @@ public class SparkSwarmEntity extends PathfinderMob {
             }
         }
 
-        // Spawn particles
-        if (this.level().isClientSide) {
+        // Spawn particles (throttled to every other tick for performance with multiple swarms)
+        if (this.level().isClientSide && this.tickCount % 2 == 0) {
             for (int i = 0; i < 3; i++) {
                 this.level().addParticle(
-                    ParticleTypes.ELECTRIC_SPARK,
+                    IBParticles.MANA_TRANSFER.get(),
                     this.getX() + (this.random.nextDouble() - 0.5) * 0.5,
                     this.getY() + this.random.nextDouble() * 0.5,
                     this.getZ() + (this.random.nextDouble() - 0.5) * 0.5,
@@ -120,19 +122,12 @@ public class SparkSwarmEntity extends PathfinderMob {
 
         // Remove after lifetime expires
         if (currentLifetime > maxLifetime) {
-            if (!this.level().isClientSide) {
-                // Spawn death particles
-                for (int i = 0; i < 20; i++) {
-                    this.level().addParticle(
-                        ParticleTypes.ELECTRIC_SPARK,
-                        this.getX(),
-                        this.getY() + 0.5,
-                        this.getZ(),
-                        (this.random.nextDouble() - 0.5) * 0.3,
-                        this.random.nextDouble() * 0.3,
-                        (this.random.nextDouble() - 0.5) * 0.3
-                    );
-                }
+            if (!this.level().isClientSide && this.level() instanceof ServerLevel serverLevel) {
+                serverLevel.sendParticles(
+                    IBParticles.MANA_TRANSFER.get(),
+                    this.getX(), this.getY() + 0.5, this.getZ(),
+                    20, 0.15, 0.15, 0.15, 0.1
+                );
             }
             this.discard();
         }
@@ -142,19 +137,12 @@ public class SparkSwarmEntity extends PathfinderMob {
     public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
         boolean hit = super.doHurtTarget(target);
 
-        if (hit && !this.level().isClientSide) {
-            // Spawn attack particles
-            for (int i = 0; i < 10; i++) {
-                this.level().addParticle(
-                    ParticleTypes.ELECTRIC_SPARK,
-                    target.getX(),
-                    target.getY() + target.getBbHeight() / 2,
-                    target.getZ(),
-                    (this.random.nextDouble() - 0.5) * 0.2,
-                    (this.random.nextDouble() - 0.5) * 0.2,
-                    (this.random.nextDouble() - 0.5) * 0.2
-                );
-            }
+        if (hit && !this.level().isClientSide && this.level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(
+                IBParticles.MANA_TRANSFER.get(),
+                target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(),
+                10, 0.1, 0.1, 0.1, 0.05
+            );
         }
 
         return hit;

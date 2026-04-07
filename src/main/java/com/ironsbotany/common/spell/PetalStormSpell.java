@@ -72,7 +72,7 @@ public class PetalStormSpell extends AbstractBotanicalSpell {
                     double x = entity.getX() + Math.cos(angle) * waveRadius;
                     double z = entity.getZ() + Math.sin(angle) * waveRadius;
                     serverLevel.sendParticles(
-                        net.minecraft.core.particles.ParticleTypes.CHERRY_LEAVES,
+                        com.ironsbotany.common.registry.IBParticles.PETAL_MAGIC.get(),
                         x, entity.getY() + 0.5 + wave * 0.5, z,
                         3, 0.2, 0.1, 0.2, 0.08
                     );
@@ -95,7 +95,7 @@ public class PetalStormSpell extends AbstractBotanicalSpell {
             // Petal slash on each target
             if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 serverLevel.sendParticles(
-                    net.minecraft.core.particles.ParticleTypes.CHERRY_LEAVES,
+                    com.ironsbotany.common.registry.IBParticles.PETAL_MAGIC.get(),
                     target.getX(), target.getY() + 1, target.getZ(),
                     30, 0.5, 0.5, 0.5, 0.2
                 );
@@ -117,7 +117,7 @@ public class PetalStormSpell extends AbstractBotanicalSpell {
                     double x = entity.getX() + Math.cos(angle) * ringRadius;
                     double z = entity.getZ() + Math.sin(angle) * ringRadius;
                     serverLevel.sendParticles(
-                        net.minecraft.core.particles.ParticleTypes.CHERRY_LEAVES,
+                        com.ironsbotany.common.registry.IBParticles.PETAL_MAGIC.get(),
                         x, entity.getY() + 1, z,
                         2, 0.1, 0.1, 0.1, 0.05
                     );

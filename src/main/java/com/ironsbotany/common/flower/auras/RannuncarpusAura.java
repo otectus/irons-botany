@@ -59,6 +59,7 @@ public class RannuncarpusAura implements FlowerAura {
     
     @Override
     public boolean appliesTo(AbstractSpell spell) {
+        if (spell == null) return false;
         return spell.getCastType() == CastType.LONG ||
                spell.getCastType() == CastType.CONTINUOUS ||
                spell.getSpellId().contains("ritual") ||

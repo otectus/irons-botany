@@ -18,6 +18,8 @@ public class ArmorSetBonusHandler {
     private static final int COOLDOWN_TICKS = 40; // 2-second internal cooldown
     private static final String LAST_SHIELD_TIME_KEY = "IronsBotany_ManaShieldCooldown";
 
+    // NORMAL priority: runs after FlowerShieldHandler (HIGH) so armor absorb
+    // applies to damage already reduced by the petal shield.
     @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
@@ -55,7 +57,7 @@ public class ArmorSetBonusHandler {
             // Spawn particles
             if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 serverLevel.sendParticles(
-                    net.minecraft.core.particles.ParticleTypes.ENCHANT,
+                    com.ironsbotany.common.registry.IBParticles.MANA_TRANSFER.get(),
                     player.getX(),
                     player.getY() + 1,
                     player.getZ(),

@@ -161,7 +161,11 @@ public class SpellDrivenAutomation {
 
         spreader.setRotationX(rotationX);
         spreader.setRotationY(rotationY);
-        spreader.commitRedirection();
+        try {
+            spreader.commitRedirection();
+        } catch (Throwable t) {
+            IronsBotany.LOGGER.debug("ManaSpreader.commitRedirection() unavailable: {}", t.getMessage());
+        }
 
         be.setChanged();
     }

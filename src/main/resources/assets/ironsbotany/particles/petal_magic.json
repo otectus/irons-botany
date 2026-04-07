@@ -1,5 +1,8 @@
 {
   "textures": [
-    "minecraft:particle/cherry_leaves"
+    "ironsbotany:particle/petal_0",
+    "ironsbotany:particle/petal_1",
+    "ironsbotany:particle/petal_2",
+    "ironsbotany:particle/petal_3"
   ]
 }

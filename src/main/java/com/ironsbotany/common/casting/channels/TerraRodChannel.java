@@ -6,6 +6,7 @@ import com.ironsbotany.common.casting.ChannelVisuals;
 import com.ironsbotany.common.casting.SpellCastContext;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import net.minecraft.ChatFormatting;
+import com.ironsbotany.common.registry.IBParticles;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -52,7 +53,7 @@ public class TerraRodChannel implements CastingChannel {
     @Override
     public ChannelVisuals getVisuals() {
         return new ChannelVisuals(
-            ParticleTypes.FLAME,
+            IBParticles.BOTANICAL_BURST.get(),
             ParticleTypes.LAVA,
             0xFF6600,
             SoundEvents.BLAZE_SHOOT

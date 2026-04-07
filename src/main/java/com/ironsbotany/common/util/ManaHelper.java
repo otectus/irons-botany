@@ -135,6 +135,7 @@ public class ManaHelper {
             }
         }
         // Check mana accessories (Curios, Baubles, etc.)
+        // Note: "getManaAccesories" is the Botania API's spelling (missing an 's'), not a mod typo
         for (ItemStack stack : ManaItemHandler.instance().getManaAccesories(player)) {
             if (ManaItemHandler.instance().requestManaExact(stack, player, amount, doExtract)) {
                 return true;

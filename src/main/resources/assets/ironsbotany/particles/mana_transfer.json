@@ -1,12 +1,8 @@
 {
   "textures": [
-    "minecraft:particle/glitter_0",
-    "minecraft:particle/glitter_1",
-    "minecraft:particle/glitter_2",
-    "minecraft:particle/glitter_3",
-    "minecraft:particle/glitter_4",
-    "minecraft:particle/glitter_5",
-    "minecraft:particle/glitter_6",
-    "minecraft:particle/glitter_7"
+    "ironsbotany:particle/soft_glow_0",
+    "ironsbotany:particle/soft_glow_1",
+    "ironsbotany:particle/soft_glow_2",
+    "ironsbotany:particle/soft_glow_3"
   ]
 }

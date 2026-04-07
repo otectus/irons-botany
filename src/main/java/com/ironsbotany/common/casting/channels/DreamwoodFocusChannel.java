@@ -6,6 +6,7 @@ import com.ironsbotany.common.casting.ChannelVisuals;
 import com.ironsbotany.common.casting.SpellCastContext;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import net.minecraft.ChatFormatting;
+import com.ironsbotany.common.registry.IBParticles;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -47,7 +48,7 @@ public class DreamwoodFocusChannel implements CastingChannel {
     @Override
     public ChannelVisuals getVisuals() {
         return new ChannelVisuals(
-            ParticleTypes.ENCHANT,
+            IBParticles.MANA_TRANSFER.get(),
             ParticleTypes.PORTAL,
             0xCC00FF,
             SoundEvents.ENCHANTMENT_TABLE_USE
