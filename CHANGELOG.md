@@ -5,6 +5,15 @@ All notable changes to Iron's Botany will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.3] - 2026-04-15
+
+### Critical Fixes
+- **Dedicated server crash fixed (second leak)** — `SpellCastSyncPacket` (a common-side packet class) held a `private static handleClient` method that directly referenced `net.minecraft.client.Minecraft`. When `PacketHandler.register()` ran inside `FMLCommonSetupEvent`, the JVM loaded `SpellCastSyncPacket` via the `consumerMainThread(SpellCastSyncPacket::handle)` method reference, and Forge's transforming classloader refused the client type on `DEDICATED_SERVER` with `BootstrapMethodError: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER`. The existing `DistExecutor.unsafeRunWhenOn` guard did not prevent class loading because the client reference lived on the same common-side class.
+  - Moved the client-only handler into a new `@OnlyIn(Dist.CLIENT)` class `com.ironsbotany.client.network.SpellCastClientHandler`.
+  - Added public `getPos()` / `getSpellId()` accessors on `SpellCastSyncPacket` so the new client class can read packet state without exposing fields.
+  - `SpellCastSyncPacket.handle()` now dispatches via the canonical Forge `() -> () -> SpellCastClientHandler.handleClient(packet)` double-lambda pattern, using a fully qualified class name so the client reference never appears in the common class's import table.
+  - Verified: `./gradlew compileJava` clean; `grep` over `com.ironsbotany.common` returns zero `net.minecraft.client` / `net.minecraftforge.client` references.
+
 ## [1.3.2] - 2026-04-07
 
 ### Critical Fixes

@@ -1,9 +1,7 @@
 package com.ironsbotany.common.network;
 
 import net.minecraft.core.BlockPos;
-import com.ironsbotany.common.registry.IBParticles;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
@@ -24,29 +22,24 @@ public class SpellCastSyncPacket {
         this.spellId = buf.readUtf();
     }
 
+    public BlockPos getPos() {
+        return pos;
+    }
+
+    public String getSpellId() {
+        return spellId;
+    }
+
     public void encode(FriendlyByteBuf buf) {
         buf.writeBlockPos(pos);
         buf.writeUtf(spellId);
     }
 
     public static void handle(SpellCastSyncPacket packet, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> handleClient(packet));
-        });
+        ctx.get().enqueueWork(() ->
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                () -> () -> com.ironsbotany.client.network.SpellCastClientHandler.handleClient(packet))
+        );
         ctx.get().setPacketHandled(true);
-    }
-
-    private static void handleClient(SpellCastSyncPacket packet) {
-        Level level = net.minecraft.client.Minecraft.getInstance().level;
-        if (level == null) return;
-
-        BlockPos pos = packet.pos;
-        for (int i = 0; i < 20; i++) {
-            level.addParticle(IBParticles.PETAL_MAGIC.get(),
-                pos.getX() + 0.5 + level.random.nextGaussian() * 0.5,
-                pos.getY() + 1.0 + level.random.nextDouble(),
-                pos.getZ() + 0.5 + level.random.nextGaussian() * 0.5,
-                0, 0.05, 0);
-        }
     }
 }
