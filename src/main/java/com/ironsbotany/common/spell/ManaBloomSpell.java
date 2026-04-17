@@ -98,12 +98,19 @@ public class ManaBloomSpell extends AbstractBotanicalSpell {
                 Block flower = getRandomBotaniaFlower(level.random);
                 level.setBlock(randomPos, flower.defaultBlockState(), 3);
 
-                // Particle effect
+                // Particle effect — vanilla swirl + mod petals for identity
                 serverLevel.sendParticles(
                         ParticleTypes.EFFECT,
                         randomPos.getX() + 0.5, randomPos.getY() + 0.5, randomPos.getZ() + 0.5,
                         10, 0.3, 0.3, 0.3, 0.1
                 );
+                if (com.ironsbotany.common.config.CommonConfig.ENABLE_SPELL_PARTICLES.get()) {
+                    serverLevel.sendParticles(
+                            com.ironsbotany.common.registry.IBParticles.PETAL_MAGIC.get(),
+                            randomPos.getX() + 0.5, randomPos.getY() + 0.6, randomPos.getZ() + 0.5,
+                            6, 0.25, 0.35, 0.25, 0.02
+                    );
+                }
             }
         }
     }

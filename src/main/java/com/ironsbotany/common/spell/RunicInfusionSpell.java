@@ -174,6 +174,15 @@ public class RunicInfusionSpell extends AbstractBotanicalSpell {
                     runeBonus * 10, 0.5, 0.5, 0.5, 0.3
                 );
             }
+
+            // Mod signature: mana transfer swirl inward on caster
+            if (CommonConfig.ENABLE_SPELL_PARTICLES.get()) {
+                serverLevel.sendParticles(
+                    com.ironsbotany.common.registry.IBParticles.MANA_TRANSFER.get(),
+                    entity.getX(), entity.getY() + 1, entity.getZ(),
+                    20 + (runeBonus * 4), 0.8, 1.0, 0.8, 0.04
+                );
+            }
         }
 
     }

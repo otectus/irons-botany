@@ -68,15 +68,18 @@ public class FlowerShieldSpell extends AbstractBotanicalSpell {
 
         // Spawn petal barrier particles
         if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-            for (int i = 0; i < 30; i++) {
-                double angle = (i / 30.0) * Math.PI * 2;
-                double x = entity.getX() + Math.cos(angle) * 1.5;
-                double z = entity.getZ() + Math.sin(angle) * 1.5;
-                serverLevel.sendParticles(
-                    com.ironsbotany.common.registry.IBParticles.PETAL_MAGIC.get(),
-                    x, entity.getY() + 1, z,
-                    8, 0.1, 0.5, 0.1, 0.02
-                );
+            boolean modParticles = com.ironsbotany.common.config.CommonConfig.ENABLE_SPELL_PARTICLES.get();
+            if (modParticles) {
+                for (int i = 0; i < 30; i++) {
+                    double angle = (i / 30.0) * Math.PI * 2;
+                    double x = entity.getX() + Math.cos(angle) * 1.5;
+                    double z = entity.getZ() + Math.sin(angle) * 1.5;
+                    serverLevel.sendParticles(
+                        com.ironsbotany.common.registry.IBParticles.PETAL_MAGIC.get(),
+                        x, entity.getY() + 1, z,
+                        8, 0.1, 0.5, 0.1, 0.02
+                    );
+                }
             }
             // Inner glow ring
             for (int i = 0; i < 20; i++) {

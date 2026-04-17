@@ -1,14 +1,21 @@
 package com.ironsbotany.common.block.entity;
 
+import com.ironsbotany.common.compat.ArsNSpellsCompat;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.registry.IBBlockEntities;
+import com.ironsbotany.common.registry.IBParticles;
 import com.ironsbotany.common.util.ManaHelper;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -38,12 +45,35 @@ public class ManaConduitBlockEntity extends BlockEntity {
         storedISSMana = tag.getInt("StoredMana");
     }
 
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag() {
+        CompoundTag tag = super.getUpdateTag();
+        saveAdditional(tag);
+        return tag;
+    }
+
     public static void serverTick(Level level, BlockPos pos, BlockState state, ManaConduitBlockEntity blockEntity) {
         if (level.getGameTime() % 20 != 0) return;
 
         int maxCapacity = CommonConfig.MANA_CONDUIT_CAPACITY.get();
         int conversionRate = CommonConfig.MANA_CONDUIT_CONVERSION_RATE.get();
         int radius = CommonConfig.MANA_CONDUIT_RADIUS.get();
+
+        // Ambient mana wisps when active — ~30% of ticks
+        if (CommonConfig.ENABLE_BLOCK_AMBIENT_PARTICLES.get()
+                && level instanceof ServerLevel serverLevel && blockEntity.storedISSMana > 0
+                && level.random.nextFloat() < 0.3F) {
+            double ox = pos.getX() + 0.4 + level.random.nextDouble() * 0.2;
+            double oy = pos.getY() + 0.9;
+            double oz = pos.getZ() + 0.4 + level.random.nextDouble() * 0.2;
+            serverLevel.sendParticles(IBParticles.MANA_TRANSFER.get(), ox, oy, oz,
+                1, 0.08, 0.3, 0.08, 0.03);
+        }
 
         // Phase 1: Try to drain from adjacent Botania mana pools
         if (blockEntity.storedISSMana < maxCapacity) {
@@ -97,8 +127,9 @@ public class ManaConduitBlockEntity extends BlockEntity {
                 MagicData magicData = MagicData.getPlayerMagicData(player);
                 if (magicData != null) {
                     float currentMana = magicData.getMana();
-                    float maxMana = (float) player.getAttributeValue(
-                            io.redspace.ironsspellbooks.api.registry.AttributeRegistry.MAX_MANA.get());
+                    // See SpellReservoirBlockEntity — use bridge max under
+                    // ANS ARS_PRIMARY so units match the redirected getMana.
+                    float maxMana = ArsNSpellsCompat.getEffectiveMaxMana(player);
 
                     if (currentMana < maxMana) {
                         int toTransfer = Math.min(getTransferRate(), blockEntity.storedISSMana);
@@ -124,8 +155,12 @@ public class ManaConduitBlockEntity extends BlockEntity {
     private static void notifyChanged(ManaConduitBlockEntity blockEntity) {
         blockEntity.setChanged();
         if (blockEntity.level != null) {
-            blockEntity.level.updateNeighbourForOutputSignal(
-                blockEntity.worldPosition, blockEntity.getBlockState().getBlock());
+            BlockState state = blockEntity.getBlockState();
+            Block block = state.getBlock();
+            blockEntity.level.updateNeighbourForOutputSignal(blockEntity.worldPosition, block);
+            if (!blockEntity.level.isClientSide) {
+                blockEntity.level.sendBlockUpdated(blockEntity.worldPosition, state, state, Block.UPDATE_CLIENTS);
+            }
         }
     }
 }

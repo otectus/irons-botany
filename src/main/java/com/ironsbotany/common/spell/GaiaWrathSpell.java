@@ -107,12 +107,21 @@ public class GaiaWrathSpell extends AbstractBotanicalSpell {
                     target.getX(), target.getY() + 1, target.getZ(),
                     3, 0.5, 0.5, 0.5, 0.0
                 );
-                
+
                 serverLevel.sendParticles(
                     net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME,
                     target.getX(), target.getY() + 1, target.getZ(),
                     20, 0.5, 0.5, 0.5, 0.1
                 );
+
+                // Mod signature: botanical burst on each target
+                if (com.ironsbotany.common.config.CommonConfig.ENABLE_SPELL_PARTICLES.get()) {
+                    serverLevel.sendParticles(
+                        com.ironsbotany.common.registry.IBParticles.BOTANICAL_BURST.get(),
+                        target.getX(), target.getY() + 1, target.getZ(),
+                        10, 0.4, 0.6, 0.4, 0.08
+                    );
+                }
             }
         }
         
@@ -139,6 +148,15 @@ public class GaiaWrathSpell extends AbstractBotanicalSpell {
                 entity.getX(), entity.getY() + 1, entity.getZ(),
                 3, 0.0, 0.0, 0.0, 0.0
             );
+
+            // Mod signature: petal storm column rising from caster
+            if (com.ironsbotany.common.config.CommonConfig.ENABLE_SPELL_PARTICLES.get()) {
+                serverLevel.sendParticles(
+                    com.ironsbotany.common.registry.IBParticles.PETAL_MAGIC.get(),
+                    entity.getX(), entity.getY() + 1, entity.getZ(),
+                    40, 0.6, 1.5, 0.6, 0.08
+                );
+            }
         }
         
     }

@@ -5,6 +5,87 @@ All notable changes to Iron's Botany will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-04-17
+
+### Ars 'n' Spells soft-integration
+
+- **Added** `common/compat/ArsNSpellsCompat.java` — reflective shim that
+  detects Ars 'n' Spells at runtime (`ModList.isLoaded`) and probes
+  `BridgeManager.getCurrentMode`, `BridgeManager.getBridge().getMaxMana`,
+  and `AnsConfig.CONVERSION_RATE_IRON_TO_ARS`. Fail-soft — if ANS is
+  absent, misversioned, or has renamed internals, each probe returns a
+  neutral value and logs once.
+- **Fixed** `DreamwoodConversionHandler` leaking Botania mana when the
+  cast was cancelled by a higher-priority handler (cooldown, LP, etc.).
+  Handler now runs at `EventPriority.LOW` and checks `event.isCanceled()`
+  before draining Botania or pre-funding ISS mana.
+- **Fixed** ISS mana clamp in `SpellReservoirBlockEntity` and
+  `ManaConduitBlockEntity` when ANS is in `ARS_PRIMARY` mode —
+  `player.getAttributeValue(MAX_MANA)` returns the ISS ceiling, but ANS
+  redirects `MagicData.getMana()` to the Ars pool via mixin. Both block
+  entities now use `ArsNSpellsCompat.getEffectiveMaxMana(player)`, which
+  reads through ANS's bridge under `ARS_PRIMARY` and falls back to the
+  ISS attribute otherwise.
+- **Fixed** Dreamwood Scepter pre-fund amount under ANS `ARS_PRIMARY` —
+  the ISS value handed to `magicData.addMana` is now scaled by
+  `CONVERSION_RATE_IRON_TO_ARS` so the Botania→Ars effective rate
+  matches what ANS expects.
+- **Added** optional `ars_n_spells` dependency in `mods.toml` with
+  `ordering="AFTER"` to stabilise mixin/subscriber registration order
+  when both mods are present.
+- **Added** `COMPAT-ARS-N-SPELLS.md` — full 5×5 mode-interaction matrix,
+  caveats, and recommended combinations.
+
+No mixins added, no hard dependency on Ars 'n' Spells, no change to
+spell balance. Iron's Botany continues to build and run with ANS absent.
+
+## [1.4.0] - 2026-04-17
+
+### Visual Overhaul — Phase 1
+
+- **Block Entity Renderers** — Spell Reservoir and Mana Conduit now render a
+  floating, fill-scaled glow orb above the block. Orb intensity, scale, and
+  alpha track the block's stored ISS mana in real time.
+  - `SpellReservoirBER`: cyan-green halo + spinning core, subtle bob.
+  - `ManaConduitBER`: violet-cyan halo + core + three orbital sparks
+    (reuses the color-cycling / orbital trig pattern from SparkSwarmRenderer).
+  - Both use `LightTexture.FULL_BRIGHT` + `RenderType.entityTranslucent` to
+    stay bright in dark biomes without a custom shader pipeline.
+  - Gated on `ClientConfig.enableManaParticles`.
+- **Client-synced block entity state** — `SpellReservoirBlockEntity` and
+  `ManaConduitBlockEntity` now implement `getUpdatePacket` /
+  `getUpdateTag` and broadcast `sendBlockUpdated` on every mana mutation,
+  so BERs (and any future client listeners) see live stored-mana values
+  instead of stale NBT snapshots.
+- **Spell particle signature** — Five spells gained Iron's Botany-flavored
+  particles layered onto their existing vanilla VFX for visual cohesion:
+  - `ManaBloomSpell` — petal bursts at each flower spawn.
+  - `LivingRootGraspSpell` — botanical burst ring at target feet.
+  - `RunicInfusionSpell` — mana transfer swirl on caster (scales with rune
+    count).
+  - `GaiaWrathSpell` — botanical burst on each target + petal storm column
+    rising from caster.
+  - `ManaRebirthSpell` — petal rebirth burst + rising mana transfer
+    pillar.
+- **Ambient block particles** — active `SpellReservoirBlockEntity` and
+  `ManaConduitBlockEntity` now emit low-rate ambient wisps from their
+  `serverTick` (~25–30% per second) while they hold mana, giving the
+  blocks atmospheric presence beyond the BER orb. Uses existing particle
+  types — no new assets.
+- **Config gates** — `CommonConfig.enableSpellParticles` and
+  `CommonConfig.enableBlockAmbientParticles` now actually govern
+  server-side particle emission. `ClientConfig.enableSpellParticles` was
+  dead code (client flag, server broadcast) and has been removed —
+  existing configs with the key will log a warning once and be ignored.
+- **HUD proximity pulse** — `ClientEventHandler` now scans a 6-block
+  radius around the player every 20 ticks for active Spell Reservoirs /
+  Mana Conduits and wraps the Botania mana bar in a cyan pulsing border
+  while any are in range.
+- **Block geometry** — `SpellReservoir` and `ManaConduit` replaced their
+  `cube_all` models with hand-written multi-element geometry (pedestal +
+  bowl rim, and pedestal + column + top cap, respectively). Reuses the
+  existing block textures; collision stays a full cube.
+
 ## [1.3.3] - 2026-04-15
 
 ### Critical Fixes

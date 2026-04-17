@@ -102,6 +102,20 @@ public class ManaRebirthSpell extends AbstractBotanicalSpell {
                 entity.getX(), entity.getY() + 1, entity.getZ(),
                 30, 0.5, 0.5, 0.5, 0.2
             );
+
+            // Mod signature: petal rebirth burst + rising mana transfer
+            if (com.ironsbotany.common.config.CommonConfig.ENABLE_SPELL_PARTICLES.get()) {
+                serverLevel.sendParticles(
+                    com.ironsbotany.common.registry.IBParticles.PETAL_MAGIC.get(),
+                    entity.getX(), entity.getY() + 1, entity.getZ(),
+                    25, 0.6, 0.6, 0.6, 0.05
+                );
+                serverLevel.sendParticles(
+                    com.ironsbotany.common.registry.IBParticles.MANA_TRANSFER.get(),
+                    entity.getX(), entity.getY() + 0.5, entity.getZ(),
+                    20, 0.3, 1.2, 0.3, 0.06
+                );
+            }
         }
 
     }

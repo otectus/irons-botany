@@ -32,6 +32,8 @@ public class CommonConfig {
     public static final ForgeConfigSpec.DoubleValue BOTANICAL_SPELL_POWER_MULTIPLIER;
     public static final ForgeConfigSpec.BooleanValue ENABLE_BOTANICAL_SCHOOL;
     public static final ForgeConfigSpec.DoubleValue SPELL_COOLDOWN_MULTIPLIER;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_SPELL_PARTICLES;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_BLOCK_AMBIENT_PARTICLES;
 
     // Equipment - Terrasteel Spell Blade
     public static final ForgeConfigSpec.DoubleValue TERRASTEEL_BLADE_SPELL_POWER;
@@ -225,6 +227,14 @@ public class CommonConfig {
         SPELL_COOLDOWN_MULTIPLIER = BUILDER
                 .comment("Cooldown multiplier for Botanical spells")
                 .defineInRange("spellCooldownMultiplier", 1.0, 0.5, 2.0);
+
+        ENABLE_SPELL_PARTICLES = BUILDER
+                .comment("Emit Iron's Botany-signature particles on spell cast (petal/botanical_burst/mana_transfer layered onto vanilla VFX). Server-authoritative.")
+                .define("enableSpellParticles", true);
+
+        ENABLE_BLOCK_AMBIENT_PARTICLES = BUILDER
+                .comment("Emit ambient particles from active Spell Reservoir and Mana Conduit blocks.")
+                .define("enableBlockAmbientParticles", true);
         BUILDER.pop();
 
         BUILDER.push("Equipment");

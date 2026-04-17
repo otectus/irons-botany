@@ -5,7 +5,10 @@ import com.ironsbotany.client.particle.BotanicalBurstParticle;
 import com.ironsbotany.client.particle.ManaTransferParticle;
 import com.ironsbotany.client.particle.PetalMagicParticle;
 import com.ironsbotany.client.renderer.BotanicalBurstRenderer;
+import com.ironsbotany.client.renderer.ManaConduitBER;
 import com.ironsbotany.client.renderer.SparkSwarmRenderer;
+import com.ironsbotany.client.renderer.SpellReservoirBER;
+import com.ironsbotany.common.registry.IBBlockEntities;
 import com.ironsbotany.common.registry.IBEntities;
 import com.ironsbotany.common.registry.IBParticles;
 import net.minecraftforge.api.distmarker.Dist;
@@ -28,7 +31,10 @@ public class ClientSetup {
         event.registerEntityRenderer(IBEntities.BOTANICAL_BURST.get(), BotanicalBurstRenderer::new);
         event.registerEntityRenderer(IBEntities.SPARK_SWARM.get(), SparkSwarmRenderer::new);
 
-        IronsBotany.LOGGER.info("Registered entity renderers");
+        event.registerBlockEntityRenderer(IBBlockEntities.SPELL_RESERVOIR.get(), SpellReservoirBER::new);
+        event.registerBlockEntityRenderer(IBBlockEntities.MANA_CONDUIT.get(), ManaConduitBER::new);
+
+        IronsBotany.LOGGER.info("Registered entity and block entity renderers");
     }
 
     @SubscribeEvent

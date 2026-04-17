@@ -106,6 +106,15 @@ public class LivingRootGraspSpell extends AbstractBotanicalSpell {
                     target.getX(), target.getY() + 0.5, target.getZ(),
                     15, 0.3, 0.5, 0.3, 0.05
                 );
+
+                // Mod signature: botanical burst ring at feet
+                if (CommonConfig.ENABLE_SPELL_PARTICLES.get()) {
+                    serverLevel.sendParticles(
+                        com.ironsbotany.common.registry.IBParticles.BOTANICAL_BURST.get(),
+                        target.getX(), target.getY() + 0.1, target.getZ(),
+                        12, 0.5, 0.2, 0.5, 0.03
+                    );
+                }
             }
         }
         

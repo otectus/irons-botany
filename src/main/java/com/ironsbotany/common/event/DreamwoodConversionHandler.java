@@ -1,6 +1,7 @@
 package com.ironsbotany.common.event;
 
 import com.ironsbotany.IronsBotany;
+import com.ironsbotany.common.compat.ArsNSpellsCompat;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.item.DreamwoodScepterItem;
 import com.ironsbotany.common.util.ManaHelper;
@@ -11,14 +12,19 @@ import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import com.ironsbotany.common.registry.IBParticles;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = IronsBotany.MODID)
 public class DreamwoodConversionHandler {
 
-    @SubscribeEvent
+    // Run at LOW so HIGHEST-priority cancellers (cooldowns, LP shortfalls, etc.
+    // from ISS add-ons like Ars 'n' Spells) get first refusal before we
+    // drain Botania mana.
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onSpellPreCast(SpellPreCastEvent event) {
+        if (event.isCanceled()) return;
         Player player = event.getEntity();
         if (player.level().isClientSide()) return;
 
@@ -50,10 +56,18 @@ public class DreamwoodConversionHandler {
         // Drain Botania mana
         if (!ManaHelper.drainBotaniaMana(player, botaniaEquivalent)) return;
 
-        // Pre-fund ISS mana so the spell can consume it instead
+        // Pre-fund ISS mana so the spell can consume it instead.
+        // Under Ars 'n' Spells ARS_PRIMARY mode, ANS's mixin redirects this
+        // addMana call into the Ars pool verbatim (no rate applied), so we
+        // must scale by ANS's ISS->Ars conversion rate up-front.
         MagicData magicData = MagicData.getPlayerMagicData(player);
         if (magicData != null) {
-            magicData.addMana(manaToConvert);
+            int adjusted = manaToConvert;
+            if (ArsNSpellsCompat.isArsPrimary()) {
+                float rate = ArsNSpellsCompat.getIronToArsConversionRate();
+                adjusted = Math.max(1, Math.round(manaToConvert * rate));
+            }
+            magicData.addMana(adjusted);
         }
 
         // Visual feedback

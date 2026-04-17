@@ -1,6 +1,87 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/block",
   "textures": {
-    "all": "ironsbotany:block/spell_reservoir"
-  }
+    "all": "ironsbotany:block/spell_reservoir",
+    "particle": "ironsbotany:block/spell_reservoir"
+  },
+  "elements": [
+    {
+      "__comment": "Base slab",
+      "from": [0, 0, 0],
+      "to": [16, 3, 16],
+      "faces": {
+        "down": {"uv": [0, 0, 16, 16], "texture": "#all", "cullface": "down"},
+        "up": {"uv": [0, 0, 16, 16], "texture": "#all"},
+        "north": {"uv": [0, 13, 16, 16], "texture": "#all", "cullface": "north"},
+        "south": {"uv": [0, 13, 16, 16], "texture": "#all", "cullface": "south"},
+        "east": {"uv": [0, 13, 16, 16], "texture": "#all", "cullface": "east"},
+        "west": {"uv": [0, 13, 16, 16], "texture": "#all", "cullface": "west"}
+      }
+    },
+    {
+      "__comment": "Central plinth",
+      "from": [4, 3, 4],
+      "to": [12, 10, 12],
+      "faces": {
+        "down": {"uv": [4, 4, 12, 12], "texture": "#all"},
+        "up": {"uv": [4, 4, 12, 12], "texture": "#all"},
+        "north": {"uv": [4, 6, 12, 13], "texture": "#all"},
+        "south": {"uv": [4, 6, 12, 13], "texture": "#all"},
+        "east": {"uv": [4, 6, 12, 13], "texture": "#all"},
+        "west": {"uv": [4, 6, 12, 13], "texture": "#all"}
+      }
+    },
+    {
+      "__comment": "Bowl rim — front",
+      "from": [3, 10, 3],
+      "to": [13, 12, 5],
+      "faces": {
+        "down": {"uv": [3, 3, 13, 5], "texture": "#all"},
+        "up": {"uv": [3, 3, 13, 5], "texture": "#all"},
+        "north": {"uv": [3, 4, 13, 6], "texture": "#all"},
+        "south": {"uv": [3, 4, 13, 6], "texture": "#all"},
+        "east": {"uv": [3, 4, 5, 6], "texture": "#all"},
+        "west": {"uv": [3, 4, 5, 6], "texture": "#all"}
+      }
+    },
+    {
+      "__comment": "Bowl rim — back",
+      "from": [3, 10, 11],
+      "to": [13, 12, 13],
+      "faces": {
+        "down": {"uv": [3, 11, 13, 13], "texture": "#all"},
+        "up": {"uv": [3, 11, 13, 13], "texture": "#all"},
+        "north": {"uv": [3, 4, 13, 6], "texture": "#all"},
+        "south": {"uv": [3, 4, 13, 6], "texture": "#all"},
+        "east": {"uv": [3, 4, 5, 6], "texture": "#all"},
+        "west": {"uv": [3, 4, 5, 6], "texture": "#all"}
+      }
+    },
+    {
+      "__comment": "Bowl rim — left",
+      "from": [3, 10, 5],
+      "to": [5, 12, 11],
+      "faces": {
+        "down": {"uv": [3, 5, 5, 11], "texture": "#all"},
+        "up": {"uv": [3, 5, 5, 11], "texture": "#all"},
+        "north": {"uv": [3, 4, 5, 6], "texture": "#all"},
+        "south": {"uv": [3, 4, 5, 6], "texture": "#all"},
+        "east": {"uv": [5, 4, 11, 6], "texture": "#all"},
+        "west": {"uv": [5, 4, 11, 6], "texture": "#all"}
+      }
+    },
+    {
+      "__comment": "Bowl rim — right",
+      "from": [11, 10, 5],
+      "to": [13, 12, 11],
+      "faces": {
+        "down": {"uv": [11, 5, 13, 11], "texture": "#all"},
+        "up": {"uv": [11, 5, 13, 11], "texture": "#all"},
+        "north": {"uv": [11, 4, 13, 6], "texture": "#all"},
+        "south": {"uv": [11, 4, 13, 6], "texture": "#all"},
+        "east": {"uv": [5, 4, 11, 6], "texture": "#all"},
+        "west": {"uv": [5, 4, 11, 6], "texture": "#all"}
+      }
+    }
+  ]
 }

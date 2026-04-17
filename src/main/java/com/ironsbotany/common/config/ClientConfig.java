@@ -8,7 +8,6 @@ public class ClientConfig {
 
     // Visual Settings
     public static final ForgeConfigSpec.BooleanValue ENABLE_MANA_PARTICLES;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_SPELL_PARTICLES;
     public static final ForgeConfigSpec.IntValue PARTICLE_DENSITY;
 
     // HUD Settings
@@ -20,13 +19,9 @@ public class ClientConfig {
     static {
         BUILDER.push("Visual");
         ENABLE_MANA_PARTICLES = BUILDER
-                .comment("Enable mana transfer particle effects")
+                .comment("Enable mana transfer particle effects and block entity renderer orbs")
                 .define("enableManaParticles", true);
-        
-        ENABLE_SPELL_PARTICLES = BUILDER
-                .comment("Enable Botanical spell particle effects")
-                .define("enableSpellParticles", true);
-        
+
         PARTICLE_DENSITY = BUILDER
                 .comment("Particle density (1-10, higher = more particles)")
                 .defineInRange("particleDensity", 5, 1, 10);

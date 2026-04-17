@@ -3,7 +3,7 @@
 ## Quick Reference
 - **Mod ID**: `ironsbotany`
 - **Package**: `com.ironsbotany`
-- **Version**: 1.3.3
+- **Version**: 1.4.1
 - **MC**: 1.20.1 | **Forge**: 47.4.16 | **Java**: 17
 - **Mappings**: Official
 

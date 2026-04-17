@@ -54,3 +54,13 @@ description='''${mod_description}'''
     versionRange="[1.20.1-84,)"
     ordering="AFTER"
     side="BOTH"
+
+# Soft dependency: when Ars 'n' Spells is present it redirects ISS mana via
+# mixin in ARS_PRIMARY mode. Declare AFTER so IB's event subscribers register
+# once ANS's BridgeManager is initialised. See COMPAT-ARS-N-SPELLS.md.
+[[dependencies.ironsbotany]]
+    modId="ars_n_spells"
+    mandatory=false
+    versionRange="[1.8.0,)"
+    ordering="AFTER"
+    side="BOTH"
