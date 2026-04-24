@@ -1,0 +1,16 @@
+{
+  "type": "botania:petal_apothecary",
+  "ingredients": [
+    { "tag": "botania:petals/cyan" },
+    { "tag": "botania:petals/blue" },
+    { "tag": "botania:petals/light_blue" },
+    { "tag": "botania:mana_dusts" },
+    { "tag": "botania:mana_dusts" }
+  ],
+  "output": {
+    "item": "ironsbotany:mana_infused_essence"
+  },
+  "reagent": {
+    "tag": "botania:seed_apothecary_reagent"
+  }
+}

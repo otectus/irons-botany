@@ -1,0 +1,16 @@
+{
+  "type": "botania:petal_apothecary",
+  "ingredients": [
+    { "tag": "botania:petals/purple" },
+    { "tag": "botania:petals/magenta" },
+    { "tag": "botania:petals/pink" },
+    { "tag": "botania:petals/white" },
+    { "tag": "botania:mana_dusts" }
+  ],
+  "output": {
+    "item": "ironsbotany:spell_petal"
+  },
+  "reagent": {
+    "tag": "botania:seed_apothecary_reagent"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "botania:runic_altar",
+  "ingredients": [
+    { "item": "botania:rune_mana" },
+    { "item": "botania:rune_water" },
+    { "item": "botania:mana_pearl" },
+    { "tag": "botania:manasteel_ingots" },
+    { "item": "ironsbotany:mana_infused_essence" }
+  ],
+  "mana": 25000,
+  "output": {
+    "item": "ironsbotany:orb_of_the_pool"
+  }
+}

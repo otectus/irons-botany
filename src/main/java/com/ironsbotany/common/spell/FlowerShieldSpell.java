@@ -5,7 +5,7 @@ import com.ironsbotany.common.util.DataKeys;
 import com.ironsbotany.common.spell.catalyst.SpellContext;
 import io.redspace.ironsspellbooks.api.config.DefaultConfig;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
-import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
+import com.ironsbotany.common.registry.IBSchools;
 import io.redspace.ironsspellbooks.api.spells.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -35,7 +35,7 @@ public class FlowerShieldSpell extends AbstractBotanicalSpell {
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.UNCOMMON)
-                .setSchoolResource(SchoolRegistry.NATURE_RESOURCE)
+                .setSchoolResource(IBSchools.BOTANY_RESOURCE)
                 .setMaxLevel(10)
                 .setCooldownSeconds(20)
                 .build();

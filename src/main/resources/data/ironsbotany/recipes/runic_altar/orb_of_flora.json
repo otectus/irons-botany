@@ -1,0 +1,14 @@
+{
+  "type": "botania:runic_altar",
+  "ingredients": [
+    { "item": "botania:rune_spring" },
+    { "item": "botania:rune_summer" },
+    { "tag": "botania:petals/green" },
+    { "tag": "botania:petals/yellow" },
+    { "item": "ironsbotany:spell_petal" }
+  ],
+  "mana": 20000,
+  "output": {
+    "item": "ironsbotany:orb_of_flora"
+  }
+}

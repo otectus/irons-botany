@@ -1,5 +1,6 @@
 package com.ironsbotany;
 
+import com.ironsbotany.common.command.IBCommands;
 import com.ironsbotany.common.config.ClientConfig;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.config.ConfigHelper;
@@ -29,6 +30,7 @@ public class IronsBotany {
         IBItems.register(modEventBus);
         IBBlocks.register(modEventBus);
         IBSpells.register(modEventBus);
+        IBSchools.register(modEventBus);
         IBAttributes.register(modEventBus);
         IBEntities.register(modEventBus);
         IBRecipeTypes.register(modEventBus);
@@ -46,6 +48,7 @@ public class IronsBotany {
 
         // Register ourselves for server and other game events
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.addListener(IBCommands::register);
 
         LOGGER.info("Iron's Botany initialized!");
     }

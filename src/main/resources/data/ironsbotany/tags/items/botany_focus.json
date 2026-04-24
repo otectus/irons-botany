@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "ironsbotany:botanical_focus",
+    { "id": "botania:mana_pearl", "required": false },
+    { "id": "botania:pixie_dust", "required": false },
+    { "id": "botania:livingwood_twig", "required": false },
+    { "id": "botania:dreamwood_twig", "required": false }
+  ]
+}

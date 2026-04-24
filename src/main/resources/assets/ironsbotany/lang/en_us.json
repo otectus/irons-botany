@@ -1,5 +1,8 @@
 {
   "itemGroup.ironsbotany": "Iron's Botany",
+  "school.ironsbotany.botany": "Botany",
+  "death.attack.botany": "%1$s was consumed by botanical magic",
+  "death.attack.botany.player": "%1$s was consumed by %2$s's botanical magic",
   "item.ironsbotany.botanical_focus": "Botanical Focus",
   "item.ironsbotany.botanical_focus.tooltip.1": "A mystical curio that bridges natural and arcane mana",
   "item.ironsbotany.botanical_focus.tooltip.2": "Right-click to toggle Siphon Mode",

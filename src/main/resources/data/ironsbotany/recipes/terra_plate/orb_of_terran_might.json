@@ -1,0 +1,14 @@
+{
+  "type": "botania:terra_plate",
+  "ingredients": [
+    { "item": "botania:terrasteel_ingot" },
+    { "item": "botania:mana_diamond" },
+    { "item": "botania:mana_pearl" },
+    { "item": "ironsbotany:mana_infused_essence" },
+    { "item": "ironsbotany:botanical_crystal" }
+  ],
+  "mana": 500000,
+  "result": {
+    "item": "ironsbotany:orb_of_terran_might"
+  }
+}

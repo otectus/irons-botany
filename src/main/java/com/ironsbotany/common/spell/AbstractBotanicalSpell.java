@@ -9,6 +9,7 @@ import com.ironsbotany.common.config.ManaUnificationMode;
 import com.ironsbotany.common.corporea.SpellCircleReagentSystem;
 import com.ironsbotany.common.network.PacketHandler;
 import com.ironsbotany.common.network.SpellCastSyncPacket;
+import com.ironsbotany.common.registry.IBSchools;
 import com.ironsbotany.common.spell.SpellManaNetworkIntegration;
 import com.ironsbotany.common.flower.ActiveFlowerAura;
 import com.ironsbotany.common.flower.FlowerAuraRegistry;
@@ -373,6 +374,12 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
 
     @Override
     public SchoolType getSchoolType() {
+        if (CommonConfig.ENABLE_BOTANICAL_SCHOOL.get()) {
+            SchoolType botany = IBSchools.BOTANY.get();
+            if (botany != null) {
+                return botany;
+            }
+        }
         return SchoolRegistry.NATURE.get();
     }
 }
