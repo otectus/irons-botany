@@ -4,7 +4,7 @@ import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.config.CommonConfig;
 import io.redspace.ironsspellbooks.api.config.DefaultConfig;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
-import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
+import com.ironsbotany.common.registry.IBSchools;
 import io.redspace.ironsspellbooks.api.spells.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -37,7 +37,7 @@ public class RunicInfusionSpell extends AbstractBotanicalSpell {
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.RARE)
-                .setSchoolResource(SchoolRegistry.NATURE_RESOURCE)
+                .setSchoolResource(IBSchools.BOTANY_RESOURCE)
                 .setMaxLevel(10)
                 .setCooldownSeconds(60)
                 .build();

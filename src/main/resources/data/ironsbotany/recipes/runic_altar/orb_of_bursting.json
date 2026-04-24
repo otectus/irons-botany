@@ -1,0 +1,14 @@
+{
+  "type": "botania:runic_altar",
+  "ingredients": [
+    { "item": "botania:rune_fire" },
+    { "item": "botania:rune_air" },
+    { "item": "minecraft:blaze_powder" },
+    { "tag": "botania:petals/red" },
+    { "item": "ironsbotany:mana_infused_essence" }
+  ],
+  "mana": 20000,
+  "output": {
+    "item": "ironsbotany:orb_of_bursting"
+  }
+}

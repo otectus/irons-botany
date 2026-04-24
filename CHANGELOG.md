@@ -5,6 +5,60 @@ All notable changes to Iron's Botany will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - v1.5 scope
+
+### Botany spell school (truth-in-advertising)
+
+- **Added** `common/registry/IBSchools.java` registering a new `ironsbotany:botany`
+  `SchoolType` via `DeferredRegister` against ISS's `SchoolRegistry.SCHOOL_REGISTRY_KEY`.
+  The school reuses `AttributeRegistry.NATURE_SPELL_POWER` and
+  `AttributeRegistry.NATURE_MAGIC_RESIST` in v1.5 so existing Manasteel Wizard armor,
+  `orb_of_flora`, and `botanical_focus`/`botanical_ring` curios keep applying without
+  migration. Dedicated `BOTANY_SPELL_POWER` / `BOTANY_MAGIC_RESIST` attributes are
+  deferred to v1.6.
+- **Added** `data/ironsbotany/damage_type/botany.json` and
+  `data/ironsbotany/tags/items/botany_focus.json` (focus items:
+  `ironsbotany:botanical_focus` plus optional `botania:mana_pearl`, `pixie_dust`,
+  `livingwood_twig`, `dreamwood_twig`).
+- **Fixed** dead `ENABLE_BOTANICAL_SCHOOL` config key — now actually read in
+  `AbstractBotanicalSpell.getSchoolType()`. When `false`, spells fall back to
+  ISS's Nature school for back-compat with existing saves.
+- **Changed** all 9 spell classes (`ManaBloomSpell`, `BotanicalBurstSpell`,
+  `FlowerShieldSpell`, `LivingRootGraspSpell`, `SparkSwarmSpell`, `RunicInfusionSpell`,
+  `PetalStormSpell`, `GaiaWrathSpell`, `ManaRebirthSpell`) to declare
+  `setSchoolResource(IBSchools.BOTANY_RESOURCE)` in their `DefaultConfig`.
+- **Added** locale keys `school.ironsbotany.botany`, `death.attack.botany`,
+  `death.attack.botany.player` to `en_us.json` and `en_gb.json`. Other 21 locales
+  fall back to English — follow-up translation pass pending.
+
+### Botania-native recipe progression
+
+- **Added** 8 Botania recipe-type JSONs alongside the existing vanilla crafting
+  recipes (kept as fallback):
+  - `recipes/runic_altar/orb_of_flora.json` (Rune of Spring + Summer, 20k mana)
+  - `recipes/runic_altar/orb_of_the_pool.json` (Rune of Mana + Water, 25k mana)
+  - `recipes/runic_altar/orb_of_bursting.json` (Rune of Fire + Air, 20k mana)
+  - `recipes/terra_plate/orb_of_terran_might.json` (Terrasteel agglomeration, 500k mana)
+  - `recipes/petal_apothecary/spell_petal.json` (purple/magenta/pink/white petals)
+  - `recipes/petal_apothecary/mana_infused_essence.json` (cyan/blue petals + dusts)
+  - `recipes/mana_infusion/botanical_crystal.json` (amethyst shard + 10k mana)
+  - `recipes/elven_trade/dreamwood_scepter.json` (Livingwood Staff + mana pearl + dreamwood log)
+
+### Operator tools
+
+- **Added** `/ironsbotany reload` and `/ironsbotany info` commands (op level 2).
+  Re-validates config in place; useful when tweaking `config/ironsbotany-common.toml`
+  mid-session. Implemented in `common/command/IBCommands.java`, wired via
+  `RegisterCommandsEvent` in `IronsBotany.java`.
+
+### Deferred to v1.6
+
+- Dedicated `BOTANY_SPELL_POWER` / `BOTANY_MAGIC_RESIST` attributes (currently aliased
+  to Nature attributes)
+- Migration of hardcoded spell tuning to per-spell `SpellConfigParameter` entries
+- Gametests covering HYBRID/SEPARATE mana modes and Ars 'n Spells deferral path
+- Locale translations for the 21 non-English locales
+
 ## [1.4.1] - 2026-04-17
 
 ### Ars 'n' Spells soft-integration

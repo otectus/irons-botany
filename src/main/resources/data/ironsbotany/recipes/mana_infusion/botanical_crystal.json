@@ -1,0 +1,10 @@
+{
+  "type": "botania:mana_infusion",
+  "input": {
+    "item": "minecraft:amethyst_shard"
+  },
+  "mana": 10000,
+  "output": {
+    "item": "ironsbotany:botanical_crystal"
+  }
+}

@@ -3,7 +3,7 @@ package com.ironsbotany.common.spell;
 import com.ironsbotany.IronsBotany;
 import io.redspace.ironsspellbooks.api.config.DefaultConfig;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
-import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
+import com.ironsbotany.common.registry.IBSchools;
 import io.redspace.ironsspellbooks.api.spells.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -33,7 +33,7 @@ public class GaiaWrathSpell extends AbstractBotanicalSpell {
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.LEGENDARY)
-                .setSchoolResource(SchoolRegistry.NATURE_RESOURCE)
+                .setSchoolResource(IBSchools.BOTANY_RESOURCE)
                 .setMaxLevel(10)
                 .setCooldownSeconds(180)
                 .build();
