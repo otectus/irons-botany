@@ -72,6 +72,21 @@ public final class ArsNSpellsCompat {
     }
 
     /**
+     * True if Iron's Botany should yield cost routing to Ars 'n Spells
+     * for this cast. Returns true when ANS is loaded and currently in a
+     * mode where ANS owns the player-side mana pool.
+     *
+     * <p>This check is consulted by {@link com.ironsbotany.common.bridge.ManaBridgeManager}
+     * before charging Botania, so a player running both bridges only ever
+     * pays once per cast.
+     */
+    public static boolean shouldDeferRouting() {
+        if (!isLoaded()) return false;
+        String mode = getActiveMode();
+        return "ARS_PRIMARY".equals(mode) || "HYBRID".equals(mode);
+    }
+
+    /**
      * Effective max mana for the player — honours ANS's bridge under
      * ARS_PRIMARY, falls back to ISS MAX_MANA attribute otherwise.
      */

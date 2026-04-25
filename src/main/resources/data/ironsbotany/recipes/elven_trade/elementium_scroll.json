@@ -1,0 +1,11 @@
+{
+  "type": "botania:elven_trade",
+  "ingredients": [
+    { "tag": "irons_spellbooks:scrolls" },
+    { "tag": "botania:elementium_ingots" },
+    { "item": "botania:pixie_dust" }
+  ],
+  "output": [
+    { "item": "ironsbotany:elementium_scroll" }
+  ]
+}

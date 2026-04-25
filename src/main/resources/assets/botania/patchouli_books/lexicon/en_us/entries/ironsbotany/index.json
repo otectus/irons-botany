@@ -1,0 +1,32 @@
+{
+  "name": "Iron's Botany — The Botany School",
+  "icon": "ironsbotany:botanical_grimoire",
+  "category": "botania:misc",
+  "advancement": "ironsbotany:first_spell",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Iron's Botany$() weaves Iron's Spells 'n Spellbooks into the mana network. Botanical mana powers spells, spells reshape Botania machinery, and a new $(l:ironsbotany/index)Botany school$() of magic emerges from the bridge.$(br2)This index entry is the canonical Lexica gateway. The full Botany guidebook is the $(item)Botanical Grimoire$() — craft one to unlock the deeper material."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Mana inks",
+      "text": "Three tiers of $(thing)Mana Ink$() are crafted at the Petal Apothecary, replacing vanilla ink for ISS scroll forging:$(br)$(li)Minor Mana Ink — uncommon scrolls$(li)Greater Mana Ink — rare scrolls$(li)Prime Mana Ink — epic scrolls"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "School power orbs",
+      "text": "The $(thing)Runic Altar$() forges Iron's Spellbooks $(thing)Spell Power Orbs$() keyed to ISS schools — Fire, Frost, Lightning, Holy, Ender, Blood, Nature, and Eldritch. Each consumes one Greater Mana Ink and the matching Botania rune."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Alfheim trades",
+      "text": "The $(thing)Alfheim Portal$() upgrades Iron's Botany weapons into elven variants — Manasteel into Elementium, Livingwood into Dreamwood, and Greater Mana Ink into Prime Mana Ink at a discount."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Gaia Guardian II",
+      "text": "Iron's Botany hooks into the $(thing)Gaia Guardian II$() loot table: hardmode kills now drop $(item)Legendary Ink$() in addition to the vanilla rewards, gating ISS legendary scroll crafting behind Botania's hardest fight."
+    }
+  ]
+}

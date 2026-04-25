@@ -1,0 +1,23 @@
+{
+  "name": "New Curios",
+  "icon": "ironsbotany:gaias_blessing",
+  "category": "ironsbotany:equipment",
+  "advancement": "ironsbotany:first_spell",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Mana Reservoir Ring",
+      "text": "$(thing)Mana Reservoir Ring$() — Petal Apothecary. +100 Max Mana. Passively converts Botania mana to ISS mana when ISS reserves drop below 50%. Doubles as a 200,000-unit Botania mana store via the network capability."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Daybloom Amulet",
+      "text": "$(thing)Daybloom Amulet$() — Petal Apothecary, with Daybloom flowers and gold. Grants +15% Nature Spell Power and +5% Cast Speed only while in direct sunlight. Bonuses fade indoors or after dusk."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Gaia's Blessing",
+      "text": "$(thing)Gaia's Blessing$() — Terra Plate, requires Gaia Spirit + a Daybloom Amulet. While worn, every Botany-school spell cast gains $(o)+1 effective level$(), paid for by draining 100,000 mana from a Mana Pool within 16 blocks. If no pool can pay, the bonus fizzles silently for that cast."
+    }
+  ]
+}

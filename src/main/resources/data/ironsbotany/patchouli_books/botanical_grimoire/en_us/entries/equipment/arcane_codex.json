@@ -1,0 +1,17 @@
+{
+  "name": "Arcane Codex",
+  "icon": "ironsbotany:arcane_codex",
+  "category": "ironsbotany:equipment",
+  "advancement": "ironsbotany:first_spell",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Fourteen spell slots. The endgame Botany spellbook, forged at the $(thing)Terra Plate$() with 500,000 mana, a Terrasteel Spellbook, a Mana Pearl, a Mana Diamond, and a Gaia Spirit."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Stats",
+      "text": "$(li)+300 Max Mana$(li)+20% Cooldown Reduction$(li)+15% Botany Spell Power$(li)+10% Spell Power (all schools)$(li)+0.15 Mana Efficiency$(br)Mana network capacity: 500,000. Fire-resistant when dropped."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "botania:runic_altar",
+  "ingredients": [
+    { "item": "botania:rune_pride" },
+    { "item": "minecraft:echo_shard" },
+    { "tag": "forge:gems/diamond" },
+    { "item": "ironsbotany:prime_mana_ink" }
+  ],
+  "mana": 32000,
+  "output": {
+    "item": "ironsbotany:orb_of_eldritch_power",
+    "count": 1
+  }
+}

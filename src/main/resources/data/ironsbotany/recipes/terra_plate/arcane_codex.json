@@ -1,0 +1,14 @@
+{
+  "type": "botania:terra_plate",
+  "ingredients": [
+    { "item": "botania:terrasteel_ingot" },
+    { "item": "ironsbotany:terrasteel_spellbook" },
+    { "item": "botania:mana_pearl" },
+    { "item": "botania:mana_diamond" },
+    { "item": "botania:gaia_ingot" }
+  ],
+  "mana": 500000,
+  "result": {
+    "item": "ironsbotany:arcane_codex"
+  }
+}

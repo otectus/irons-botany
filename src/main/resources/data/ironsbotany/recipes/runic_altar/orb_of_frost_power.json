@@ -1,0 +1,14 @@
+{
+  "type": "botania:runic_altar",
+  "ingredients": [
+    { "item": "botania:rune_water" },
+    { "item": "minecraft:packed_ice" },
+    { "tag": "forge:gems/diamond" },
+    { "item": "ironsbotany:greater_mana_ink" }
+  ],
+  "mana": 16000,
+  "output": {
+    "item": "ironsbotany:orb_of_frost_power",
+    "count": 1
+  }
+}

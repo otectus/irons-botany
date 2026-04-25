@@ -1,0 +1,11 @@
+{
+  "type": "botania:elven_trade",
+  "ingredients": [
+    { "item": "ironsbotany:terrasteel_spell_blade" },
+    { "tag": "botania:elementium_ingots" },
+    { "tag": "botania:elementium_ingots" }
+  ],
+  "output": [
+    { "item": "ironsbotany:terrasteel_spell_blade" }
+  ]
+}

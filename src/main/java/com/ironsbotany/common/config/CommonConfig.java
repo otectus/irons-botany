@@ -2,6 +2,8 @@ package com.ironsbotany.common.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
+import java.util.List;
+
 public class CommonConfig {
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
     public static final ForgeConfigSpec SPEC;
@@ -27,6 +29,9 @@ public class CommonConfig {
     // Mana Pool Access
     public static final ForgeConfigSpec.BooleanValue ENABLE_MANA_POOL_ACCESS;
     public static final ForgeConfigSpec.IntValue MANA_POOL_SEARCH_RADIUS;
+
+    // Cross-bridge priority chain (Phase 1B)
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> MANA_PRIORITY_CHAIN;
 
     // Spells
     public static final ForgeConfigSpec.DoubleValue BOTANICAL_SPELL_POWER_MULTIPLIER;
@@ -213,6 +218,20 @@ public class CommonConfig {
         MANA_POOL_SEARCH_RADIUS = BUILDER
                 .comment("Radius to search for Botania mana pools when drawing mana for spells")
                 .defineInRange("manaPoolSearchRadius", 8, 4, 16);
+
+        MANA_PRIORITY_CHAIN = BUILDER
+                .comment("Cross-bridge mana resource ordering. Sources are tried in",
+                         "list order; absent mods are skipped. Tokens: botania, ars, iss.",
+                         "Default: [\"botania\", \"ars\", \"iss\"] — Botania pays first, then",
+                         "Ars 'n Spells if loaded, then ISS as the safety-net fallback.")
+                .defineList("manaPriorityChain",
+                        java.util.List.of("botania", "ars", "iss"),
+                        token -> token instanceof String s
+                                && (s.equalsIgnoreCase("botania")
+                                    || s.equalsIgnoreCase("ars")
+                                    || s.equalsIgnoreCase("iss")
+                                    || s.equalsIgnoreCase("lp")
+                                    || s.equalsIgnoreCase("aura")));
         BUILDER.pop();
 
         BUILDER.push("Spells");

@@ -1,0 +1,14 @@
+{
+  "type": "botania:runic_altar",
+  "ingredients": [
+    { "item": "botania:rune_spring" },
+    { "item": "minecraft:sculk_sensor" },
+    { "tag": "forge:gems/diamond" },
+    { "item": "ironsbotany:greater_mana_ink" }
+  ],
+  "mana": 16000,
+  "output": {
+    "item": "ironsbotany:orb_of_nature_power",
+    "count": 1
+  }
+}

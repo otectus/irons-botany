@@ -30,6 +30,8 @@ public class IronsBotany {
         IBBlocks.register(modEventBus);
         IBSpells.register(modEventBus);
         IBAttributes.register(modEventBus);
+        IBSchools.register(modEventBus);
+        com.ironsbotany.common.loot.IBLootModifiers.register(modEventBus);
         IBEntities.register(modEventBus);
         IBRecipeTypes.register(modEventBus);
         IBCreativeTabs.register(modEventBus);

@@ -1,0 +1,13 @@
+{
+  "type": "botania:terra_plate",
+  "ingredients": [
+    { "item": "botania:gaia_ingot" },
+    { "item": "ironsbotany:daybloom_amulet" },
+    { "item": "botania:pixie_dust" },
+    { "item": "botania:dragonstone" }
+  ],
+  "mana": 200000,
+  "result": {
+    "item": "ironsbotany:gaias_blessing"
+  }
+}

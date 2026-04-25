@@ -1,0 +1,18 @@
+{
+  "type": "botania:petal_apothecary",
+  "ingredients": [
+    { "tag": "botania:petals/blue" },
+    { "tag": "botania:petals/blue" },
+    { "tag": "botania:petals/purple" },
+    { "tag": "botania:petals/black" },
+    { "item": "ironsbotany:minor_mana_ink" },
+    { "item": "botania:mana_pearl" }
+  ],
+  "output": {
+    "item": "ironsbotany:greater_mana_ink",
+    "count": 2
+  },
+  "reagent": {
+    "tag": "botania:seed_apothecary_reagent"
+  }
+}

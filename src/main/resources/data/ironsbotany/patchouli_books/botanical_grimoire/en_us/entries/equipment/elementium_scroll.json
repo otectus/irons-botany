@@ -1,0 +1,17 @@
+{
+  "name": "Elementium Scroll",
+  "icon": "ironsbotany:elementium_scroll",
+  "category": "ironsbotany:equipment",
+  "advancement": "ironsbotany:first_spell",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "A reusable scroll. Where vanilla ISS scrolls are single-use, the Elementium variant pulls cast cost from your Botania mana network at a 1000:1 ratio. If no Botania mana is available, the scroll gracefully falls back to single-use behavior — it consumes itself instead of fizzling."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Crafting",
+      "text": "Take any ISS scroll, an Elementium ingot, and Pixie Dust into the $(thing)Alfheim Portal$(). The trade preserves the bound spell while promoting the scroll to its reusable form."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " T ",
+    "TBT",
+    " T "
+  ],
+  "key": {
+    "T": { "tag": "botania:terrasteel_ingots" },
+    "B": { "tag": "irons_spellbooks:spell_books" }
+  },
+  "result": {
+    "item": "ironsbotany:terrasteel_spellbook",
+    "count": 1
+  }
+}
