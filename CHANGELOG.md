@@ -5,6 +5,180 @@ All notable changes to Iron's Botany will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — v2.0 planning
+
+The forward-looking v2.0 roadmap is captured in
+[`PHASE_7_PLAN.md`](PHASE_7_PLAN.md) at the project root. Headline features:
+six ISS-school generating flowers (mana feedback from spell casts), the Verdant
+Caster (a functional flower that casts ISS spells autonomously — the v2.0
+signature), Corporea Scroll Rack with spell-aware request matcher, and a
+KubeJS plugin surface for downstream addons.
+
+## [1.6.0] - In Development
+
+Endgame content layer. Adds the four major Botany progression items, three new
+curios, and revives the datagen pipeline so future asset additions don't accumulate
+hand-written JSON debt.
+
+### Added — Phase 6.1: Datagen revival
+
+- **`IBDatagen`** + provider stack (`IBItemModelProvider`, `IBBlockStateProvider`,
+  `IBLanguageProvider`, `IBLootTableProvider`, `IBRecipeProvider`) — wired to
+  `GatherDataEvent`. The datagen run config in `build.gradle` is uncommented;
+  `./gradlew runData` regenerates JSON under `src/generated/resources/`.
+- Botania custom-recipe JSONs (`petal_apothecary`, `runic_altar`, `terra_plate`,
+  `elven_trade`) and Patchouli book entries stay hand-written by design.
+
+### Added — Phase 6.2: Manasteel Staff
+
+- **`ManasteelStaffItem`** — extends ISS `StaffItem` with a custom `MANASTEEL_TIER`
+  (damage 2.0, speed -3.0) plus four `AttributeContainer`s: +20 Max Mana,
+  +5% Cast Time Reduction, +10% Botany Spell Power, +0.05 Mana Efficiency.
+- Mana network: 50,000-unit `MANA_ITEM` capability via `IBCapabilityHandler`.
+- Crafting: shaped recipe (Manasteel + Mana Pearl + Sticks).
+
+### Added — Phase 6.3: Spellbooks
+
+- **`TerrasteelSpellbookItem`** — 12-slot Rare-tier `SimpleAttributeSpellBook`.
+  Stats: +200 Max Mana, +15% Botany Spell Power, +10% Nature Spell Power,
+  +0.10 Mana Efficiency. Mana network: 200,000-unit capacity.
+- **`ArcaneCodexItem`** — 14-slot Epic-tier endgame spellbook. Stats: +300 Max
+  Mana, +20% Cooldown Reduction, +15% Botany Spell Power, +10% Spell Power
+  (all schools), +0.15 Mana Efficiency. Mana network: 500,000-unit capacity.
+  Fire-resistant.
+- Crafting: Terrasteel Spellbook is a vanilla shaped recipe (`#botania:terrasteel_ingots`
+  surrounding any spellbook). Arcane Codex is a Terra Plate recipe (500,000 mana
+  + Terrasteel + Terrasteel Spellbook + Mana Pearl + Mana Diamond + Gaia Ingot).
+
+### Added — Phase 6.4: Elementium Scroll
+
+- **`ElementiumScrollItem`** — extends ISS `Scroll`, overrides
+  `removeScrollAfterCast` to skip consumption when `ManaBridgeManager` paid the
+  cost from Botania mana that tick. Falls back to vanilla single-use behavior if
+  no Botania mana is available.
+- **`ManaBridgeManager.resolveCost`** — adds an Elementium-scroll branch that
+  checks for the item in either hand on `CastSource.SCROLL`, charges
+  `issCost × MANA_CONVERSION_RATIO` Botania mana, marks the routed tag, and
+  returns `botaniaOnly` so the scroll's override sees the marker.
+- Crafting: Alfheim elven trade (any ISS scroll + Elementium + Pixie Dust).
+
+### Added — Phase 6.5: Three new curios
+
+- **`ManaReservoirRingItem`** — ring slot. +100 Max Mana attribute. Every 20
+  ticks, while ISS mana is below 50%, drains 20 Botania mana from any source
+  in the wearer's inventory and adds 1 ISS mana. Doubles as a 200,000-unit
+  Botania mana store via `IBCapabilityHandler`.
+- **`DaybloomAmuletItem`** — necklace slot. Daytime-conditional bonuses:
+  +15% Nature Spell Power and +5% Cast Time Reduction while in direct
+  sunlight. Implemented as transient UUID-keyed attribute modifiers added/
+  removed in `curioTick` based on `isDay() && canSeeSky(pos)`.
+- **`GaiasBlessingItem`** — necklace slot, Epic. While worn, Botany-school
+  spells gain +1 effective level via `ModifySpellLevelEvent`. Each cast drains
+  100,000 mana from a `ManaPool` within 16 blocks; if no pool can pay, the
+  bonus fizzles silently.
+- **`CurioEffectsHandler`** — Forge-bus subscriber that wires Gaia's Blessing
+  into the spell-level event.
+- Crafting: Mana Reservoir Ring is Petal Apothecary; Daybloom Amulet is Petal
+  Apothecary; Gaia's Blessing is Terra Plate (200,000 mana + Gaia Spirit +
+  Daybloom Amulet + Pixie Dust + Dragonstone).
+- Curios slot tags updated: `ring.json` adds Mana Reservoir Ring; new
+  `necklace.json` registers Daybloom Amulet and Gaia's Blessing.
+
+### Added — Phase 6.6: Patchouli + release prep
+
+- 5 new Patchouli entries under `equipment/` (manasteel_staff, terrasteel_spellbook,
+  arcane_codex, elementium_scroll, new_curios).
+- Version bump to 1.6.0 in `build.gradle`.
+
+## [1.5.0] - Released
+
+Foundation release implementing Phases 1–3 of the v2.0 enhancement roadmap. Adds the centralized
+mana bridge, custom Botany school, recipe content, and the first mana-network blocks.
+
+### Phase 1: Foundation Hardening
+
+- **Added** `ManaBridgeManager` (`com.ironsbotany.common.bridge`) — single entry point for
+  spell cost routing. Handles all five `ManaUnificationMode` values with a single
+  `resolveCost(player, spell, level, source)` call, returning
+  `ManaResolutionResult(issCharged, botaniaCharged, ok)`.
+- **Added** `CostRoutedTag` — tick-scoped idempotency tag stored on the player's persistent
+  data, preventing double-billing when both `SpellPreCastEvent` and `ChangeManaEvent` fire
+  for the same cast. Reads ANS's mirror tag to defer cleanly.
+- **Added** `SpellEventHandlers` — explicit `EventPriority.LOW` subscribers for ISS spell
+  events. Yields to Ars 'n Spells (which runs at `NORMAL`) and to KubeJS scripts
+  (`HIGH`/`HIGHEST`).
+- **Added** `ManaPriorityChain` + `ManaSource` enum — config-driven cross-bridge resource
+  ordering (default `["botania", "ars", "iss"]`). Configured via the new
+  `MANA_PRIORITY_CHAIN` TOML key.
+- **Added** `ArsNSpellsCompat.shouldDeferRouting()` — IB cleanly defers routing when ANS
+  is in `ARS_PRIMARY` or `HYBRID` mode.
+- **Added** public API package at `com.ironsbotany.api.*`:
+  - `IronsBotanyApi` — stable entry point for downstream addons
+  - `IManaSource` — SPI for cross-bridge mana source contract
+  - `BotanySchoolFlowerRegistry` — registration surface for school-themed flowers
+- **Added** `BotanySpellConfig` — per-spell `SpellConfigParameter`s (`botania_mana_cost`,
+  `dual_cost_enabled`) via `RegisterConfigParametersEvent`. Datapack-overridable per spell
+  at `data/<namespace>/spell_configs/<spell_id>.json`.
+- **Added** `/irons_botany reload` — server command (perm 2) that flushes runtime caches.
+- **Added** mixin JSON skeleton (`ironsbotany.mixins.json`) for future client-side HUD work.
+
+### Phase 2: Content & School
+
+- **Added** Botany SchoolType (`IBSchools.BOTANY`) — replaces the earlier shortcut of
+  piggybacking on Nature. Wires:
+  - Focus tag `#ironsbotany:focus/botany` (Mana Pearl, Pixie Dust, Dragonstone)
+  - Attributes `BOTANY_SPELL_POWER`, `BOTANY_MAGIC_RESIST`
+  - Damage type `ironsbotany:botany` (data-driven JSON at
+    `data/ironsbotany/damage_type/botany.json`)
+- **Changed** all 9 existing Botanical spells now return `IBSchools.BOTANY.get()` from
+  `getSchoolType()`.
+- **Added** Mana Inks (`MINOR_MANA_INK`, `GREATER_MANA_INK`, `PRIME_MANA_INK`) — petal
+  apothecary recipes that craft tiered scroll inks.
+- **Added** 8 School Power Orbs (Fire, Frost, Lightning, Holy, Ender, Blood, Nature,
+  Eldritch), crafted at the Runic Altar with the matching Botania rune.
+- **Added** 3 Alfheim Portal trades — Manasteel→Elementium spellblade,
+  Livingwood→Dreamwood scepter, Greater→Prime ink discount.
+- **Added** Gaia Guardian II loot modifier — Forge GLM (`AddItemLootModifier` +
+  `IBLootModifiers`) that adds Legendary Ink to the hardmode loot table without
+  overwriting Botania's JSON.
+- **Added** Lexica Botania Patchouli entry at
+  `assets/botania/patchouli_books/lexicon/en_us/entries/ironsbotany/index.json` — five-page
+  guide covering Iron's Botany content from inside Botania's own book.
+
+### Phase 3: Mana Network Citizenship
+
+- **Added** `ItemManaStorage` + `ItemManaCapabilityProvider` — per-stack `ManaItem`
+  capability provider, attached via `IBCapabilityHandler.onAttachItemCapabilities`. Iron's
+  Botany weapons and curios now appear in the Botania mana HUD, accept Spark deposits, and
+  are drained by `ManaItemHandler.requestMana` alongside Mana Tablets.
+- **Added** Arcane Mana Altar (`ArcaneManaAltarBlock` + `ArcaneManaAltarBlockEntity`) —
+  block entity implementing `ManaPool`, `ManaReceiver`, and `SparkAttachable`
+  simultaneously. Default capacity 1,000,000 mana. Drainable by nearby players during cast
+  resolution via `ManaBridgeManager.tryDrainFromNearbyAltar`.
+- **Added** `ManaBridgeManager.tryDrainFromNearbyAltar(player, amount, radius)` — bridge
+  helper that scans for an Arcane Mana Altar within range and drains from it before
+  falling through to the player's tablets.
+
+### Changed
+
+- `AbstractBotanicalSpell.onCast` — removed inline mana routing (the bridge handles it
+  before this method runs). Cost handling is now centralized in `ManaBridgeManager`.
+- `AbstractBotanicalSpell.getBotaniaManaCost(level)` — now consults the
+  `botania_mana_cost` SpellConfigParameter via `BotanySpellConfig.resolveBotaniaCost` and
+  falls back to the constructor-supplied ladder.
+
+### Deferred to v1.6 / v2.0
+
+The following enhancement-doc items are scoped for follow-up releases:
+
+- **v1.6**: Manasteel Staff, Terrasteel Spellbook, Elementium Scroll (ISS spellbook
+  subclasses); 3 new curios (Mana Reservoir Ring, Daybloom Amulet, Gaia's Blessing);
+  `ArcaneCodexItem` + Terra Plate recipe; datagen revival.
+- **v2.0**: Six ISS-school generating flowers (Emberlily, Frostbud, Stormbloom,
+  Sanctuary Lily, Voidpetal, Bloodweed); Verdant Caster functional flower;
+  Spreader-fired spell bursts; Corporea Scroll Rack + spell request matcher;
+  performance hygiene with `FakePlayer` pool; KubeJS surface (`irons_botany_js`).
+
 ## [1.4.1] - 2026-04-17
 
 ### Ars 'n' Spells soft-integration

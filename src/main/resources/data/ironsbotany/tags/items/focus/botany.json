@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "botania:mana_pearl",
+      "required": false
+    },
+    {
+      "id": "botania:pixie_dust",
+      "required": false
+    },
+    {
+      "id": "botania:dragonstone",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "type": "botania:petal_apothecary",
+  "ingredients": [
+    { "tag": "botania:petals/blue" },
+    { "tag": "botania:petals/blue" },
+    { "tag": "botania:petals/cyan" },
+    { "tag": "botania:petals/light_blue" },
+    { "item": "ironsbotany:botanical_ring" },
+    { "item": "botania:mana_tablet" }
+  ],
+  "output": {
+    "item": "ironsbotany:mana_reservoir_ring"
+  },
+  "reagent": {
+    "tag": "botania:seed_apothecary_reagent"
+  }
+}

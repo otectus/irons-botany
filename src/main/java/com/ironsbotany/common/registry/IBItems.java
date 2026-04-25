@@ -26,6 +26,31 @@ public class IBItems {
     public static final RegistryObject<Item> LIVINGWOOD_STAFF = ITEMS.register("livingwood_staff",
             () -> new LivingwoodStaffItem(new Item.Properties().stacksTo(1).durability(1000)));
 
+    // Manasteel Staff (Phase 6.2) — extends ISS StaffItem; mana cap attached via IBCapabilityHandler
+    public static final RegistryObject<Item> MANASTEEL_STAFF = ITEMS.register("manasteel_staff",
+            () -> new ManasteelStaffItem(new Item.Properties().stacksTo(1).durability(750)));
+
+    // Spellbooks (Phase 6.3) — ISS SpellBook subclasses with multi-attribute containers
+    public static final RegistryObject<Item> TERRASTEEL_SPELLBOOK = ITEMS.register("terrasteel_spellbook",
+            TerrasteelSpellbookItem::new);
+
+    public static final RegistryObject<Item> ARCANE_CODEX = ITEMS.register("arcane_codex",
+            ArcaneCodexItem::new);
+
+    // Elementium Scroll (Phase 6.4) — reusable scroll; pulls cost from Botania mana network
+    public static final RegistryObject<Item> ELEMENTIUM_SCROLL = ITEMS.register("elementium_scroll",
+            ElementiumScrollItem::new);
+
+    // New curios (Phase 6.5)
+    public static final RegistryObject<Item> MANA_RESERVOIR_RING = ITEMS.register("mana_reservoir_ring",
+            () -> new ManaReservoirRingItem(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> DAYBLOOM_AMULET = ITEMS.register("daybloom_amulet",
+            () -> new DaybloomAmuletItem(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> GAIAS_BLESSING = ITEMS.register("gaias_blessing",
+            () -> new GaiasBlessingItem(new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> DREAMWOOD_SCEPTER = ITEMS.register("dreamwood_scepter",
             () -> new DreamwoodScepterItem(new Item.Properties().stacksTo(1).durability(2000)));
 
@@ -75,6 +100,41 @@ public class IBItems {
     // Patchouli Book - opens guidebook GUI when right-clicked (if Patchouli is present)
     public static final RegistryObject<Item> BOTANICAL_GRIMOIRE = ITEMS.register("botanical_grimoire",
             () -> new com.ironsbotany.common.item.BotanicalGrimoireItem(new Item.Properties().stacksTo(1)));
+
+    // Mana Inks (Phase 2B) — petal apothecary outputs that replace vanilla ink for ISS scroll forging
+    public static final RegistryObject<Item> MINOR_MANA_INK = ITEMS.register("minor_mana_ink",
+            () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.minor_mana_ink.tooltip"));
+
+    public static final RegistryObject<Item> GREATER_MANA_INK = ITEMS.register("greater_mana_ink",
+            () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.greater_mana_ink.tooltip"));
+
+    public static final RegistryObject<Item> PRIME_MANA_INK = ITEMS.register("prime_mana_ink",
+            () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.prime_mana_ink.tooltip"));
+
+    // School-tied upgrade orbs (Phase 2C) — runic altar outputs, one per ISS school's spell-power attribute
+    public static final RegistryObject<Item> ORB_OF_FIRE_POWER = ITEMS.register("orb_of_fire_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.FLORA_ORB_TYPE, "fire"));
+
+    public static final RegistryObject<Item> ORB_OF_FROST_POWER = ITEMS.register("orb_of_frost_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.POOL_ORB_TYPE, "frost"));
+
+    public static final RegistryObject<Item> ORB_OF_LIGHTNING_POWER = ITEMS.register("orb_of_lightning_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.BURSTING_ORB_TYPE, "lightning"));
+
+    public static final RegistryObject<Item> ORB_OF_HOLY_POWER = ITEMS.register("orb_of_holy_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.FLORA_ORB_TYPE, "holy"));
+
+    public static final RegistryObject<Item> ORB_OF_ENDER_POWER = ITEMS.register("orb_of_ender_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.POOL_ORB_TYPE, "ender"));
+
+    public static final RegistryObject<Item> ORB_OF_BLOOD_POWER = ITEMS.register("orb_of_blood_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.BURSTING_ORB_TYPE, "blood"));
+
+    public static final RegistryObject<Item> ORB_OF_NATURE_POWER = ITEMS.register("orb_of_nature_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.TERRAN_ORB_TYPE, "nature"));
+
+    public static final RegistryObject<Item> ORB_OF_ELDRITCH_POWER = ITEMS.register("orb_of_eldritch_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.TERRAN_ORB_TYPE, "eldritch"));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

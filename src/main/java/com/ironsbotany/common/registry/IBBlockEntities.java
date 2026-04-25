@@ -1,6 +1,7 @@
 package com.ironsbotany.common.registry;
 
 import com.ironsbotany.IronsBotany;
+import com.ironsbotany.common.block.entity.ArcaneManaAltarBlockEntity;
 import com.ironsbotany.common.block.entity.ManaConduitBlockEntity;
 import com.ironsbotany.common.block.entity.SpellReservoirBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -22,6 +23,11 @@ public class IBBlockEntities {
         BLOCK_ENTITIES.register("mana_conduit", () ->
             BlockEntityType.Builder.of(ManaConduitBlockEntity::new,
                     IBBlocks.MANA_CONDUIT.get()).build(null));
+
+    public static final RegistryObject<BlockEntityType<ArcaneManaAltarBlockEntity>> ARCANE_MANA_ALTAR =
+        BLOCK_ENTITIES.register("arcane_mana_altar", () ->
+            BlockEntityType.Builder.of(ArcaneManaAltarBlockEntity::new,
+                    IBBlocks.ARCANE_MANA_ALTAR.get()).build(null));
 
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
