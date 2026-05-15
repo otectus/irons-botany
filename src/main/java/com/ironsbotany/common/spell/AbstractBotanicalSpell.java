@@ -9,6 +9,7 @@ import com.ironsbotany.common.config.ManaUnificationMode;
 import com.ironsbotany.common.corporea.SpellCircleReagentSystem;
 import com.ironsbotany.common.network.PacketHandler;
 import com.ironsbotany.common.network.SpellCastSyncPacket;
+import com.ironsbotany.common.progression.ProgressionGates;
 import com.ironsbotany.common.spell.SpellManaNetworkIntegration;
 import com.ironsbotany.common.flower.ActiveFlowerAura;
 import com.ironsbotany.common.flower.FlowerAuraRegistry;
@@ -111,6 +112,12 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
 
             // Apply Alfheim portal proximity boost
             AlfheimSpellBoost.applyAlfheimBoost(context, this, player);
+
+            // Spell Overcharge — permanent +5% damage on Nature spells once the
+            // player has earned the Gaia Guardian advancement (unified progression).
+            if (ProgressionGates.isOverchargeUnlocked(player)) {
+                context.multiplyDamage(1.05f);
+            }
 
             // Apply spellbook attunement bonuses
             if (ConfigHelper.isAlfheimEnabled()) {

@@ -2,6 +2,7 @@ package com.ironsbotany.common.spell.catalyst;
 
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.config.ConfigHelper;
+import com.ironsbotany.common.progression.ProgressionGates;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -57,28 +58,37 @@ public class SpellCatalystRegistry {
         
         List<CatalystEffect> effects = new ArrayList<>();
         int maxCatalysts = CommonConfig.MAX_CATALYSTS_PER_SPELL.get();
-        
+        boolean allowLegendary = ProgressionGates.isTier4Unlocked(player);
+
         // Check main inventory
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             if (effects.size() >= maxCatalysts) break;
-            
+
             ItemStack stack = player.getInventory().getItem(i);
             List<CatalystEffect> itemEffects = CATALYST_EFFECTS.get(stack.getItem());
             if (itemEffects != null) {
                 for (CatalystEffect effect : itemEffects) {
-                    if (effects.size() < maxCatalysts) {
+                    if (effects.size() < maxCatalysts && isTierAllowed(effect, allowLegendary)) {
                         effects.add(effect);
                     }
                 }
             }
         }
-        
+
         // Check curios slots
         if (effects.size() < maxCatalysts) {
-            effects.addAll(getCuriosCatalysts(player, maxCatalysts - effects.size()));
+            effects.addAll(getCuriosCatalysts(player, maxCatalysts - effects.size(), allowLegendary));
         }
-        
+
         return effects;
+    }
+
+    /**
+     * LEGENDARY-tier catalysts require the player to have unlocked Tier 4 spell
+     * modifiers (Botania Terrasteel advancement). Lower tiers are unrestricted.
+     */
+    private static boolean isTierAllowed(CatalystEffect effect, boolean allowLegendary) {
+        return effect.getTier() != CatalystEffect.CatalystTier.LEGENDARY || allowLegendary;
     }
     
     /**
@@ -120,21 +130,21 @@ public class SpellCatalystRegistry {
     /**
      * Get catalyst effects from Curios slots
      */
-    private static List<CatalystEffect> getCuriosCatalysts(Player player, int maxCount) {
+    private static List<CatalystEffect> getCuriosCatalysts(Player player, int maxCount, boolean allowLegendary) {
         List<CatalystEffect> effects = new ArrayList<>();
-        
+
         try {
             List<SlotResult> curios = CuriosApi.getCuriosInventory(player)
                 .map(handler -> handler.findCurios(stack -> CATALYST_EFFECTS.containsKey(stack.getItem())))
                 .orElse(new ArrayList<>());
-            
+
             for (SlotResult result : curios) {
                 if (effects.size() >= maxCount) break;
-                
+
                 List<CatalystEffect> itemEffects = CATALYST_EFFECTS.get(result.stack().getItem());
                 if (itemEffects != null) {
                     for (CatalystEffect effect : itemEffects) {
-                        if (effects.size() < maxCount) {
+                        if (effects.size() < maxCount && isTierAllowed(effect, allowLegendary)) {
                             effects.add(effect);
                         }
                     }
@@ -143,7 +153,7 @@ public class SpellCatalystRegistry {
         } catch (Exception e) {
             com.ironsbotany.IronsBotany.LOGGER.debug("Curios catalyst scan failed: {}", e.getMessage());
         }
-        
+
         return effects;
     }
     

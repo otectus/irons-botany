@@ -1,183 +1,195 @@
 package com.ironsbotany.common.util;
 
-import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.config.ManaUnificationMode;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
+import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import vazkii.botania.api.mana.ManaItemHandler;
-import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
 import vazkii.botania.api.mana.ManaPool;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ManaHelper {
-    
-    /**
-     * Converts Botania mana to ISS mana based on configured ratio and mode
-     * @param botaniaAmount Amount of Botania mana
-     * @return Equivalent ISS mana
-     */
+
     public static int convertBotaniaToISS(int botaniaAmount) {
         ManaUnificationMode mode = CommonConfig.MANA_UNIFICATION_MODE.get();
-        
-        // Check if conversion is allowed in current mode
-        if (!mode.allowsConversion()) {
-            return 0; // No conversion in SEPARATE or DISABLED modes
-        }
-        
+        if (!mode.allowsConversion()) return 0;
         int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
         return botaniaAmount / ratio;
     }
 
-    /**
-     * Converts ISS mana to Botania mana based on configured ratio
-     * @param issAmount Amount of ISS mana
-     * @return Equivalent Botania mana
-     */
     public static int convertISSToBotania(int issAmount) {
         ManaUnificationMode mode = CommonConfig.MANA_UNIFICATION_MODE.get();
-
-        if (!mode.allowsConversion()) {
-            return 0;
-        }
-
+        if (!mode.allowsConversion()) return 0;
         int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
         return issAmount * ratio;
     }
 
-    /**
-     * Attempts to convert Botania mana from an item to ISS mana for a player
-     * @param player The player receiving ISS mana
-     * @param stack The item stack containing Botania mana
-     * @return true if conversion was successful
-     */
     public static boolean tryConvertManaToISS(Player player, ItemStack stack) {
         if (player.level().isClientSide()) return false;
-
         MagicData magicData = MagicData.getPlayerMagicData(player);
         if (magicData == null) return false;
 
         float currentMana = magicData.getMana();
-        float maxMana = (float) player.getAttributeValue(io.redspace.ironsspellbooks.api.registry.AttributeRegistry.MAX_MANA.get());
-
-        if (currentMana >= maxMana) return false; // Already at max
+        float maxMana = (float) player.getAttributeValue(AttributeRegistry.MAX_MANA.get());
+        if (currentMana >= maxMana) return false;
 
         int transferRate = CommonConfig.MANA_TRANSFER_RATE.get();
-
-        // Check conversion yields something before draining
         int issToAdd = convertBotaniaToISS(transferRate);
         if (issToAdd <= 0) return false;
 
-        // Clamp to available ISS room
         int issRoom = (int) (maxMana - currentMana);
         if (issToAdd > issRoom) {
             issToAdd = issRoom;
-            // Only drain the exact Botania amount for the clamped ISS gain
             int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
             transferRate = issToAdd * ratio;
         }
 
-        // Now drain — we know it converts cleanly and there's room
         boolean extracted = ManaItemHandler.instance().requestManaExact(stack, player, transferRate, true);
         if (extracted) {
             magicData.addMana(issToAdd);
             return true;
         }
-
         return false;
     }
 
     /**
-     * Checks if a player has enough Botania mana across all sources
-     * (inventory, Curios slots, accessories — same sources the mana HUD shows)
+     * Check if the player can pay {@code amount} Botania mana from any combination
+     * of valid sources (mana items, accessories, and — if enabled — nearby pools).
+     *
+     * Aggregates across all sources, mirroring what the mana HUD shows. This is
+     * the contract callers expect; a player with two half-full tablets must be
+     * able to pay a full-tablet cost.
      */
     public static boolean hasBotaniaMana(Player player, int amount) {
-        // Use ManaItemHandler to check all mana items + accessories (matches HUD)
-        // requestManaExactForTool with simulate=false just checks availability
-        if (requestManaFromAllSources(player, amount, false)) {
-            return true;
-        }
-        // Fallback: check nearby mana pools
-        if (CommonConfig.ENABLE_MANA_POOL_ACCESS.get()) {
-            return hasBotaniaManaFromPools(player, amount);
-        }
-        return false;
+        return aggregateAndDrain(player, amount, false);
     }
 
     /**
-     * Drains Botania mana from a player's items and accessories
-     * (uses the same aggregation as the mana HUD for consistency)
+     * Drain {@code amount} Botania mana from any combination of valid sources.
+     * Two-pass: simulate to confirm coverage, then drain proportionally across
+     * items → accessories → pools. Returns false if total available is short;
+     * no partial drain occurs.
      */
     public static boolean drainBotaniaMana(Player player, int amount) {
-        // Use ManaItemHandler to drain from all sources (matches HUD)
-        if (requestManaFromAllSources(player, amount, true)) {
+        return aggregateAndDrain(player, amount, true);
+    }
+
+    private static boolean aggregateAndDrain(Player player, int amount, boolean doExtract) {
+        if (amount <= 0) return true;
+
+        List<ItemStack> items = ManaItemHandler.instance().getManaItems(player);
+        List<ItemStack> accessories = ManaItemHandler.instance().getManaAccesories(player);
+
+        // === Simulate pass ===
+        int simulated = sumFromStacks(player, items, amount, false);
+        if (simulated < amount) {
+            simulated += sumFromStacks(player, accessories, amount - simulated, false);
+        }
+
+        List<BlockPos> contributingPools = new ArrayList<>();
+        int poolSim = 0;
+        if (simulated < amount && CommonConfig.ENABLE_MANA_POOL_ACCESS.get()) {
+            poolSim = simulatePools(player, amount - simulated, contributingPools);
+        }
+
+        if (simulated + poolSim < amount) {
+            return false;
+        }
+        if (!doExtract) {
             return true;
         }
-        // Fallback: drain from nearby mana pools
-        if (CommonConfig.ENABLE_MANA_POOL_ACCESS.get()) {
-            return drainBotaniaManaFromPools(player, amount);
+
+        // === Drain pass ===
+        int drained = sumFromStacks(player, items, amount, true);
+        if (drained < amount) {
+            drained += sumFromStacks(player, accessories, amount - drained, true);
         }
-        return false;
-    }
-
-    /**
-     * Request mana from all Botania mana sources (items + accessories).
-     * Uses ManaItemHandler which aggregates inventory, Curios, and other mana providers.
-     */
-    private static boolean requestManaFromAllSources(Player player, int amount, boolean doExtract) {
-        // Check mana items (main inventory)
-        for (ItemStack stack : ManaItemHandler.instance().getManaItems(player)) {
-            if (ManaItemHandler.instance().requestManaExact(stack, player, amount, doExtract)) {
-                return true;
-            }
+        if (drained < amount && !contributingPools.isEmpty()) {
+            drained += drainPools(player.level(), contributingPools, amount - drained);
         }
-        // Check mana accessories (Curios, Baubles, etc.)
-        // Note: "getManaAccesories" is the Botania API's spelling (missing an 's'), not a mod typo
-        for (ItemStack stack : ManaItemHandler.instance().getManaAccesories(player)) {
-            if (ManaItemHandler.instance().requestManaExact(stack, player, amount, doExtract)) {
-                return true;
-            }
+        return drained >= amount;
+    }
+
+    private static int sumFromStacks(Player player, List<ItemStack> stacks, int need, boolean doExtract) {
+        if (need <= 0) return 0;
+        int total = 0;
+        for (ItemStack stack : stacks) {
+            int got = ManaItemHandler.instance().requestMana(stack, player, need - total, doExtract);
+            total += got;
+            if (total >= need) break;
         }
-        return false;
+        return total;
     }
 
-    /**
-     * Check if nearby Botania mana pools have enough mana
-     */
-    public static boolean hasBotaniaManaFromPools(Player player, int amount) {
-        return findAndDrainPool(player, amount, false);
-    }
-
-    /**
-     * Drain Botania mana from nearby mana pools
-     */
-    public static boolean drainBotaniaManaFromPools(Player player, int amount) {
-        return findAndDrainPool(player, amount, true);
-    }
-
-    private static boolean findAndDrainPool(Player player, int amount, boolean doDrain) {
-        if (!BotaniaIntegration.isBotaniaLoaded()) return false;
+    private static int simulatePools(Player player, int need, List<BlockPos> contributing) {
+        if (!BotaniaIntegration.isBotaniaLoaded() || need <= 0) return 0;
 
         Level level = player.level();
         int radius = CommonConfig.MANA_POOL_SEARCH_RADIUS.get();
-        BlockPos playerPos = player.blockPosition();
+        BlockPos origin = player.blockPosition();
+        int total = 0;
 
-        for (BlockPos checkPos : BlockPos.betweenClosed(
-                playerPos.offset(-radius, -radius / 2, -radius),
-                playerPos.offset(radius, radius / 2, radius))) {
-            BlockEntity blockEntity = level.getBlockEntity(checkPos);
-            if (blockEntity instanceof ManaPool pool) {
-                if (pool.getCurrentMana() >= amount) {
-                    if (doDrain) {
-                        pool.receiveMana(-amount);
-                    }
-                    return true;
+        for (BlockPos pos : BlockPos.betweenClosed(
+                origin.offset(-radius, -radius / 2, -radius),
+                origin.offset(radius, radius / 2, radius))) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof ManaPool pool) {
+                int available = pool.getCurrentMana();
+                if (available <= 0) continue;
+                int contribution = Math.min(available, need - total);
+                if (contribution > 0) {
+                    contributing.add(pos.immutable());
+                    total += contribution;
+                    if (total >= need) break;
                 }
             }
         }
-        return false;
+        return total;
+    }
+
+    private static int drainPools(Level level, List<BlockPos> pools, int need) {
+        int total = 0;
+        for (BlockPos pos : pools) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof ManaPool pool) {
+                int remaining = need - total;
+                if (remaining <= 0) break;
+                int take = Math.min(pool.getCurrentMana(), remaining);
+                if (take > 0) {
+                    pool.receiveMana(-take);
+                    total += take;
+                }
+            }
+        }
+        return total;
+    }
+
+    /**
+     * @deprecated Pool-only checks are now folded into {@link #hasBotaniaMana(Player, int)}.
+     * Kept for compatibility with any external callers; prefer the aggregated entry point.
+     */
+    @Deprecated
+    public static boolean hasBotaniaManaFromPools(Player player, int amount) {
+        if (!CommonConfig.ENABLE_MANA_POOL_ACCESS.get()) return false;
+        return simulatePools(player, amount, new ArrayList<>()) >= amount;
+    }
+
+    /**
+     * @deprecated Pool-only drains are now folded into {@link #drainBotaniaMana(Player, int)}.
+     */
+    @Deprecated
+    public static boolean drainBotaniaManaFromPools(Player player, int amount) {
+        if (!CommonConfig.ENABLE_MANA_POOL_ACCESS.get()) return false;
+        List<BlockPos> pools = new ArrayList<>();
+        int sim = simulatePools(player, amount, pools);
+        if (sim < amount) return false;
+        return drainPools(player.level(), pools, amount) >= amount;
     }
 }

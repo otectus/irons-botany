@@ -1,5 +1,6 @@
 package com.ironsbotany;
 
+import com.ironsbotany.common.casting.CastingChannelRegistration;
 import com.ironsbotany.common.config.ClientConfig;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.config.ConfigHelper;
@@ -7,6 +8,7 @@ import com.ironsbotany.common.flower.FlowerAuraRegistration;
 import com.ironsbotany.common.network.PacketHandler;
 import com.ironsbotany.common.registry.*;
 import com.ironsbotany.common.spell.catalyst.CatalystRegistration;
+import com.ironsbotany.common.util.IBRegistryHealthCheck;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -57,12 +59,18 @@ public class IronsBotany {
             
             // Register spell catalysts
             CatalystRegistration.registerCatalysts();
-            
+
             // Register flower auras
             FlowerAuraRegistration.registerFlowerAuras();
 
+            // Register casting channels (hardware vs software profiles)
+            CastingChannelRegistration.registerChannels();
+
             // Validate config combinations
             ConfigHelper.validateConfig();
+
+            // Verify deep-synergy registries are populated; throw in dev, warn in prod.
+            IBRegistryHealthCheck.runAfterSetup();
 
             LOGGER.info("Iron's Botany common setup complete!");
         });

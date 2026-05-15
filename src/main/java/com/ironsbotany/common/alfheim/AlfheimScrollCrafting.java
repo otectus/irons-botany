@@ -1,11 +1,13 @@
 package com.ironsbotany.common.alfheim;
 
 import com.ironsbotany.IronsBotany;
+import com.ironsbotany.common.progression.ProgressionGates;
 import com.ironsbotany.common.util.DataKeys;
 import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.SchoolType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.ModList;
 
@@ -19,18 +21,31 @@ import java.util.List;
 public class AlfheimScrollCrafting {
     
     /**
-     * Mark a scroll as Alfheim-crafted with dual-school
+     * Mark a scroll as Alfheim-crafted with dual-school. The {@code player}
+     * must have unlocked dual-school casting (see {@link ProgressionGates});
+     * otherwise the scroll is marked Alfheim-crafted but without the
+     * dual-school NBT and no secondary school is recorded.
      */
-    public static void markAlfheimScroll(ItemStack scroll, SchoolType primarySchool, 
-                                         SchoolType secondarySchool) {
+    public static boolean markAlfheimScroll(Player player, ItemStack scroll,
+                                            SchoolType primarySchool,
+                                            SchoolType secondarySchool) {
         if (!ModList.get().isLoaded("botania")) {
-            return;
+            return false;
         }
-        
+
         CompoundTag tag = scroll.getOrCreateTag();
         tag.putBoolean(DataKeys.ALFHEIM_CRAFTED, true);
+
+        if (!ProgressionGates.isDualSchoolUnlocked(player)) {
+            IronsBotany.LOGGER.debug(
+                "Dual-school not unlocked for player {} — Alfheim scroll left single-school",
+                player == null ? "<null>" : player.getName().getString());
+            return false;
+        }
+
         tag.putBoolean(DataKeys.DUAL_SCHOOL, true);
         tag.putString(DataKeys.SECONDARY_SCHOOL, secondarySchool.getId().toString());
+        return true;
     }
     
     /**
