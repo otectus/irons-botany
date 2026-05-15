@@ -71,7 +71,6 @@
   "spell.ironsbotany.mana_rebirth.description": "Heals the caster, removes negative effects, and grants Regeneration and Absorption. Can prevent death at higher levels.",
   "spell.ironsbotany.mana_rebirth.guide": "Heals the caster, removes negative effects, and grants Regeneration and Absorption. Can prevent death at higher levels.",
   "ironsbotany.spell.insufficient_botania_mana": "Insufficient Botania Mana! Need %s",
-  "attribute.ironsbotany.mana_efficiency": "Mana Efficiency",
   "advancements.ironsbotany.root.title": "Natural Awakening",
   "advancements.ironsbotany.root.description": "Craft a Botanical Focus to bridge natural and arcane mana",
   "advancements.ironsbotany.first_spell.title": "First Bloom",

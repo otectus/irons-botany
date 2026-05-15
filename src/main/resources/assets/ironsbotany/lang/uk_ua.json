@@ -71,7 +71,6 @@
   "spell.ironsbotany.mana_rebirth.description": "Зцілює заклинача, знімає негативні ефекти та дає Регенерацію і Поглинання. На вищих рівнях може запобігти смерті.",
   "spell.ironsbotany.mana_rebirth.guide": "Зцілює заклинача, знімає негативні ефекти та дає Регенерацію і Поглинання. На вищих рівнях може запобігти смерті.",
   "ironsbotany.spell.insufficient_botania_mana": "Недостатньо мани Botania! Потрібно %s",
-  "attribute.ironsbotany.mana_efficiency": "Ефективність Мани",
   "advancements.ironsbotany.root.title": "Природне Пробудження",
   "advancements.ironsbotany.root.description": "Створіть Ботанічний Фокус, щоб поєднати природну та арканову ману",
   "advancements.ironsbotany.first_spell.title": "Перше Цвітіння",

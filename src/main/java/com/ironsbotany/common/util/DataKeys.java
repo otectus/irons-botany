@@ -22,6 +22,9 @@ public final class DataKeys {
     public static final String LAST_SPELL_TIME = "IronsBotany_LastSpellTime";
     public static final String UNIQUE_SPELLS = "IronsBotany_UniqueSpells";
 
+    // Armor set bonus internal cooldown
+    public static final String MANA_SHIELD_COOLDOWN = "IronsBotany_ManaShieldCooldown";
+
     // Gaia trials
     public static final String ACTIVE_AURAS = "IronsBotany_ActiveAuras";
 

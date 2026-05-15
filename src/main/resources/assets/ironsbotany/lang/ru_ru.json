@@ -71,7 +71,6 @@
   "spell.ironsbotany.mana_rebirth.description": "Исцеляет заклинателя, снимает негативные эффекты и даёт Регенерацию и Поглощение. На высоких уровнях может предотвратить смерть.",
   "spell.ironsbotany.mana_rebirth.guide": "Исцеляет заклинателя, снимает негативные эффекты и даёт Регенерацию и Поглощение. На высоких уровнях может предотвратить смерть.",
   "ironsbotany.spell.insufficient_botania_mana": "Недостаточно маны Botania! Необходимо %s",
-  "attribute.ironsbotany.mana_efficiency": "Эффективность маны",
   "advancements.ironsbotany.root.title": "Природное пробуждение",
   "advancements.ironsbotany.root.description": "Создайте Ботанический фокус, чтобы соединить природную и тайную ману",
   "advancements.ironsbotany.first_spell.title": "Первое цветение",

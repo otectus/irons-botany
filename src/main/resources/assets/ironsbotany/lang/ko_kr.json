@@ -71,7 +71,6 @@
   "spell.ironsbotany.mana_rebirth.description": "시전자를 치유하고 부정적 효과를 제거하며 재생과 흡수를 부여합니다. 높은 레벨에서 죽음을 방지할 수 있습니다.",
   "spell.ironsbotany.mana_rebirth.guide": "시전자를 치유하고 부정적 효과를 제거하며 재생과 흡수를 부여합니다. 높은 레벨에서 죽음을 방지할 수 있습니다.",
   "ironsbotany.spell.insufficient_botania_mana": "Botania 마나 부족! %s 필요",
-  "attribute.ironsbotany.mana_efficiency": "마나 효율",
   "advancements.ironsbotany.root.title": "자연의 각성",
   "advancements.ironsbotany.root.description": "자연 마나와 비전 마나를 잇는 식물학 초점을 제작하세요",
   "advancements.ironsbotany.first_spell.title": "첫 번째 개화",

@@ -4,7 +4,9 @@ import com.ironsbotany.common.casting.CastingChannelRegistration;
 import com.ironsbotany.common.config.ClientConfig;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.config.ConfigHelper;
+import com.ironsbotany.common.config.ProgressionConfig;
 import com.ironsbotany.common.flower.FlowerAuraRegistration;
+import com.ironsbotany.common.loot.IBLootModifiers;
 import com.ironsbotany.common.network.PacketHandler;
 import com.ironsbotany.common.registry.*;
 import com.ironsbotany.common.spell.catalyst.CatalystRegistration;
@@ -31,17 +33,18 @@ public class IronsBotany {
         IBItems.register(modEventBus);
         IBBlocks.register(modEventBus);
         IBSpells.register(modEventBus);
-        IBAttributes.register(modEventBus);
         IBEntities.register(modEventBus);
         IBRecipeTypes.register(modEventBus);
         IBCreativeTabs.register(modEventBus);
         IBSounds.register(modEventBus);
         IBParticles.register(modEventBus);
         IBBlockEntities.register(modEventBus);
+        IBLootModifiers.register(modEventBus);
 
         // Register configs
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CommonConfig.SPEC);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ProgressionConfig.SPEC);
 
         // Register setup
         modEventBus.addListener(this::commonSetup);

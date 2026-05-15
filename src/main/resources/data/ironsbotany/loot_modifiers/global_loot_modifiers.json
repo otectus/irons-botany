@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "entries": [
+    "ironsbotany:village_plains_house",
+    "ironsbotany:village_taiga_house",
+    "ironsbotany:village_snowy_house",
+    "ironsbotany:mineshaft",
+    "ironsbotany:stronghold_library",
+    "ironsbotany:end_city"
+  ]
+}

@@ -71,7 +71,6 @@
   "spell.ironsbotany.mana_rebirth.description": "詠唱者を回復し、負の効果を除去し、再生と吸収を付与する。高レベルでは死亡を防ぐことができる。",
   "spell.ironsbotany.mana_rebirth.guide": "詠唱者を回復し、負の効果を除去し、再生と吸収を付与する。高レベルでは死亡を防ぐことができる。",
   "ironsbotany.spell.insufficient_botania_mana": "Botaniaマナが不足しています！%s 必要です",
-  "attribute.ironsbotany.mana_efficiency": "マナ効率",
   "advancements.ironsbotany.root.title": "自然の目覚め",
   "advancements.ironsbotany.root.description": "ボタニカルフォーカスを作成して自然と秘術のマナを繋ごう",
   "advancements.ironsbotany.first_spell.title": "最初の開花",

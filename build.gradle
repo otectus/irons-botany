@@ -44,12 +44,28 @@ minecraft {
             }
         }
 
-        // TODO: Add datagen run config once GatherDataEvent providers are implemented
-        // data {
-        //     workingDirectory project.file('run')
-        //     args '--mod', 'ironsbotany', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-        //     mods { ironsbotany { source sourceSets.main } }
-        // }
+        // Datagen run config — wired up for IBDataGenerator (loot modifiers, etc.).
+        //
+        // NOTE: `./gradlew runData` requires Botania / Iron's Spells / Curios on
+        // the runtime classpath in deobfuscated form. The libs/ folder ships only
+        // obfuscated production jars (compileOnly), so a vanilla runData call
+        // fails at boot with "Missing or unsupported mandatory dependencies".
+        // Hand-authored JSONs under src/main/resources/data/ironsbotany/
+        // loot_modifiers/ are the source of truth for 1.7.0; the provider class
+        // exists so a future commit that adds deobf'd Maven coordinates can
+        // regenerate them with `./gradlew runData`.
+        data {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', 'ironsbotany', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                ironsbotany {
+                    source sourceSets.main
+                }
+            }
+        }
     }
 }
 

@@ -2,6 +2,7 @@ package com.ironsbotany.common.event;
 
 import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.item.ManasteelWizardArmorItem;
+import com.ironsbotany.common.util.DataKeys;
 import com.ironsbotany.common.util.ManaHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,7 +17,6 @@ public class ArmorSetBonusHandler {
 
     private static final int MANA_PER_DAMAGE = 10000; // 10k Botania mana per heart absorbed
     private static final int COOLDOWN_TICKS = 40; // 2-second internal cooldown
-    private static final String LAST_SHIELD_TIME_KEY = "IronsBotany_ManaShieldCooldown";
 
     // NORMAL priority: runs after FlowerShieldHandler (HIGH) so armor absorb
     // applies to damage already reduced by the petal shield.
@@ -29,7 +29,7 @@ public class ArmorSetBonusHandler {
         if (!hasFullManasteelSet(player)) return;
 
         // Check internal cooldown
-        long lastProc = player.getPersistentData().getLong(LAST_SHIELD_TIME_KEY);
+        long lastProc = player.getPersistentData().getLong(DataKeys.MANA_SHIELD_COOLDOWN);
         long currentTime = player.level().getGameTime();
         if (currentTime - lastProc < COOLDOWN_TICKS) return;
 
@@ -43,7 +43,7 @@ public class ArmorSetBonusHandler {
         if (ManaHelper.drainBotaniaMana(player, manaCost)) {
             // Reduce damage by 50%
             event.setAmount(damage * 0.5f);
-            player.getPersistentData().putLong(LAST_SHIELD_TIME_KEY, currentTime);
+            player.getPersistentData().putLong(DataKeys.MANA_SHIELD_COOLDOWN, currentTime);
             
             // Grant mana_shield advancement
             if (player instanceof ServerPlayer serverPlayer) {

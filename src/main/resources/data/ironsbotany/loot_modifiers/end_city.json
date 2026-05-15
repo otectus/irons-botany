@@ -1,0 +1,13 @@
+{
+  "type": "ironsbotany:add_pool",
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/end_city_treasure"
+    }
+  ],
+  "entries": [
+    { "item": "ironsbotany:orb_of_terran_might", "weight": 5, "min": 1, "max": 1 },
+    { "item": "ironsbotany:botanical_crystal", "weight": 10, "min": 1, "max": 2 }
+  ]
+}
