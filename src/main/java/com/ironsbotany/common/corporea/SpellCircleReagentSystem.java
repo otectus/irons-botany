@@ -42,8 +42,10 @@ public class SpellCircleReagentSystem {
             return true;
         }
 
-        // Only apply to long-cast spells (rituals)
-        if (spell.getCastType() != CastType.LONG && spell.getCastType() != CastType.CONTINUOUS) {
+        // 1.7.0: tightened to ritual-grade Iron's Botany spells only.
+        // The previous "any LONG/CONTINUOUS cast" scope vacuumed reagents for
+        // every long animation, which the audit flagged as bleed-prone.
+        if (!(spell instanceof com.ironsbotany.common.spell.AbstractBotanicalSpell ib && ib.isRitualGrade())) {
             return true;
         }
 

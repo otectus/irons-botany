@@ -1,0 +1,9 @@
+{
+  "item": "botania:rune_summer",
+  "tier": "BASIC",
+  "modifiers": {
+    "damage": 1.2,
+    "cooldown": 1.05
+  },
+  "applies_to_schools": []
+}

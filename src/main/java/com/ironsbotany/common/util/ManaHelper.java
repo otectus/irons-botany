@@ -2,18 +2,24 @@ package com.ironsbotany.common.util;
 
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.config.ManaUnificationMode;
+import com.ironsbotany.common.item.PoolAttunementCharm;
+import com.ironsbotany.common.registry.IBItems;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.SlotResult;
 import vazkii.botania.api.mana.ManaItemHandler;
 import vazkii.botania.api.mana.ManaPool;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ManaHelper {
 
@@ -79,6 +85,103 @@ public class ManaHelper {
      */
     public static boolean drainBotaniaMana(Player player, int amount) {
         return aggregateAndDrain(player, amount, true);
+    }
+
+    /**
+     * Nature-spell variant: like {@link #drainBotaniaMana} but also consults
+     * the bound pool of a worn {@link PoolAttunementCharm}, if any, as one
+     * additional source. The charm's bound pool is gated by range and
+     * bandwidth configs and only fires for Nature-school casts.
+     */
+    public static boolean drainBotaniaManaWithBoundPool(Player player, int amount) {
+        if (aggregateAndDrain(player, amount, true)) return true;
+        // Items + accessories + nearby pools couldn't cover. Fall back to the
+        // bound pool, draining the entire shortfall in one hit if possible.
+        int remaining = computeShortfall(player, amount);
+        if (remaining <= 0) return true;
+        return drainFromBoundPool(player, remaining);
+    }
+
+    /**
+     * Pre-check variant of {@link #drainBotaniaManaWithBoundPool}.
+     */
+    public static boolean hasBotaniaManaWithBoundPool(Player player, int amount) {
+        if (aggregateAndDrain(player, amount, false)) return true;
+        int remaining = computeShortfall(player, amount);
+        if (remaining <= 0) return true;
+        return simulateBoundPool(player, remaining);
+    }
+
+    private static int computeShortfall(Player player, int amount) {
+        if (amount <= 0) return 0;
+        List<ItemStack> items = ManaItemHandler.instance().getManaItems(player);
+        List<ItemStack> accessories = ManaItemHandler.instance().getManaAccesories(player);
+        int sim = sumFromStacks(player, items, amount, false);
+        if (sim < amount) sim += sumFromStacks(player, accessories, amount - sim, false);
+        if (sim < amount && CommonConfig.ENABLE_MANA_POOL_ACCESS.get()) {
+            sim += simulatePools(player, amount - sim, new ArrayList<>());
+        }
+        return Math.max(0, amount - sim);
+    }
+
+    private static boolean simulateBoundPool(Player player, int need) {
+        if (!CommonConfig.ENABLE_POOL_ATTUNEMENT.get()) return false;
+        Optional<ItemStack> charm = findBoundCharm(player);
+        if (charm.isEmpty()) return false;
+
+        BlockPos pos = PoolAttunementCharm.getBoundPos(charm.get());
+        ResourceLocation dim = PoolAttunementCharm.getBoundDimension(charm.get());
+        if (pos == null || dim == null) return false;
+
+        // Same dimension only.
+        if (!player.level().dimension().location().equals(dim)) return false;
+
+        // Range cap.
+        int range = CommonConfig.POOL_ATTUNEMENT_RANGE.get();
+        if (player.blockPosition().distSqr(pos) > (double) range * range) return false;
+
+        BlockEntity be = player.level().getBlockEntity(pos);
+        if (!(be instanceof ManaPool pool)) return false;
+
+        int bandwidth = CommonConfig.POOL_ATTUNEMENT_BANDWIDTH.get();
+        int contribution = Math.min(pool.getCurrentMana(), Math.min(need, bandwidth));
+        return contribution >= need;
+    }
+
+    private static boolean drainFromBoundPool(Player player, int need) {
+        if (!CommonConfig.ENABLE_POOL_ATTUNEMENT.get()) return false;
+        Optional<ItemStack> charm = findBoundCharm(player);
+        if (charm.isEmpty()) return false;
+
+        BlockPos pos = PoolAttunementCharm.getBoundPos(charm.get());
+        ResourceLocation dim = PoolAttunementCharm.getBoundDimension(charm.get());
+        if (pos == null || dim == null) return false;
+        if (!player.level().dimension().location().equals(dim)) return false;
+
+        int range = CommonConfig.POOL_ATTUNEMENT_RANGE.get();
+        if (player.blockPosition().distSqr(pos) > (double) range * range) return false;
+
+        BlockEntity be = player.level().getBlockEntity(pos);
+        if (!(be instanceof ManaPool pool)) return false;
+
+        int bandwidth = CommonConfig.POOL_ATTUNEMENT_BANDWIDTH.get();
+        int contribution = Math.min(pool.getCurrentMana(), Math.min(need, bandwidth));
+        if (contribution < need) return false;
+        pool.receiveMana(-need);
+        return true;
+    }
+
+    private static Optional<ItemStack> findBoundCharm(Player player) {
+        try {
+            return CuriosApi.getCuriosInventory(player)
+                .map(handler -> handler.findCurios(
+                    s -> s.getItem() == IBItems.POOL_ATTUNEMENT_CHARM.get()
+                      && PoolAttunementCharm.isBound(s)))
+                .filter(list -> !list.isEmpty())
+                .map(list -> list.get(0).stack());
+        } catch (Throwable t) {
+            return Optional.empty();
+        }
     }
 
     private static boolean aggregateAndDrain(Player player, int amount, boolean doExtract) {

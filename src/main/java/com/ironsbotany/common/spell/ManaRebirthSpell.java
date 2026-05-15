@@ -31,6 +31,11 @@ public class ManaRebirthSpell extends AbstractBotanicalSpell {
     }
 
     @Override
+    public boolean isRitualGrade() {
+        return true;
+    }
+
+    @Override
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.EPIC)

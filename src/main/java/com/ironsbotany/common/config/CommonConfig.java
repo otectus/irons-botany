@@ -128,6 +128,12 @@ public class CommonConfig {
     public static final ForgeConfigSpec.BooleanValue ENABLE_DUAL_SCHOOL_SCROLLS;
     public static final ForgeConfigSpec.BooleanValue ENABLE_SPELLBOOK_ATTUNEMENT;
 
+    // 1.7.0 — Phase 4 Content Expansion
+    public static final ForgeConfigSpec.BooleanValue ENABLE_POOL_ATTUNEMENT;
+    public static final ForgeConfigSpec.IntValue POOL_ATTUNEMENT_RANGE;
+    public static final ForgeConfigSpec.IntValue POOL_ATTUNEMENT_BANDWIDTH;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_ELVEN_BLOOM_SCROLLS;
+
     static {
         BUILDER.push("Master Toggles");
         BUILDER.comment("=".repeat(60));
@@ -464,8 +470,11 @@ public class CommonConfig {
 
         BUILDER.push("Corporea Logistics");
         ENABLE_CORPOREA_LOGISTICS = BUILDER
-                .comment("Enable Corporea integration for spell logistics")
-                .define("enableCorporeaLogistics", true);
+                .comment("EXPERIMENTAL: Enable Corporea integration for spell logistics.",
+                         "Off by default — when enabled, only ritual-grade spells",
+                         "(Gaia's Wrath, Mana Rebirth) request reagents via Corporea.",
+                         "See the 1.7.0 audit for the rationale on tight scoping.")
+                .define("enableCorporeaLogistics", false);
         
         AUTO_REQUEST_REAGENTS = BUILDER
                 .comment("Automatically request spell reagents from Corporea")
@@ -492,6 +501,36 @@ public class CommonConfig {
         ENABLE_SPELLBOOK_ATTUNEMENT = BUILDER
                 .comment("Enable spellbook attunement in Alfheim")
                 .define("enableSpellbookAttunement", true);
+        BUILDER.pop();
+
+        BUILDER.push("Phase 4 — Content Expansion");
+        BUILDER.comment("=".repeat(60));
+        BUILDER.comment("New 1.7.0 features. Defaults follow the 1.7.0 audit.");
+        BUILDER.comment("=".repeat(60));
+
+        ENABLE_POOL_ATTUNEMENT = BUILDER
+                .comment("Pool Attunement Charm: a worn curio that binds one Botania",
+                         "mana pool as a supplementary source for Nature-school spells.",
+                         "Binding requires the Spell Overcharge unlock (Gaia Guardian kill).")
+                .define("enablePoolAttunement", true);
+
+        POOL_ATTUNEMENT_RANGE = BUILDER
+                .comment("Maximum block-distance between the player and a bound pool",
+                         "for the pool to contribute mana. Pools beyond this range are",
+                         "ignored even if bound.")
+                .defineInRange("poolAttunementRange", 64, 8, 256);
+
+        POOL_ATTUNEMENT_BANDWIDTH = BUILDER
+                .comment("Maximum Botania mana a bound pool can supply per cast",
+                         "(cap; smaller costs draw less). Prevents the charm from",
+                         "becoming an infinite battery for every spell.")
+                .defineInRange("poolAttunementBandwidth", 50000, 1000, 1000000);
+
+        ENABLE_ELVEN_BLOOM_SCROLLS = BUILDER
+                .comment("EXPERIMENTAL: Enable Elven Bloom Scrolls — rune-enhanced",
+                         "scrolls crafted near an Alfheim portal gain +1 effective",
+                         "spell level. Off by default; enable for pack-side endgame.")
+                .define("enableElvenBloomScrolls", false);
         BUILDER.pop();
 
         SPEC = BUILDER.build();

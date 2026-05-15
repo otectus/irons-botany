@@ -52,6 +52,9 @@ public final class DataKeys {
     public static final String SECONDARY_SCHOOL = "IronsBotany_SecondarySchool";
     public static final String ALFHEIM_CRAFTED = "IronsBotany_AlfheimCrafted";
 
+    // Elven Bloom Scrolls (1.7.0 Phase 4.4)
+    public static final String ELVEN_BLOOM = "IronsBotany_ElvenBloom";
+
     // Spellbook attunement
     public static final String ALFHEIM_ATTUNEMENT = "IronsBotany_AlfheimAttunement";
     public static final String ATTUNEMENT_LEVEL = "IronsBotany_AttunementLevel";

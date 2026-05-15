@@ -76,6 +76,10 @@ public class IBItems {
     public static final RegistryObject<Item> BOTANICAL_GRIMOIRE = ITEMS.register("botanical_grimoire",
             () -> new com.ironsbotany.common.item.BotanicalGrimoireItem(new Item.Properties().stacksTo(1)));
 
+    // 1.7.0 — Pool Attunement Charm (curios charm slot)
+    public static final RegistryObject<Item> POOL_ATTUNEMENT_CHARM = ITEMS.register("pool_attunement_charm",
+            () -> new com.ironsbotany.common.item.PoolAttunementCharm(new Item.Properties().stacksTo(1)));
+
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }

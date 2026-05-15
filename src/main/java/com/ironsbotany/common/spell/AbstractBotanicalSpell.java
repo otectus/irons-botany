@@ -57,6 +57,26 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
         return baseBotaniaManaCost + (botaniaManaCostPerLevel * (spellLevel - 1));
     }
 
+    /**
+     * Ritual-grade spells participate in Corporea reagent logistics when
+     * enabled. Default is {@code false}; only true endgame spells (Gaia's
+     * Wrath, Mana Rebirth) override to {@code true}. Tightens the scope
+     * the 1.7.0 audit flagged for {@code SpellCircleReagentSystem}.
+     */
+    public boolean isRitualGrade() {
+        return false;
+    }
+
+    private static boolean hasElvenBloomScroll(Player player) {
+        return isElvenBloom(player.getMainHandItem()) || isElvenBloom(player.getOffhandItem());
+    }
+
+    private static boolean isElvenBloom(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        var tag = stack.getTag();
+        return tag != null && tag.getBoolean(DataKeys.ELVEN_BLOOM);
+    }
+
     @Override
     public void onCast(Level level, int spellLevel, LivingEntity entity, CastSource castSource, MagicData playerMagicData) {
         if (level.isClientSide) {
@@ -115,6 +135,13 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
             // player has earned the Gaia Guardian advancement (unified progression).
             if (ProgressionGates.isOverchargeUnlocked(player)) {
                 context.multiplyDamage(1.05f);
+            }
+
+            // Elven Bloom Scroll bonus — +15% damage and -10% cooldown when the
+            // cast is invoked via a scroll crafted near an Alfheim portal.
+            if (hasElvenBloomScroll(player)) {
+                context.multiplyDamage(1.15f);
+                context.multiplyCooldown(0.9f);
             }
 
             // Apply spellbook attunement bonuses

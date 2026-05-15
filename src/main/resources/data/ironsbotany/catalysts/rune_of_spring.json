@@ -1,0 +1,11 @@
+{
+  "item": "botania:rune_spring",
+  "tier": "BASIC",
+  "modifiers": {
+    "damage": 1.1,
+    "cast_speed": 1.1
+  },
+  "applies_to_schools": [
+    "irons_spellbooks:nature"
+  ]
+}

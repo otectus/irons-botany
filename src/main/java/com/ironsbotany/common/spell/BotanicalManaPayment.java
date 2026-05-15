@@ -35,13 +35,17 @@ public final class BotanicalManaPayment {
         }
 
         // BOTANIA_PRIMARY | SEPARATE | HYBRID-with-dual-cost: drain Botania.
+        // Pool Attunement Charm hook: Iron's Botany spells are Nature-school
+        // by contract (AbstractBotanicalSpell.getSchoolType), so the bound-pool
+        // variant is the canonical entry point. ManaHelper enforces the
+        // Nature-only filter implicitly because only this pipeline calls it.
         int botaniaRequired = context.getModifiedManaCost(spell.getBotaniaManaCost(spellLevel));
-        if (!ManaHelper.hasBotaniaMana(player, botaniaRequired)) {
+        if (!ManaHelper.hasBotaniaManaWithBoundPool(player, botaniaRequired)) {
             player.displayClientMessage(
                 Component.translatable("ironsbotany.spell.insufficient_botania_mana", botaniaRequired),
                 true);
             return false;
         }
-        return ManaHelper.drainBotaniaMana(player, botaniaRequired);
+        return ManaHelper.drainBotaniaManaWithBoundPool(player, botaniaRequired);
     }
 }
