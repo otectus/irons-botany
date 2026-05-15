@@ -11,5 +11,8 @@
   ],
   "output": {
     "item": "ironsbotany:botanical_focus"
+  },
+  "reagent": {
+    "tag": "botania:seed_apothecary_reagent"
   }
 }

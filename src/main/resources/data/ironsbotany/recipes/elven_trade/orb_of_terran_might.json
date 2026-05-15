@@ -4,7 +4,7 @@
     { "tag": "botania:terrasteel_ingots" },
     { "item": "ironsbotany:botanical_crystal" },
     { "item": "ironsbotany:botanical_crystal" },
-    { "item": "irons_spellbooks:upgrade_orb_legendary" }
+    { "item": "irons_spellbooks:nature_upgrade_orb" }
   ],
   "output": [
     { "item": "ironsbotany:orb_of_terran_might" }

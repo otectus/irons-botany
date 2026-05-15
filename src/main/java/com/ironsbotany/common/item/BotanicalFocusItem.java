@@ -8,6 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
@@ -33,6 +34,11 @@ public class BotanicalFocusItem extends Item implements ICurioItem {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+        // Sneak + right-click is reserved for Curios auto-equip; do nothing here
+        // so the Curios capability handler can intercept the same use() call.
+        if (player.isShiftKeyDown()) {
+            return InteractionResultHolder.pass(stack);
+        }
         if (!level.isClientSide) {
             boolean current = stack.getOrCreateTag().getBoolean("siphonMode");
             stack.getOrCreateTag().putBoolean("siphonMode", !current);
@@ -81,6 +87,8 @@ public class BotanicalFocusItem extends Item implements ICurioItem {
                 .withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("item.ironsbotany.botanical_focus.tooltip.2")
                 .withStyle(ChatFormatting.BLUE));
+        tooltip.add(Component.translatable("item.ironsbotany.botanical_focus.tooltip.3")
+                .withStyle(ChatFormatting.DARK_GRAY));
         tooltip.add(Component.literal("+50 Max Mana").withStyle(ChatFormatting.GREEN));
         tooltip.add(Component.literal("+10% Mana Regeneration").withStyle(ChatFormatting.GREEN));
 
@@ -91,8 +99,14 @@ public class BotanicalFocusItem extends Item implements ICurioItem {
         super.appendHoverText(stack, level, tooltip, flag);
     }
 
+    /**
+     * Only allow Curios to auto-equip from a right-click when the player is
+     * sneaking; otherwise the use() call falls through to toggle Siphon Mode.
+     * Dragging the item into a curio slot via the menu still works either way.
+     */
     @Override
     public boolean canEquipFromUse(SlotContext slotContext, ItemStack stack) {
-        return true;
+        LivingEntity entity = slotContext.entity();
+        return entity != null && entity.isShiftKeyDown();
     }
 }

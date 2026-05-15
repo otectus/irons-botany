@@ -3,7 +3,8 @@
     "subtitle": "ironsbotany.subtitle.mana_conversion",
     "sounds": [
       {
-        "name": "minecraft:block/beacon/power_select",
+        "name": "minecraft:block.beacon.power_select",
+        "type": "event",
         "volume": 0.5,
         "pitch": 1.2
       }
@@ -13,7 +14,8 @@
     "subtitle": "ironsbotany.subtitle.botanical_cast",
     "sounds": [
       {
-        "name": "minecraft:block/enchantment_table/use",
+        "name": "minecraft:block.enchantment_table.use",
+        "type": "event",
         "volume": 0.7,
         "pitch": 1.1
       }
@@ -23,7 +25,8 @@
     "subtitle": "ironsbotany.subtitle.flower_bloom",
     "sounds": [
       {
-        "name": "minecraft:block/grass/place",
+        "name": "minecraft:block.grass.place",
+        "type": "event",
         "volume": 0.8,
         "pitch": 1.3
       }
@@ -33,7 +36,8 @@
     "subtitle": "ironsbotany.subtitle.spark_summon",
     "sounds": [
       {
-        "name": "minecraft:entity/lightning_bolt/thunder",
+        "name": "minecraft:entity.lightning_bolt.thunder",
+        "type": "event",
         "volume": 0.3,
         "pitch": 1.8
       }

@@ -5,6 +5,77 @@ All notable changes to Iron's Botany will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2026-05-15
+
+Post-1.7.0 bug patch driven by launch-log analysis on the user's CurseForge
+instance plus two reported gameplay defects. Every issue resolved here was
+either blocking a feature shipped by 1.7.0 or visible in the log.
+
+### Critical fixes
+
+- **Patchouli book ("Chronicle of the Green Mage") now loads.** 1.7.0 left
+  `use_resource_pack` implicitly false and kept all book content under
+  `data/`, but Patchouli 1.20+ removed that mode and now requires content
+  under `assets/`. Set `use_resource_pack: true` in `book.json`; moved all
+  27 content files (5 categories + 22 entries) from
+  `data/ironsbotany/patchouli_books/botanical_grimoire/en_us/` to
+  `assets/ironsbotany/patchouli_books/botanical_grimoire/en_us/`.
+  `BotanicalGrimoireItem.use()` already called the right API; once the
+  book loads, right-clicking the Chronicle now opens the book.
+- **Spell scroll recipes (9 files) now craft.** The earlier recipes used
+  `irons_spellbooks:scroll_forge` as a recipe TYPE, but ISS 3.15.2's
+  scroll_forge is only a BLOCK with hardcoded Java logic — there has
+  never been a JSON recipe type by that name. Added a new
+  `IBSpellScrollRecipe` (custom CustomRecipe) registered as
+  `ironsbotany:ib_spell_scroll`, taking an ink + focus ingredient pair
+  and producing an `irons_spellbooks:scroll` carrying an
+  `ISpellContainer` bound to the configured IB spell at level 1.
+  Rewrote all 9 scroll recipe JSONs against the new schema.
+- **Petal Apothecary recipes (3 files) now load.** `spell_petal`,
+  `botanical_focus`, and `botanical_ring` all omitted Botania's required
+  `reagent` field, so deserialization threw "Item cannot be null".
+  Added `"reagent": { "tag": "botania:seed_apothecary_reagent" }` to
+  each.
+- **Runic Altar `botanical_grimoire` and Elven Trade `orb_of_terran_might`
+  now load.** They referenced `irons_spellbooks:wisdom_orb` and
+  `irons_spellbooks:upgrade_orb_legendary`, neither of which exists in
+  ISS 3.15.2. Swapped to `minecraft:enchanted_book` and
+  `irons_spellbooks:nature_upgrade_orb` respectively.
+- **Botanical Focus Siphon Mode is now actually toggleable.** Curios was
+  intercepting every right-click in hand to auto-equip, so `Item.use()`
+  (the siphon toggle) never fired. Overrode `canEquipFromUse()` to
+  return true only when the player is sneaking; regular right-click
+  passes through to `use()` and toggles siphon mode. Tooltip updated:
+  "Right-click in hand to toggle Siphon Mode" + new line "Sneak +
+  right-click to equip to Curios slot".
+
+### Polish
+
+- **Sounds.json now loads.** All four IB sound events
+  (`mana_conversion`, `botanical_cast`, `flower_bloom`, `spark_summon`)
+  used vanilla path-style references (e.g. `minecraft:block/beacon/power_select`)
+  that Minecraft tried to resolve as a file path. Switched to
+  `"type": "event"` references with dotted event names.
+- **Pool Attunement Charm now has a texture.** 1.7.0 shipped the model
+  JSON but no PNG. Placeholder texture copied from `botanical_focus.png`;
+  a bespoke art pass is deferred to 1.7.2.
+- **`mods.toml` Forge update-check no longer fails.** Removed the
+  `updateJSONURL` line; the old URL pointed at a GitHub releases page
+  which returns HTML, not the JSON Forge expects.
+- **Particle atlas added.** `assets/ironsbotany/atlases/particles.json`
+  registers a directory source for the existing 12 particle PNGs.
+  May or may not silence the "Missing particle sprites" warning depending
+  on atlas-build ordering; particle rendering itself was unaffected.
+
+### Not in scope (other-mod issues seen in the log)
+
+- ISS shipping `minecraft:set_written_book_pages` (a 1.21 loot function)
+  in a 1.20.1 loot table — surfaces as a parse error for
+  `irons_spellbooks:chests/citadel/citadel_tomes`.
+- ISS's `template_open_spell_book_model` missing reference.
+- The `global_config.json` "outside namespaced directory" warning fires
+  from ISS scanning, with no IB file involved (confirmed).
+
 ## [1.7.0] - 2026-05-14
 
 A full stabilization, architecture, and integration release built end-to-end

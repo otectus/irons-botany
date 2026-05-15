@@ -7,5 +7,6 @@
   "model": "ironsbotany:botanical_grimoire",
   "show_progress": true,
   "index_icon": "ironsbotany:botanical_focus",
-  "use_blocky_font": false
+  "use_blocky_font": false,
+  "use_resource_pack": true
 }

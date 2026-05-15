@@ -9,5 +9,8 @@
   ],
   "output": {
     "item": "ironsbotany:botanical_ring"
+  },
+  "reagent": {
+    "tag": "botania:seed_apothecary_reagent"
   }
 }

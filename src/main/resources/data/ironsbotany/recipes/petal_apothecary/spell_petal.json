@@ -8,5 +8,8 @@
   "output": {
     "item": "ironsbotany:spell_petal",
     "count": 4
+  },
+  "reagent": {
+    "tag": "botania:seed_apothecary_reagent"
   }
 }

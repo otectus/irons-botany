@@ -4,7 +4,7 @@
     { "item": "minecraft:book" },
     { "item": "ironsbotany:spell_petal" },
     { "item": "ironsbotany:mana_infused_essence" },
-    { "item": "irons_spellbooks:wisdom_orb" }
+    { "item": "minecraft:enchanted_book" }
   ],
   "mana": 8000,
   "output": {
