@@ -5,6 +5,16 @@ All notable changes to Iron's Botany will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.2] - 2026-05-15
+
+- **Removed duplicate "Chronicle of the Green Mage 1st Edition" book.**
+  1.7.1 left Patchouli's auto-generated `patchouli:guide_book` instance
+  alongside the IB-registered `ironsbotany:botanical_grimoire` item, so
+  the player saw two near-identical books. Added Botania-style
+  `dont_generate_book: true` + `custom_book_item: "ironsbotany:botanical_grimoire"`
+  to `book.json`, suppressing the auto-spawn and binding the
+  pre-existing IB item as the canonical book item.
+
 ## [1.7.1] - 2026-05-15
 
 Post-1.7.0 bug patch driven by launch-log analysis on the user's CurseForge

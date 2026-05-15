@@ -8,5 +8,7 @@
   "show_progress": true,
   "index_icon": "ironsbotany:botanical_focus",
   "use_blocky_font": false,
-  "use_resource_pack": true
+  "use_resource_pack": true,
+  "dont_generate_book": true,
+  "custom_book_item": "ironsbotany:botanical_grimoire"
 }
