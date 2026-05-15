@@ -19,7 +19,7 @@ Five configurable modes control how Botania and ISS mana interact:
 | **DISABLED** | No mana integration at all |
 
 Key items:
-- **Botanical Focus** — Curio that enables passive Botania-to-ISS mana conversion
+- **Botanical Focus** — Curio that enables passive Botania-to-ISS mana conversion. Right-click in hand to toggle Siphon Mode; sneak + right-click in hand to equip to a Curios slot (or drag in the inventory UI).
 - **Spell Reservoir** — Block that stores and distributes ISS mana to nearby players. Right-click with mana items to deposit. Comparator output.
 - **Mana Conduit** — Block that converts Botania mana pool energy into ISS mana for nearby players. Feeds adjacent Reservoirs. Comparator output.
 
@@ -69,7 +69,7 @@ All stages are individually toggleable. Use `bareBonesMode` to disable everythin
 5. **Corporea Reagent Recall** *(default OFF in 1.7.0)* — Ritual-grade spells (Gaia's Wrath, Mana Rebirth) auto-request reagents from Corporea networks. Scope tightened in 1.7.0.
 6. **Alfheim Integration** *(default ON)* — Spells gain power in the Alfheim dimension; scrolls gain dual-school properties when crafted with `DUAL_SCHOOL_UNLOCKED`; spellbooks gain attunement levels.
 
-### 1.7.0 Phase 4 Additions
+### 1.7.0+ Additions
 
 - **Pool Attunement Charm** *(default ON, requires Gaia Guardian unlock)* — Curios charm that binds a single Botania mana pool as a supplementary Botania mana source for Nature-school spells. Range and bandwidth configurable.
 - **Runic Catalysis** *(default ON)* — Tag-driven catalyst definitions loaded from `data/ironsbotany/catalysts/`. Datapack authors can add new catalysts without Java.
@@ -79,6 +79,8 @@ All stages are individually toggleable. Use `bareBonesMode` to disable everythin
   - Alfheim Portal → dual-school scroll crafting unlock
   - Gaia Guardian → Spell Overcharge (+5% Nature damage) + Pool Attunement binding
 
+**1.7.1 / 1.7.2 patches** — Recipe correctness pass: the Botania-native Petal Apothecary, Runic Altar, Mana Infusion and Elven Trade paths shipped in 1.7.0 now actually load (missing `reagent` fields restored, invalid ISS item references corrected). Spell scrolls craft via the new `IBSpellScrollRecipe` (vanilla crafting + `irons_spellbooks:common_ink` + `ironsbotany:spell_petal` → bound ISS scroll) instead of the never-existing `irons_spellbooks:scroll_forge` recipe type. The Patchouli "Chronicle of the Green Mage" book now loads (content migrated from `data/` to `assets/` per the 1.20 upgrade guide) and is no longer duplicated by Patchouli's auto-spawn (`dont_generate_book: true`). Botanical Focus Siphon Mode is reachable again — Curios only auto-equips on sneak + right-click.
+
 ## Localization
 
 Fully translated into 22 languages: Afrikaans, Arabic, Bengali, German, British English, Argentine Spanish, Spanish, Mexican Spanish, French, Hindi, Italian, Japanese, Korean, Dutch, Brazilian Portuguese, Russian, Turkish, Ukrainian, Vietnamese, Simplified Chinese, Traditional Chinese (HK), Traditional Chinese (TW).
@@ -86,14 +88,15 @@ Fully translated into 22 languages: Afrikaans, Arabic, Bengali, German, British 
 ## Dependencies
 
 **Required:**
-- Minecraft Forge 1.20.1 (47.3.0+)
-- Botania 1.20.1-441+
-- Iron's Spells 'n Spellbooks 1.20.1-3.0.0+
-- Curios API 5.0.0+
+- Minecraft Forge 1.20.1 (47.4.16+)
+- Botania 1.20.1-450+
+- Iron's Spells 'n Spellbooks 1.20.1-3.15.2+
+- Curios API 5.14.1+
 
 **Optional:**
 - Patchouli (in-game guidebook: *Chronicle of the Green Mage*)
 - JEI (recipe viewing)
+- Ars 'n' Spells 1.8.0+ (soft compat — see [COMPAT-ARS-N-SPELLS.md](COMPAT-ARS-N-SPELLS.md))
 
 ## Installation
 
@@ -134,25 +137,28 @@ The built JAR will be in `build/libs/`.
 ```
 src/main/java/com/ironsbotany/
 ├── IronsBotany.java          # Mod entry point
-├── client/                    # Rendering, particles, HUD
+├── client/                    # Rendering, particles, HUD, NearbyIBBlockCache
+├── data/                      # Datagen entrypoint + GLM provider (1.7.0)
 └── common/
     ├── alfheim/               # Dimension integration
     ├── automation/            # Spell-driven Botania automation
     ├── block/                 # Spell Reservoir, Mana Conduit
     ├── boss/                  # Gaia Guardian spell trials
-    ├── casting/               # Casting channel system
-    ├── config/                # 70+ config options
-    ├── corporea/              # Corporea logistics
+    ├── casting/               # Casting channel system + registration (1.7.0)
+    ├── compat/                # Ars 'n' Spells reflective shim (1.4.1)
+    ├── config/                # 80+ config options + ProgressionConfig
+    ├── corporea/              # Corporea logistics (ritual-grade only, 1.7.0)
     ├── entity/                # Projectiles and summons
-    ├── event/                 # Armor set bonus
+    ├── event/                 # Armor set bonus, Elven Bloom handler (1.7.0)
     ├── flower/                # Flower aura system
-    ├── item/                  # Weapons, armor, curios, orbs
+    ├── item/                  # Weapons, armor, curios, orbs, Pool Attunement Charm (1.7.0)
+    ├── loot/                  # Global Loot Modifier codecs (1.7.0)
     ├── network/               # Client-server sync
-    ├── progression/           # Advancement tracking
-    ├── recipe/                # Rune Scroll Fusion
+    ├── progression/           # UnifiedAdvancementSystem + ProgressionGates
+    ├── recipe/                # Rune Scroll Fusion + IBSpellScrollRecipe (1.7.1)
     ├── registry/              # Deferred registers
-    ├── spell/                 # 9 spells + catalyst system
-    └── util/                  # ManaHelper, BotaniaIntegration, DataKeys
+    ├── spell/                 # 9 spells, catalyst system, BotanicalManaPayment (1.7.0)
+    └── util/                  # ManaHelper, BotaniaIntegration, DataKeys, IBRegistryHealthCheck, NearbyManaPoolCache
 ```
 
 ## Credits
