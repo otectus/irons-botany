@@ -110,7 +110,7 @@ tasks.named('processResources', ProcessResources).configure {
             loader_version_range: '[47,)',
             mod_id: 'ironsbotany',
             mod_name: "Iron's Botany",
-            mod_license: 'MIT',
+            mod_license: 'GPL-3.0-or-later',
             mod_version: version,
             mod_authors: 'IronsBotany Team',
             mod_description: 'A compatibility mod bridging Botania and Iron\'s Spells \'n Spellbooks'

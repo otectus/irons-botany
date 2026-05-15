@@ -36,4 +36,4 @@
 - Registration: DeferredRegister on MOD bus
 - Dependencies via local JARs in `libs/` folder (compileOnly, not deobfed)
 - Bridges Botania and Iron's Spellbooks systems
-- License: MIT
+- License: GPL-3.0-or-later
