@@ -1,0 +1,14 @@
+{
+  "type": "botania:runic_altar",
+  "ingredients": [
+    { "tag": "botania:manasteel_ingots" },
+    { "item": "ironsbotany:mana_infused_essence" },
+    { "item": "ironsbotany:mana_infused_essence" },
+    { "item": "minecraft:obsidian" },
+    { "item": "irons_spellbooks:arcane_essence" }
+  ],
+  "mana": 8000,
+  "output": {
+    "item": "ironsbotany:spell_reservoir"
+  }
+}

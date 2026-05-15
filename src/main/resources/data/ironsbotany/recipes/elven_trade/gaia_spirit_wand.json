@@ -1,0 +1,13 @@
+{
+  "type": "botania:elven_trade",
+  "ingredients": [
+    { "item": "ironsbotany:dreamwood_scepter" },
+    { "tag": "botania:gaia_ingots" },
+    { "tag": "botania:gaia_ingots" },
+    { "tag": "botania:gaia_ingots" },
+    { "item": "ironsbotany:botanical_crystal" }
+  ],
+  "output": [
+    { "item": "ironsbotany:gaia_spirit_wand" }
+  ]
+}

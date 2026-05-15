@@ -1,0 +1,14 @@
+{
+  "type": "botania:runic_altar",
+  "ingredients": [
+    { "tag": "botania:livingwood" },
+    { "tag": "botania:livingwood" },
+    { "tag": "botania:livingwood" },
+    { "item": "ironsbotany:mana_infused_essence" },
+    { "item": "ironsbotany:botanical_crystal" }
+  ],
+  "mana": 15000,
+  "output": {
+    "item": "ironsbotany:livingwood_staff"
+  }
+}

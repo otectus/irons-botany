@@ -1,0 +1,13 @@
+{
+  "type": "botania:runic_altar",
+  "ingredients": [
+    { "tag": "botania:mana_diamonds" },
+    { "tag": "botania:gaia_ingots" },
+    { "item": "ironsbotany:mana_infused_essence" },
+    { "item": "ironsbotany:mana_infused_essence" }
+  ],
+  "mana": 12000,
+  "output": {
+    "item": "ironsbotany:botanical_crystal"
+  }
+}

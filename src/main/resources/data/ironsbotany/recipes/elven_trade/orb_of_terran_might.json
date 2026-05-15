@@ -1,0 +1,12 @@
+{
+  "type": "botania:elven_trade",
+  "ingredients": [
+    { "tag": "botania:terrasteel_ingots" },
+    { "item": "ironsbotany:botanical_crystal" },
+    { "item": "ironsbotany:botanical_crystal" },
+    { "item": "irons_spellbooks:upgrade_orb_legendary" }
+  ],
+  "output": [
+    { "item": "ironsbotany:orb_of_terran_might" }
+  ]
+}

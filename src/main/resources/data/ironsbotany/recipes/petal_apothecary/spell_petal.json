@@ -1,0 +1,12 @@
+{
+  "type": "botania:petal_apothecary",
+  "ingredients": [
+    { "tag": "botania:petals" },
+    { "tag": "botania:petals" },
+    { "item": "irons_spellbooks:arcane_essence" }
+  ],
+  "output": {
+    "item": "ironsbotany:spell_petal",
+    "count": 4
+  }
+}

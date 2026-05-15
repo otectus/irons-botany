@@ -1,0 +1,13 @@
+{
+  "type": "botania:petal_apothecary",
+  "ingredients": [
+    { "tag": "botania:petals/green" },
+    { "tag": "botania:petals/green" },
+    { "tag": "botania:petals/yellow" },
+    { "item": "ironsbotany:spell_petal" },
+    { "tag": "botania:manasteel_ingots" }
+  ],
+  "output": {
+    "item": "ironsbotany:botanical_ring"
+  }
+}

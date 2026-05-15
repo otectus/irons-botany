@@ -1,0 +1,13 @@
+{
+  "type": "botania:runic_altar",
+  "ingredients": [
+    { "tag": "botania:manasteel_ingots" },
+    { "tag": "botania:manasteel_ingots" },
+    { "item": "ironsbotany:mana_infused_essence" },
+    { "item": "minecraft:redstone_block" }
+  ],
+  "mana": 10000,
+  "output": {
+    "item": "ironsbotany:mana_conduit"
+  }
+}

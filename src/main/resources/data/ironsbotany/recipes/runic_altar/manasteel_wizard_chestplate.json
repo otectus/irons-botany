@@ -1,0 +1,18 @@
+{
+  "type": "botania:runic_altar",
+  "ingredients": [
+    { "tag": "botania:manasteel_ingots" },
+    { "tag": "botania:manasteel_ingots" },
+    { "tag": "botania:manasteel_ingots" },
+    { "tag": "botania:manasteel_ingots" },
+    { "tag": "botania:manasteel_ingots" },
+    { "tag": "botania:manasteel_ingots" },
+    { "tag": "botania:manasteel_ingots" },
+    { "tag": "botania:manasteel_ingots" },
+    { "item": "ironsbotany:mana_infused_essence" }
+  ],
+  "mana": 16000,
+  "output": {
+    "item": "ironsbotany:manasteel_wizard_chestplate"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "type": "botania:mana_infusion",
+  "input": { "item": "irons_spellbooks:arcane_essence" },
+  "mana": 4000,
+  "output": { "item": "ironsbotany:mana_infused_essence" }
+}

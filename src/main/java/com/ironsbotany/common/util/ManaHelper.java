@@ -133,12 +133,10 @@ public class ManaHelper {
 
         Level level = player.level();
         int radius = CommonConfig.MANA_POOL_SEARCH_RADIUS.get();
-        BlockPos origin = player.blockPosition();
         int total = 0;
 
-        for (BlockPos pos : BlockPos.betweenClosed(
-                origin.offset(-radius, -radius / 2, -radius),
-                origin.offset(radius, radius / 2, radius))) {
+        // Cached cube scan — refreshed at most every 2s or 4-block move.
+        for (BlockPos pos : NearbyManaPoolCache.get(player, radius)) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof ManaPool pool) {
                 int available = pool.getCurrentMana();

@@ -5,7 +5,6 @@ import com.ironsbotany.common.alfheim.AlfheimSpellBoost;
 import com.ironsbotany.common.alfheim.SpellbookAttunement;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.config.ConfigHelper;
-import com.ironsbotany.common.config.ManaUnificationMode;
 import com.ironsbotany.common.corporea.SpellCircleReagentSystem;
 import com.ironsbotany.common.network.PacketHandler;
 import com.ironsbotany.common.network.SpellCastSyncPacket;
@@ -18,7 +17,6 @@ import com.ironsbotany.common.spell.catalyst.CatalystEffect;
 import com.ironsbotany.common.spell.catalyst.SpellCatalystRegistry;
 import com.ironsbotany.common.spell.catalyst.SpellContext;
 import com.ironsbotany.common.util.DataKeys;
-import com.ironsbotany.common.util.ManaHelper;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
 import io.redspace.ironsspellbooks.api.spells.*;
 import net.minecraft.core.BlockPos;
@@ -140,41 +138,9 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
                 return;
             }
 
-            // Handle mana costs based on unification mode
-            ManaUnificationMode manaMode = CommonConfig.MANA_UNIFICATION_MODE.get();
-
-            if (manaMode == ManaUnificationMode.DISABLED) {
-                // No mana integration - spell proceeds normally with ISS mana only
-            } else if (manaMode == ManaUnificationMode.BOTANIA_PRIMARY) {
-                // ISS spells consume Botania mana directly
-                int botaniaRequired = context.getModifiedManaCost(getBotaniaManaCost(spellLevel));
-                if (!ManaHelper.hasBotaniaMana(player, botaniaRequired)) {
-                    player.displayClientMessage(
-                            Component.translatable("ironsbotany.spell.insufficient_botania_mana",
-                                    botaniaRequired),
-                            true);
-                    return;
-                }
-                if (!ManaHelper.drainBotaniaMana(player, botaniaRequired)) {
-                    return;
-                }
-            } else if (manaMode == ManaUnificationMode.ISS_PRIMARY) {
-                // Botania mana is converted to ISS mana automatically
-                // No additional cost here - conversion happens passively
-            } else if (manaMode == ManaUnificationMode.SEPARATE ||
-                       (manaMode == ManaUnificationMode.HYBRID && CommonConfig.ENABLE_DUAL_COST_SPELLS.get())) {
-                // Dual-cost: require both Botania and ISS mana
-                int botaniaRequired = context.getModifiedManaCost(getBotaniaManaCost(spellLevel));
-                if (!ManaHelper.hasBotaniaMana(player, botaniaRequired)) {
-                    player.displayClientMessage(
-                            Component.translatable("ironsbotany.spell.insufficient_botania_mana",
-                                    botaniaRequired),
-                            true);
-                    return;
-                }
-                if (!ManaHelper.drainBotaniaMana(player, botaniaRequired)) {
-                    return;
-                }
+            // Single authoritative Botania mana payment for all unification modes.
+            if (!BotanicalManaPayment.pay(player, context, this, spellLevel)) {
+                return;
             }
 
             // Show catalyst activation effects

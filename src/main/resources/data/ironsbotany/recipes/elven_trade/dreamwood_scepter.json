@@ -1,0 +1,12 @@
+{
+  "type": "botania:elven_trade",
+  "ingredients": [
+    { "item": "ironsbotany:livingwood_staff" },
+    { "tag": "botania:dreamwood" },
+    { "tag": "botania:dreamwood" },
+    { "item": "ironsbotany:botanical_crystal" }
+  ],
+  "output": [
+    { "item": "ironsbotany:dreamwood_scepter" }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "type": "botania:runic_altar",
+  "ingredients": [
+    { "item": "minecraft:book" },
+    { "item": "ironsbotany:spell_petal" },
+    { "item": "ironsbotany:mana_infused_essence" },
+    { "item": "irons_spellbooks:wisdom_orb" }
+  ],
+  "mana": 8000,
+  "output": {
+    "item": "ironsbotany:botanical_grimoire"
+  }
+}

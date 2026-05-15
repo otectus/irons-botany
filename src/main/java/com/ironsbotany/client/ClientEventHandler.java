@@ -1,15 +1,10 @@
 package com.ironsbotany.client;
 
 import com.ironsbotany.IronsBotany;
-import com.ironsbotany.common.block.entity.ManaConduitBlockEntity;
-import com.ironsbotany.common.block.entity.SpellReservoirBlockEntity;
 import com.ironsbotany.common.config.ClientConfig;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -25,10 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ClientEventHandler {
 
     private static final int PROXIMITY_RADIUS = 6;
-    private static final int PROXIMITY_RESCAN_TICKS = 20;
-
-    private static long lastProximityScanTick = Long.MIN_VALUE;
-    private static boolean nearActiveIBBlock = false;
 
     @SubscribeEvent
     public static void onRenderGuiOverlay(RenderGuiOverlayEvent.Post event) {
@@ -75,9 +66,10 @@ public class ClientEventHandler {
 
         float fillRatio = (float) totalMana.get() / totalMax.get();
 
-        // Proximity pulse — refresh at low frequency, shown every frame.
-        updateProximityFlag(player);
-        if (nearActiveIBBlock) {
+        // Proximity pulse — cached cube scan, refreshed at most every 20 ticks
+        // or whenever the player moves > 4 blocks from the last scan origin.
+        boolean nearActive = NearbyIBBlockCache.hasNearbyActive(player, PROXIMITY_RADIUS);
+        if (nearActive) {
             float t = (mc.level == null ? 0 : mc.level.getGameTime()) + event.getPartialTick();
             float pulse = 0.5F + 0.5F * (float) Math.sin(t * 0.18);
             int borderAlpha = (int) (80 + 120 * pulse);
@@ -97,30 +89,5 @@ public class ClientEventHandler {
         // Text label
         String manaText = totalMana.get() + " / " + totalMax.get();
         event.getGuiGraphics().drawString(mc.font, manaText, x, y - 10, 0x00FFFF, true);
-    }
-
-    private static void updateProximityFlag(Player player) {
-        Level level = player.level();
-        if (level == null) return;
-        long now = level.getGameTime();
-        if (now - lastProximityScanTick < PROXIMITY_RESCAN_TICKS) return;
-        lastProximityScanTick = now;
-
-        BlockPos origin = player.blockPosition();
-        BlockPos min = origin.offset(-PROXIMITY_RADIUS, -PROXIMITY_RADIUS, -PROXIMITY_RADIUS);
-        BlockPos max = origin.offset(PROXIMITY_RADIUS, PROXIMITY_RADIUS, PROXIMITY_RADIUS);
-        for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be == null) continue;
-            if (be instanceof SpellReservoirBlockEntity r && r.getStoredMana() > 0) {
-                nearActiveIBBlock = true;
-                return;
-            }
-            if (be instanceof ManaConduitBlockEntity c && c.getStoredMana() > 0) {
-                nearActiveIBBlock = true;
-                return;
-            }
-        }
-        nearActiveIBBlock = false;
     }
 }
