@@ -62,12 +62,22 @@ Key items:
 
 All stages are individually toggleable. Use `bareBonesMode` to disable everything except mana conversion, or `enableDeepSynergy` as a master switch.
 
-1. **Spell Catalysts** — Botania runes and lenses in your inventory modify spell behavior. 9 catalysts: elemental runes (+damage, AoE splash, pierce, speed), Terrasteel (crit chance), Gaia Spirit (+50% damage).
-2. **Casting Channels** — Livingwood Staff, Dreamwood Focus, and Terra Rod each provide unique casting profiles (speed, regen, burst damage).
-3. **Flower Auras** — Nearby Botania flowers passively buff spellcasting. Bellethorne (thorns/retaliation), Jaded Amaranthus, Heisei Dream, Rannuncarpus (ritual automation).
-4. **Spell-Triggered Mana Events** (Experimental, disabled by default) — Casting spells sends ripples through the Botania mana network, boosting nearby spreaders, pools, and flowers.
-5. **Corporea Logistics** — High-tier spells (level 5+) auto-request reagents from Corporea networks.
-6. **Alfheim Integration** — Spells gain power in the Alfheim dimension, scrolls gain dual-school properties, spellbooks gain attunement levels.
+1. **Spell Catalysts** *(default ON)* — Botania runes and lenses in your inventory modify spell behavior. 9 hardcoded Java catalysts (elemental runes, Terrasteel, Gaia Spirit) plus tag-driven `data/ironsbotany/catalysts/` JSON catalysts (1.7.0).
+2. **Casting Channels** *(default ON)* — Livingwood Staff, Dreamwood Focus, and Terra Rod each provide unique casting profiles (speed, regen, burst damage). *Registered in 1.7.0 — previously the registry was empty at runtime.*
+3. **Flower Auras** *(default ON)* — Nearby Botania flowers passively buff spellcasting. Bellethorne, Jaded Amaranthus, Heisei Dream, Rannuncarpus.
+4. **Spell-Triggered Mana Events** *(default OFF, experimental)* — Casting spells sends ripples through the Botania mana network. Only water-fill is fully functional; other effects stubbed.
+5. **Corporea Reagent Recall** *(default OFF in 1.7.0)* — Ritual-grade spells (Gaia's Wrath, Mana Rebirth) auto-request reagents from Corporea networks. Scope tightened in 1.7.0.
+6. **Alfheim Integration** *(default ON)* — Spells gain power in the Alfheim dimension; scrolls gain dual-school properties when crafted with `DUAL_SCHOOL_UNLOCKED`; spellbooks gain attunement levels.
+
+### 1.7.0 Phase 4 Additions
+
+- **Pool Attunement Charm** *(default ON, requires Gaia Guardian unlock)* — Curios charm that binds a single Botania mana pool as a supplementary Botania mana source for Nature-school spells. Range and bandwidth configurable.
+- **Runic Catalysis** *(default ON)* — Tag-driven catalyst definitions loaded from `data/ironsbotany/catalysts/`. Datapack authors can add new catalysts without Java.
+- **Elven Bloom Scrolls** *(default OFF, experimental)* — Rune-enhanced scrolls crafted near an Alfheim Portal gain +15% damage / -10% cooldown.
+- **Unified Progression** — Three cross-mod unlocks now have real gameplay effects:
+  - Botania Terrasteel → LEGENDARY-tier catalysts unlock
+  - Alfheim Portal → dual-school scroll crafting unlock
+  - Gaia Guardian → Spell Overcharge (+5% Nature damage) + Pool Attunement binding
 
 ## Localization
 

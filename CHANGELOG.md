@@ -5,6 +5,146 @@ All notable changes to Iron's Botany will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-05-14
+
+A full stabilization, architecture, and integration release built end-to-end
+against the [1.7.0 audit](irons-botany-1.7.0.md). Five phases, each shipped
+as a discrete commit.
+
+### Phase 1 — Stabilization (P0)
+
+- **Aggregated Botania mana drain fixed** — `ManaHelper.requestManaFromAllSources`
+  was returning true only when a single stack could satisfy the full request,
+  so spells failed under split-mana setups. Replaced with a two-pass
+  aggregated transaction that sums across all mana items, accessories, and
+  (if enabled) nearby pools, then drains in the same order. Public API
+  (`hasBotaniaMana`, `drainBotaniaMana`) is unchanged.
+- **Casting channels registered** — `CastingChannelRegistry` had three
+  implementations and a lookup site in `AbstractBotanicalSpell`, but no
+  call to `registerItemChannel` anywhere. Added
+  `CastingChannelRegistration` (mirroring `CatalystRegistration`) wired
+  from common setup, binding Livingwood/Dreamwood/TerraRod profiles to
+  the corresponding IB items and Botania's Terra Truncator if present.
+- **Progression flags wired to real gameplay** — `UnifiedAdvancementSystem`
+  was writing `TIER4_UNLOCKED`, `DUAL_SCHOOL_UNLOCKED`, and
+  `OVERCHARGE_UNLOCKED` to player NBT but nothing read them. Added
+  `ProgressionGates` reader-side helpers and wired:
+  - `TIER4_UNLOCKED` → filters LEGENDARY-tier catalysts from
+    `SpellCatalystRegistry.getActiveCatalysts`.
+  - `DUAL_SCHOOL_UNLOCKED` → required by
+    `AlfheimScrollCrafting.markAlfheimScroll`; falls back to single-school
+    when locked.
+  - `OVERCHARGE_UNLOCKED` → +5% Nature spell damage at cast time, and
+    required for binding the new Pool Attunement Charm.
+- **`IBRegistryHealthCheck`** logs catalyst/aura/channel counts after
+  common setup. In dev environments, throws when any registry is empty;
+  in production it warns.
+
+### Phase 2 — Architecture Cleanup
+
+- **Datagen pipeline scaffolded** — `runData` run config in `build.gradle`
+  enabled; new `data/IBDataGenerator` subscribes to `GatherDataEvent`.
+  `runData` requires deobfuscated dependencies that the project ships as
+  obfuscated `compileOnly` jars, so the four GLM JSONs are hand-authored
+  from the same Java provider source for 1.7.0. The provider class is
+  retained for future regeneration once deobf coordinates are available.
+- **Global Loot Modifiers replace `LootTableInjector`** — Custom
+  `AddPoolModifier` codec registered via `IBLootModifiers`; six
+  modifier JSONs under `data/ironsbotany/loot_modifiers/` target the
+  four vanilla chests (village houses ×3, mineshaft, stronghold library,
+  end city). Pack authors can disable any specific injection by
+  overriding the JSON; `ENABLE_VANILLA_LOOT_INJECTION` remains the
+  runtime master toggle.
+- **NBT keys centralized** — `ArmorSetBonusHandler.LAST_SHIELD_TIME_KEY`
+  moved to `DataKeys.MANA_SHIELD_COOLDOWN`. All player-persistent NBT
+  keys now flow through `DataKeys`.
+- **Custom attribute retired** — `IBAttributes.MANA_EFFICIENCY` had zero
+  consumers. Class deleted; corresponding lang key removed from all 23
+  locale files.
+- **Cross-mod IDs moved to config** — Three Botania advancement IDs
+  hardcoded in `UnifiedAdvancementSystem` migrated to
+  `ProgressionConfig` (server config). Pack authors can retarget gates
+  when upstream renames an advancement; missing IDs warn at startup but
+  never throw.
+
+### Phase 3 — Core Integration Enhancements
+
+- **Botania-native recipe paths** — 17 new recipe JSONs across four
+  Botania recipe types replace 17 vanilla shaped/shapeless crafting JSONs:
+  - **Petal Apothecary** — `spell_petal`, `botanical_focus`,
+    `botanical_ring`.
+  - **Mana Infusion** — `mana_infused_essence`.
+  - **Runic Altar** — `botanical_crystal`, `botanical_grimoire`,
+    `mana_conduit`, `spell_reservoir`, `livingwood_staff`,
+    all four `manasteel_wizard_*` pieces.
+  - **Elven Trade** — `dreamwood_scepter`, `gaia_spirit_wand`,
+    `orb_of_terran_might`.
+  Entry-tier consumables (orb_of_flora/pool/bursting, all spell scrolls,
+  bulk variants, rune_scroll_fusion) keep their vanilla crafting paths.
+- **`NearbyManaPoolCache` + `NearbyIBBlockCache`** — Per-player cube-scan
+  caches with 40-tick TTL and 4-block movement invalidation. `ManaHelper.
+  simulatePools` and the client HUD proximity pulse both swapped from
+  per-call `BlockPos.betweenClosed` walks to cached lookups.
+- **`BotanicalManaPayment` service** — Single static entry point
+  centralises the five `ManaUnificationMode` branches that previously
+  lived inline in `AbstractBotanicalSpell.onCast`. Mana payment now
+  flows through one authoritative path.
+
+### Phase 4 — Content Expansion
+
+Audit-prescribed defaults: Runic Catalysis **ON**, Pool Attunement **ON**,
+Corporea Reagent Recall **OFF**, Elven Bloom Scrolls **OFF**.
+
+- **Runic Catalysis (tag-driven catalysts)** — New `TemplatedCatalystEffect`
+  handles modifier-only catalysts as a generic data class. `CatalystDataLoader`
+  (`SimpleJsonResourceReloadListener`) loads from
+  `data/ironsbotany/catalysts/*.json` on reload. Schema supports per-school
+  filtering, four tiers, and five modifier multipliers. Existing Java
+  catalyst classes remain for complex behaviours (mob effects, custom
+  data, conditional damage); the JSON system is additive.
+- **Pool Attunement Charm** — New curio `ironsbotany:pool_attunement_charm`.
+  Right-click on a Mana Pool binds it (requires `OVERCHARGE_UNLOCKED`).
+  Worn charms supply Botania mana to Nature-school spells only, gated by
+  `POOL_ATTUNEMENT_RANGE` (default 64 blocks) and
+  `POOL_ATTUNEMENT_BANDWIDTH` (default 50,000 mana/cast). Wired into
+  `BotanicalManaPayment` via new `ManaHelper.{has,drain}BotaniaMana`-with-bound-pool
+  entry points; the Nature-only filter is implicit because no other
+  caller reaches that path.
+- **Corporea Reagent Recall (default OFF)** — `ENABLE_CORPOREA_LOGISTICS`
+  flipped to false. Scope tightened in `SpellCircleReagentSystem`:
+  now requires `AbstractBotanicalSpell.isRitualGrade()` to return true.
+  Only `GaiaWrathSpell` and `ManaRebirthSpell` currently qualify.
+- **Elven Bloom Scrolls (default OFF)** — New `ENABLE_ELVEN_BLOOM_SCROLLS`
+  config plus `DataKeys.ELVEN_BLOOM`. `ElvenBloomScrollHandler` listens
+  to `PlayerEvent.ItemCraftedEvent`: if a rune-enhanced scroll is
+  crafted within 8 blocks of an Alfheim Portal block, the scroll's NBT
+  is flagged. `AbstractBotanicalSpell.onCast` checks main/offhand for
+  the flag and applies +15% damage and -10% cooldown — a sidegrade
+  endgame reward gated entirely behind real Botania late-game.
+
+### Phase 5 — Polish
+
+- New Patchouli entries: Pool Attunement Charm, Runic Catalysis,
+  Elven Bloom Scrolls, Datapack Overview (`advanced_systems`).
+- README and CurseForge description updated to mark each feature as
+  default-on / default-off / experimental.
+- `ENABLE_CORPOREA_LOGISTICS` default flipped (see Phase 4.3).
+
+### Known limitations
+
+- `./gradlew runData` currently fails because `libs/` ships obfuscated
+  production jars (compileOnly). The hand-authored JSONs match the Java
+  provider source bit-for-bit and are the source of truth until deobf
+  coordinates land.
+- `SpellManaNetworkIntegration` remains mostly stubbed (only water-fill
+  is functional) — audit-acknowledged, deferred to a future release.
+- ISS 3.15.2 upgrade-orb registry schema not independently verified
+  against developer docs.
+- JEI plugin not added — Rune-Scroll Fusion uses Forge's `CustomRecipe`
+  which JEI auto-handles via the default crafting category; Elven Bloom
+  Scrolls modify an existing recipe's output NBT rather than creating a
+  separate recipe type, so no dedicated category is required.
+
 ## [1.4.1] - 2026-04-17
 
 ### Ars 'n' Spells soft-integration

@@ -1,0 +1,15 @@
+{
+  "name": "Elven Bloom Scrolls",
+  "icon": "ironsbotany:spell_petal",
+  "category": "ironsbotany:deep_synergy",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Elven Bloom Scrolls$() are a Phase 4 endgame addition. When you craft a rune-enhanced scroll (via Rune-Scroll Fusion) within 8 blocks of an $(l)Alfheim Portal$(), the resulting scroll is blessed by the elven bloom and gains a permanent second-order property."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Bonus when cast:$()$(br)$(li)+15% spell damage$(br)$(li)-10% cooldown$(br2)$(l)Configuration:$()$(br)$(li)$(o)ENABLE_ELVEN_BLOOM_SCROLLS$() — off by default$(br)$(li)Requires Botania to be installed$(br)$(li)Range check: 8 blocks from any alfheim_portal block$(br2)A sidegrade aimed at packs that want a tangible endgame for Botania late-game players."
+    }
+  ]
+}

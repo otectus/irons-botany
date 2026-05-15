@@ -1,0 +1,15 @@
+{
+  "name": "Runic Catalysis",
+  "icon": "botania:rune_spring",
+  "category": "ironsbotany:deep_synergy",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Runic Catalysis$() is the 1.7.0 datapack-driven catalyst system. Pack authors and modpack curators can define new spell catalysts entirely through JSON files under $(o)data/ironsbotany/catalysts/$().$(br2)Each definition binds an item (or item tag) to a templated catalyst with tier, modifier multipliers, and per-school filters."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Schema fields:$()$(br)$(li)$(o)item$() or $(o)item_tag$() — what holds the catalyst$(br)$(li)$(o)tier$() — BASIC, ADVANCED, ELITE, LEGENDARY$(br)$(li)$(o)modifiers$() — damage, cooldown, cast_speed, mana_cost, burst$(br)$(li)$(o)applies_to_schools$() — list of school IDs (empty = all)$(br2)Catalysts shipped from JSON sit alongside the original Java catalysts (Runes of Fire/Water/Earth/Air/Mana, Lenses, Materials)."
+    }
+  ]
+}

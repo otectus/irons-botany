@@ -1,0 +1,15 @@
+{
+  "name": "Pool Attunement Charm",
+  "icon": "ironsbotany:pool_attunement_charm",
+  "category": "ironsbotany:deep_synergy",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The $(l)Pool Attunement Charm$() is a curio that binds a single Botania Mana Pool as a supplementary mana source for $(l)Nature-school$() spells.$(br2)Worn in the Charm slot, the charm allows nature spells to draw Botania mana from your bound pool when carried mana sources are exhausted."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Binding:$()$(br)$(li)Defeat the Gaia Guardian to unlock Spell Overcharge$(br)$(li)Right-click the charm on a Mana Pool to bind$(br)$(li)Binding overwrites previous binding$(br2)$(l)Limits:$()$(br)$(li)Same dimension only$(br)$(li)Range cap: 64 blocks (configurable)$(br)$(li)Bandwidth: 50,000 mana per cast (configurable)$(br)$(li)Nature-school spells only — does not power generic ISS spells."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Datapack Overview (1.7.0)",
+  "icon": "minecraft:writable_book",
+  "category": "ironsbotany:advanced_systems",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "1.7.0 moved several Iron's Botany systems behind datapack overrides so pack authors and modpack curators can retune the mod without recompiling Java.$(br2)$(l)What is data-driven:$()$(br)$(li)Vanilla loot injection (Global Loot Modifiers)$(br)$(li)Cross-mod progression IDs (server config)$(br)$(li)Spell catalysts (datapack JSON)$(br)$(li)Most progression recipes (Botania-native)"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Where to find things:$()$(br)$(li)$(o)data/ironsbotany/loot_modifiers/$() — chest injection$(br)$(li)$(o)data/ironsbotany/catalysts/$() — new catalysts$(br)$(li)$(o)data/ironsbotany/recipes/petal_apothecary/$()$(br)$(li)$(o)data/ironsbotany/recipes/runic_altar/$()$(br)$(li)$(o)data/ironsbotany/recipes/mana_infusion/$()$(br)$(li)$(o)data/ironsbotany/recipes/elven_trade/$()$(br)$(li)$(o)curios/tags/items/$() — Curios slot bindings"
+    }
+  ]
+}
