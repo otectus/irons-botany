@@ -85,7 +85,10 @@ public class DaybloomAmuletItem extends Item implements ICurioItem {
         if (instance == null) return;
         AttributeModifier existing = instance.getModifier(uuid);
         if (shouldBeActive && existing == null) {
-            instance.addPermanentModifier(new AttributeModifier(uuid, name, amount,
+            // Transient (not permanent): must NOT be serialized into the entity's
+            // attribute save data. A permanent modifier would bake the day-only buff
+            // permanently if the removal path (unequip/tick reconcile) is ever skipped.
+            instance.addTransientModifier(new AttributeModifier(uuid, name, amount,
                     AttributeModifier.Operation.MULTIPLY_BASE));
         } else if (!shouldBeActive && existing != null) {
             instance.removeModifier(uuid);

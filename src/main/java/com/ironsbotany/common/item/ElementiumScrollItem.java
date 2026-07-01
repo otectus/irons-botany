@@ -15,9 +15,10 @@ import net.minecraft.world.item.Rarity;
  * <p>Mechanics:
  * <ul>
  *   <li>{@link com.ironsbotany.common.bridge.ManaBridgeManager}
- *       recognizes Elementium scrolls in the player's hand and tries
- *       to charge {@code spell.getManaCost(level) × elementiumScrollMultiplier}
- *       Botania mana before the ISS pipeline debits the scroll.</li>
+ *       recognizes Elementium scrolls in the player's hand and tries to
+ *       charge the {@code elementiumScrollManaCost} config value (a flat
+ *       Botania floor, since scroll spells usually report 0 ISS mana cost)
+ *       before the ISS pipeline consumes the scroll.</li>
  *   <li>{@link #removeScrollAfterCast} checks the
  *       {@link CostRoutedTag} — if Botania paid for this tick, the
  *       scroll stays in inventory; otherwise the parent's vanilla

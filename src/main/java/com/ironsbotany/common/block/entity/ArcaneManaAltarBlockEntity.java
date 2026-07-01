@@ -76,9 +76,11 @@ public class ArcaneManaAltarBlockEntity extends BlockEntity implements ManaPool,
     public void load(CompoundTag tag) {
         super.load(tag);
         storedMana = tag.getInt(NBT_MANA);
-        if (tag.contains(NBT_COLOR)) {
-            color = Optional.of(net.minecraft.world.item.DyeColor.byId(tag.getInt(NBT_COLOR)));
-        }
+        // Reset explicitly when the tag is absent so a reused instance can't keep a
+        // stale color from a prior load.
+        color = tag.contains(NBT_COLOR)
+                ? Optional.of(net.minecraft.world.item.DyeColor.byId(tag.getInt(NBT_COLOR)))
+                : Optional.empty();
     }
 
     @Override
@@ -153,7 +155,12 @@ public class ArcaneManaAltarBlockEntity extends BlockEntity implements ManaPool,
 
     @Override
     public int getMaxMana() {
-        return DEFAULT_MAX_MANA;
+        // Configurable cap (falls back to DEFAULT_MAX_MANA before the config is loaded).
+        try {
+            return com.ironsbotany.common.config.CommonConfig.ARCANE_ALTAR_MAX_MANA.get();
+        } catch (IllegalStateException notLoadedYet) {
+            return DEFAULT_MAX_MANA;
+        }
     }
 
     @Override
@@ -171,7 +178,7 @@ public class ArcaneManaAltarBlockEntity extends BlockEntity implements ManaPool,
 
     @Override
     public boolean canAttachSpark(ItemStack stack) {
-        return attachedSpark == null;
+        return getAttachedSpark() == null;
     }
 
     @Override
@@ -186,6 +193,16 @@ public class ArcaneManaAltarBlockEntity extends BlockEntity implements ManaPool,
 
     @Override
     public ManaSpark getAttachedSpark() {
+        // The field is never explicitly cleared when a spark is removed/broken, so
+        // validate it lazily: drop the reference once its entity is gone. Otherwise
+        // a stale spark would block all future attachments and hand out a removed
+        // entity to Botania's spark-transfer routing.
+        if (attachedSpark != null) {
+            net.minecraft.world.entity.Entity sparkEntity = attachedSpark.entity();
+            if (sparkEntity == null || sparkEntity.isRemoved()) {
+                attachedSpark = null;
+            }
+        }
         return attachedSpark;
     }
 

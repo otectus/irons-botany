@@ -17,7 +17,10 @@ public class PacketHandler {
     private static int packetId = 0;
 
     public static void register() {
-        CHANNEL.messageBuilder(SpellCastSyncPacket.class, packetId++)
+        // Explicit direction (server → client only): hardens against a spoofed
+        // client → server packet, and the handler no-ops off-client anyway.
+        CHANNEL.messageBuilder(SpellCastSyncPacket.class, packetId++,
+                        net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(SpellCastSyncPacket::encode)
                 .decoder(SpellCastSyncPacket::new)
                 .consumerMainThread(SpellCastSyncPacket::handle)

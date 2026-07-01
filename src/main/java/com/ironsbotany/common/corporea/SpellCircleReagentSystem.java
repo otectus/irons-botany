@@ -66,10 +66,16 @@ public class SpellCircleReagentSystem {
      */
     private static List<ItemStack> getCircleReagents(AbstractSpell spell, int spellLevel) {
         String spellId = spell.getSpellId();
+        // Key by spell AND level: reagents scale with level (terrasteel at level >= 8, rune
+        // count from spellLevel/2), so a level-only key would lock in the first-cast level's
+        // reagents for every later cast at any level.
+        String cacheKey = spellId + "@" + spellLevel;
 
-        // Check cache
-        if (SPELL_REAGENTS.containsKey(spellId)) {
-            return SPELL_REAGENTS.get(spellId);
+        // Cache holds prototypes; hand out copies so a caller that mutates a returned stack
+        // (e.g. getRuneStack sets count) can't corrupt the shared cache across players/casts.
+        List<ItemStack> cached = SPELL_REAGENTS.get(cacheKey);
+        if (cached != null) {
+            return copyReagents(cached);
         }
 
         List<ItemStack> reagents = new ArrayList<>();
@@ -96,8 +102,17 @@ public class SpellCircleReagentSystem {
             }
         }
 
-        SPELL_REAGENTS.put(spellId, reagents);
-        return reagents;
+        SPELL_REAGENTS.put(cacheKey, reagents);
+        return copyReagents(reagents);
+    }
+
+    /** Deep-copy a reagent list so callers can't mutate the cached prototypes. */
+    private static List<ItemStack> copyReagents(List<ItemStack> source) {
+        List<ItemStack> out = new ArrayList<>(source.size());
+        for (ItemStack stack : source) {
+            out.add(stack.copy());
+        }
+        return out;
     }
 
     /**
@@ -203,7 +218,9 @@ public class SpellCircleReagentSystem {
             registryName = "botania:rune_water";
         } else if (school == SchoolRegistry.LIGHTNING.get()) {
             registryName = "botania:rune_air";
-        } else if (school == SchoolRegistry.NATURE.get()) {
+        } else if (school == com.ironsbotany.common.registry.IBSchools.BOTANY.get()
+                || school == SchoolRegistry.NATURE.get()) {
+            // Botanical spells report the custom Botany school; map them to the earth rune.
             registryName = "botania:rune_earth";
         } else {
             registryName = "botania:rune_mana";

@@ -30,7 +30,22 @@ public class AlfheimScrollCrafting {
         CompoundTag tag = scroll.getOrCreateTag();
         tag.putBoolean(DataKeys.ALFHEIM_CRAFTED, true);
         tag.putBoolean(DataKeys.DUAL_SCHOOL, true);
+        // Persist BOTH schools; the primary was previously dropped, so a "dual-school"
+        // scroll only ever recorded one of its two schools.
+        tag.putString(DataKeys.PRIMARY_SCHOOL, primarySchool.getId().toString());
         tag.putString(DataKeys.SECONDARY_SCHOOL, secondarySchool.getId().toString());
+    }
+
+    /**
+     * Get primary school for a dual-school scroll (null if unmarked/unparseable).
+     */
+    public static SchoolType getPrimarySchool(ItemStack scroll) {
+        CompoundTag tag = scroll.getTag();
+        if (tag == null || !tag.contains(DataKeys.PRIMARY_SCHOOL)) {
+            return null;
+        }
+        ResourceLocation rl = ResourceLocation.tryParse(tag.getString(DataKeys.PRIMARY_SCHOOL));
+        return rl == null ? null : SchoolRegistry.getSchool(rl);
     }
     
     /**
@@ -71,7 +86,14 @@ public class AlfheimScrollCrafting {
      */
     public static List<SchoolType> getCompatibleSchools(SchoolType primarySchool) {
         List<SchoolType> compatible = new ArrayList<>();
-        
+
+        // Botany (the mod's own school) is compatible with Holy and Nature. Without this
+        // branch, dual-school crafting produced NO compatible schools for botanical spells.
+        if (primarySchool == com.ironsbotany.common.registry.IBSchools.BOTANY.get()) {
+            compatible.add(SchoolRegistry.HOLY.get());
+            compatible.add(SchoolRegistry.NATURE.get());
+        }
+
         // Nature school is compatible with Holy
         if (primarySchool == SchoolRegistry.NATURE.get()) {
             compatible.add(SchoolRegistry.HOLY.get());

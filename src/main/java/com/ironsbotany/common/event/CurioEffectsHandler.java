@@ -26,6 +26,12 @@ import vazkii.botania.api.mana.ManaPool;
 @Mod.EventBusSubscriber(modid = IronsBotany.MODID)
 public final class CurioEffectsHandler {
 
+    // Per-cast-tick payment marker. ModifySpellLevelEvent can fire many times per cast
+    // (and in non-cast level queries), so we must grant +1 on every firing for a
+    // consistent effective level, but drain the pool only ONCE per (tick, spell).
+    private static final String KEY_PAID_TICK = "ironsbotany_gaia_blessing_paid_tick";
+    private static final String KEY_PAID_SPELL = "ironsbotany_gaia_blessing_paid_spell";
+
     private CurioEffectsHandler() {}
 
     @SubscribeEvent
@@ -40,11 +46,25 @@ public final class CurioEffectsHandler {
                 .isPresent();
         if (!wearingBlessing) return;
 
-        // Pay the cost from a nearby mana pool. If no pool can cover it, fizzle silently.
-        if (!drainNearbyPool(player, GaiasBlessingItem.MANA_PER_CAST, GaiasBlessingItem.POOL_SCAN_RADIUS)) {
+        long tick = player.level().getGameTime();
+        int spellHash = event.getSpell().getSpellId().hashCode();
+        net.minecraft.nbt.CompoundTag data = player.getPersistentData();
+
+        // Already paid for this (tick, spell): grant the level again without re-draining.
+        if (data.contains(KEY_PAID_TICK)
+                && data.getLong(KEY_PAID_TICK) == tick
+                && data.getInt(KEY_PAID_SPELL) == spellHash) {
+            event.addLevels(1);
             return;
         }
 
+        // First firing this cast-tick: pay the cost from a nearby mana pool.
+        // If no pool can cover it, fizzle silently (no level, no marker).
+        if (!drainNearbyPool(player, GaiasBlessingItem.MANA_PER_CAST, GaiasBlessingItem.POOL_SCAN_RADIUS)) {
+            return;
+        }
+        data.putLong(KEY_PAID_TICK, tick);
+        data.putInt(KEY_PAID_SPELL, spellHash);
         event.addLevels(1);
     }
 

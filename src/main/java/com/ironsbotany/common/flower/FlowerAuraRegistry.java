@@ -71,8 +71,10 @@ public class FlowerAuraRegistry {
         cached.auras = auras;
         cached.lastUpdate = currentTime;
         AURA_CACHE.put(playerUUID, cached);
-        
-        return auras;
+
+        // Return a copy, not the cached list itself — a caller mutating the result must
+        // not corrupt the cache (the cache-hit path above already copies).
+        return new ArrayList<>(auras);
     }
     
     private static List<ActiveFlowerAura> scanForAuras(Player player, int radius) {

@@ -36,10 +36,10 @@ public class SpellCastSyncPacket {
     }
 
     public static void handle(SpellCastSyncPacket packet, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() ->
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
-                () -> () -> com.ironsbotany.client.network.SpellCastClientHandler.handleClient(packet))
-        );
+        // Registered via consumerMainThread, so this already runs on the client main thread.
+        // Dispatch directly — an extra enqueueWork here would defer handling by a tick.
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                () -> () -> com.ironsbotany.client.network.SpellCastClientHandler.handleClient(packet));
         ctx.get().setPacketHandled(true);
     }
 }

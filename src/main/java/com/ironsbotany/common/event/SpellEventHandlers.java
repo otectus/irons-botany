@@ -60,18 +60,28 @@ public final class SpellEventHandlers {
     }
 
     /**
-     * Fires when ISS is about to mutate the player's mana value. The
-     * bridge already covered this cast in the pre-cast hook (the
-     * {@link CostRoutedTag} guarantees idempotency), so this handler
-     * exists primarily as a safety net for cast paths that bypass
-     * {@code SpellPreCastEvent} (e.g. some scroll implementations).
+     * Fires when ISS is about to mutate the player's mana value. When the
+     * bridge already paid this cast's cost from Botania <em>in place of</em>
+     * ISS mana (BOTANIA_PRIMARY or an Elementium-scroll cast, flagged via
+     * {@link CostRoutedTag#markBotaniaPaid}), refund the ISS debit here so the
+     * player is charged exactly once. Regen (an <em>increase</em>) and
+     * HYBRID/SEPARATE dual-cost casts (which intentionally pay both, and never
+     * set the Botania-paid marker) are left untouched.
      */
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onChangeMana(ChangeManaEvent event) {
-        // Intentionally empty for now. The pre-cast hook handles the
-        // routing decision; we leave this hook in place so future
-        // BOTANIA_PRIMARY work (where we want to *cancel* the ISS debit
-        // entirely) has a documented insertion point.
+        if (CommonConfig.MANA_UNIFICATION_MODE.get() == ManaUnificationMode.DISABLED) return;
+        Player player = event.getEntity();
+        if (player == null || player.level().isClientSide()) return;
+
+        // Only intercept debits (a decrease); regen and top-ups must pass through.
+        if (event.getNewMana() >= event.getOldMana()) return;
+
+        long tick = player.level().getGameTime();
+        if (CostRoutedTag.isBotaniaPaid(player, tick)) {
+            // Botania already covered this cast — cancel ISS's own debit.
+            event.setNewMana(event.getOldMana());
+        }
     }
 
     /**

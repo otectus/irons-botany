@@ -104,9 +104,14 @@ public class SpellReservoirBlockEntity extends BlockEntity {
      */
     public int addMana(int amount) {
         int maxCapacity = CommonConfig.SPELL_RESERVOIR_CAPACITY.get();
-        int accepted = Math.min(amount, maxCapacity - this.storedISSMana);
-        this.storedISSMana += accepted;
-        notifyChanged();
+        // Clamp to >= 0 so a config-lowered capacity (below current stored mana) can't
+        // produce a negative "accepted" — which would silently drain this reservoir and
+        // hand negative mana back to the caller (the conduit), creating free mana.
+        int accepted = Math.max(0, Math.min(amount, maxCapacity - this.storedISSMana));
+        if (accepted > 0) {
+            this.storedISSMana += accepted;
+            notifyChanged();
+        }
         return accepted;
     }
 

@@ -44,8 +44,12 @@ public class FlowerAuraRegistration {
             Block block = ForgeRegistries.BLOCKS.getValue(
                 net.minecraft.resources.ResourceLocation.tryParse(blockId)
             );
-            
-            if (block != null) {
+
+            // getValue returns the registry default (minecraft:air), NOT null, for an
+            // unknown id. Guard against AIR too — otherwise a renamed/missing block id
+            // would register an aura against AIR, which scanForAuras matches on nearly
+            // every position near every player (severe perf/gameplay corruption).
+            if (block != null && block != net.minecraft.world.level.block.Blocks.AIR) {
                 FlowerAuraRegistry.registerFlowerAura(block, aura);
                 IronsBotany.LOGGER.debug("Registered aura for: {}", blockId);
             } else {

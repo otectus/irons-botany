@@ -5,10 +5,8 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.Set;
@@ -44,8 +42,4 @@ public class IBLootTableProvider extends LootTableProvider {
                     .collect(Collectors.toList());
         }
     }
-
-    /** Suppresses an unused-import warning for ForgeRegistries / Item — they're referenced indirectly via ResourceLocation lookup. */
-    @SuppressWarnings("unused")
-    private static final Item ANCHOR = (Item) ForgeRegistries.ITEMS.getValue(net.minecraft.resources.ResourceLocation.tryParse("minecraft:air"));
 }

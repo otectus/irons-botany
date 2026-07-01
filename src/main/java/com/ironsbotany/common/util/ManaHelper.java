@@ -75,10 +75,13 @@ public class ManaHelper {
         int issRoom = (int) (maxMana - currentMana);
         if (issToAdd > issRoom) {
             issToAdd = issRoom;
-            // Only drain the exact Botania amount for the clamped ISS gain
-            int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
-            transferRate = issToAdd * ratio;
         }
+
+        // Only drain the exact Botania that maps to the ISS actually granted. Integer
+        // division in convertBotaniaToISS floors the ISS gain, so draining the raw
+        // transferRate would over-charge Botania (e.g. drain 100 for 3 ISS at ratio 30).
+        int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
+        transferRate = issToAdd * ratio;
 
         // Now drain — we know it converts cleanly and there's room
         boolean extracted = ManaItemHandler.instance().requestManaExact(stack, player, transferRate, true);

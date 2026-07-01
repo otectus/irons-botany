@@ -43,11 +43,11 @@ public class TerraRodChannel implements CastingChannel {
     
     @Override
     public boolean canCast(AbstractSpell spell, Player player) {
-        // Best for damage spells
-        return spell.getSpellId().contains("burst") ||
-               spell.getSpellId().contains("damage") ||
-               spell.getSpellId().contains("wrath") ||
-               spell.getSpellId().contains("storm");
+        // Best for botanical spells. Match on the spell type / Botany school rather than
+        // fragile substring checks against the raw namespaced id (which could false-match
+        // e.g. "othermod:sandstorm" or silently break when a spell is renamed).
+        return spell instanceof com.ironsbotany.common.spell.AbstractBotanicalSpell
+                || spell.getSchoolType() == com.ironsbotany.common.registry.IBSchools.BOTANY.get();
     }
     
     @Override
