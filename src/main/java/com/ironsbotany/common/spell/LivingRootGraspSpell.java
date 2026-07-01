@@ -31,6 +31,16 @@ public class LivingRootGraspSpell extends AbstractBotanicalSpell {
     }
 
     @Override
+    protected double perSpellPowerMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.LIVING_ROOT_GRASP_POWER.get();
+    }
+
+    @Override
+    protected double perSpellCooldownMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.LIVING_ROOT_GRASP_COOLDOWN.get();
+    }
+
+    @Override
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.COMMON)

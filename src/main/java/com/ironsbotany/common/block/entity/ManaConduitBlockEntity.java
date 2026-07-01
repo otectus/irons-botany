@@ -75,19 +75,18 @@ public class ManaConduitBlockEntity extends BlockEntity {
                 1, 0.08, 0.3, 0.08, 0.03);
         }
 
-        // Phase 1: Try to drain from adjacent Botania mana pools
-        if (blockEntity.storedISSMana < maxCapacity) {
+        // Phase 1: Try to drain from adjacent Botania mana pools.
+        // Conversion availability is mode-dependent and identical for every neighbor,
+        // so evaluate it once before scanning rather than per-direction.
+        int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
+        int issFromConversion = ManaHelper.convertBotaniaToISS(conversionRate);
+        if (blockEntity.storedISSMana < maxCapacity && issFromConversion > 0) {
             for (Direction dir : Direction.values()) {
                 BlockPos neighborPos = pos.relative(dir);
                 BlockEntity neighbor = level.getBlockEntity(neighborPos);
                 if (neighbor instanceof ManaPool pool) {
                     // Compute how much ISS mana we can accept
                     int issRoom = maxCapacity - blockEntity.storedISSMana;
-                    // Compute maximum Botania mana to drain for that ISS room
-                    int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
-                    int issFromConversion = ManaHelper.convertBotaniaToISS(conversionRate);
-                    if (issFromConversion <= 0) break; // Conversion not allowed in this mode
-
                     int issToGain = Math.min(issFromConversion, issRoom);
                     // Only drain the exact Botania amount that converts cleanly
                     int botaniaToConsume = issToGain * ratio;

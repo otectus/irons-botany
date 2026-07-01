@@ -3,7 +3,9 @@ package com.ironsbotany.common.item;
 import com.ironsbotany.common.bridge.CostRoutedTag;
 import io.redspace.ironsspellbooks.item.Scroll;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 
 /**
  * Reusable scroll variant that pulls cast cost from the Botania mana
@@ -25,15 +27,19 @@ import net.minecraft.world.item.ItemStack;
 public class ElementiumScrollItem extends Scroll {
 
     public ElementiumScrollItem() {
-        super();
+        // Iron's Spells 3.16 changed Scroll's constructor from no-arg to
+        // Scroll(Item.Properties). Mirror ISS's own base scroll registration
+        // (RARE rarity). This binds to the 3.16 API, so 1.8.1 requires ISS 3.16+.
+        super(new Item.Properties().rarity(Rarity.RARE));
     }
 
     @Override
     protected void removeScrollAfterCast(ServerPlayer player, ItemStack stack) {
         long tick = player.level().getGameTime();
-        // If our bridge already routed cost this tick, Botania paid — don't burn the scroll.
-        if (player.getPersistentData().contains(CostRoutedTag.KEY_TICK)
-                && player.getPersistentData().getLong(CostRoutedTag.KEY_TICK) == tick) {
+        // Keep the scroll only if Botania specifically paid for THIS scroll cast this
+        // tick. Using the dedicated scroll-paid marker (not the generic routed tag)
+        // prevents a same-tick non-scroll routed cast from granting a free scroll.
+        if (CostRoutedTag.isScrollPaid(player, tick)) {
             return;
         }
         super.removeScrollAfterCast(player, stack);

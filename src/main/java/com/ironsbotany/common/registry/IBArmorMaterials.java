@@ -17,11 +17,34 @@ public enum IBArmorMaterials implements ArmorMaterial {
         map.put(ArmorItem.Type.LEGGINGS, 5);
         map.put(ArmorItem.Type.CHESTPLATE, 7);
         map.put(ArmorItem.Type.HELMET, 2);
-    }), 18, SoundEvents.ARMOR_EQUIP_IRON, 1.0F, 0.0F, () -> {
-        net.minecraft.world.item.Item manasteel = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(
-                net.minecraft.resources.ResourceLocation.tryParse("botania:manasteel_ingot"));
-        return manasteel != null ? Ingredient.of(manasteel) : Ingredient.EMPTY;
-    });
+    }), 18, SoundEvents.ARMOR_EQUIP_IRON, 1.0F, 0.0F, () -> repairFrom("botania:manasteel_ingot")),
+
+    ELEMENTIUM_MAGE("elementium_mage", 22, Util.make(new EnumMap<>(ArmorItem.Type.class), (map) -> {
+        map.put(ArmorItem.Type.BOOTS, 2);
+        map.put(ArmorItem.Type.LEGGINGS, 5);
+        map.put(ArmorItem.Type.CHESTPLATE, 7);
+        map.put(ArmorItem.Type.HELMET, 3);
+    }), 20, SoundEvents.ARMOR_EQUIP_IRON, 1.5F, 0.0F, () -> repairFrom("botania:elementium_ingot")),
+
+    TERRASTEEL_MAGE("terrasteel_mage", 28, Util.make(new EnumMap<>(ArmorItem.Type.class), (map) -> {
+        map.put(ArmorItem.Type.BOOTS, 3);
+        map.put(ArmorItem.Type.LEGGINGS, 6);
+        map.put(ArmorItem.Type.CHESTPLATE, 8);
+        map.put(ArmorItem.Type.HELMET, 3);
+    }), 22, SoundEvents.ARMOR_EQUIP_IRON, 2.0F, 0.05F, () -> repairFrom("botania:terrasteel_ingot")),
+
+    GAIA_MAGE("gaia_mage", 35, Util.make(new EnumMap<>(ArmorItem.Type.class), (map) -> {
+        map.put(ArmorItem.Type.BOOTS, 3);
+        map.put(ArmorItem.Type.LEGGINGS, 6);
+        map.put(ArmorItem.Type.CHESTPLATE, 8);
+        map.put(ArmorItem.Type.HELMET, 3);
+    }), 25, SoundEvents.ARMOR_EQUIP_NETHERITE, 3.0F, 0.10F, () -> repairFrom("botania:gaia_ingot"));
+
+    private static Ingredient repairFrom(String itemId) {
+        net.minecraft.world.item.Item item = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(
+                net.minecraft.resources.ResourceLocation.tryParse(itemId));
+        return item != null ? Ingredient.of(item) : Ingredient.EMPTY;
+    }
 
     private final String name;
     private final int durabilityMultiplier;

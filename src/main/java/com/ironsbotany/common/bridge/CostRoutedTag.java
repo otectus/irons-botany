@@ -31,6 +31,13 @@ public final class CostRoutedTag {
     /** Mirror tag written by Ars 'n Spells (defensive interop). */
     public static final String ANS_KEY_TICK = "arsnspells_cost_routed_tick";
 
+    /**
+     * Tick on which Botania specifically paid for an Elementium-scroll cast.
+     * Distinct from the generic routed tag so a same-tick non-scroll cast can't
+     * trick {@code ElementiumScrollItem} into keeping the scroll for free.
+     */
+    public static final String KEY_SCROLL_PAID_TICK = "ironsbotany_scroll_paid_tick";
+
     private CostRoutedTag() {}
 
     public static void mark(Player player, long tick, int spellHash, int issCost) {
@@ -46,6 +53,17 @@ public final class CostRoutedTag {
                 && data.getLong(KEY_TICK) == tick
                 && data.getInt(KEY_SPELL_HASH) == spellHash
                 && data.getInt(KEY_COST) == issCost;
+    }
+
+    /** Stamp that Botania paid for an Elementium-scroll cast on {@code tick}. */
+    public static void markScrollPaid(Player player, long tick) {
+        player.getPersistentData().putLong(KEY_SCROLL_PAID_TICK, tick);
+    }
+
+    /** True if Botania paid for an Elementium-scroll cast on {@code tick}. */
+    public static boolean isScrollPaid(Player player, long tick) {
+        CompoundTag data = player.getPersistentData();
+        return data.contains(KEY_SCROLL_PAID_TICK) && data.getLong(KEY_SCROLL_PAID_TICK) == tick;
     }
 
     /** True if any sister bridge has already routed cost this tick. */

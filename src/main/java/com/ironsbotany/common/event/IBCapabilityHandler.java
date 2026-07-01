@@ -43,6 +43,8 @@ public final class IBCapabilityHandler {
     private static int capacityFor(Item item) {
         if (item == IBItems.LIVINGWOOD_STAFF.get()) return CommonConfig.LIVINGWOOD_STAFF_MANA_CAPACITY.get();
         if (item == IBItems.DREAMWOOD_SCEPTER.get()) return 250_000;
+        if (item == IBItems.ELEMENTIUM_WAND.get()) return 250_000;
+        if (item == IBItems.TERRASTEEL_WAND.get()) return 500_000;
         if (item == IBItems.GAIA_SPIRIT_WAND.get()) return 1_000_000;
         if (item == IBItems.MANASTEEL_STAFF.get()) return 50_000;
         if (item == IBItems.TERRASTEEL_SPELLBOOK.get()) return 200_000;

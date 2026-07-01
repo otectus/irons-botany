@@ -3,6 +3,7 @@ package com.ironsbotany.common.item;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.ironsbotany.common.config.CommonConfig;
+import com.ironsbotany.common.registry.IBAttributes;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class GaiaSpiritWandItem extends Item {
     private static final UUID SPELL_POWER_UUID = UUID.fromString("f3a4b5c6-d7e8-9012-3456-789abcdef034");
     private static final UUID COOLDOWN_UUID = UUID.fromString("a4b5c6d7-e8f9-0123-4567-89abcdef0345");
+    private static final UUID MANA_EFFICIENCY_UUID = UUID.fromString("b5c6d7e8-f9a0-1234-5678-9abcdef03456");
 
     public GaiaSpiritWandItem(Properties properties) {
         super(properties);
@@ -43,6 +45,12 @@ public class GaiaSpiritWandItem extends Item {
                     new AttributeModifier(COOLDOWN_UUID, "Gaia Cooldown Reduction",
                             CommonConfig.GAIA_WAND_COOLDOWN_REDUCTION.get(),
                             AttributeModifier.Operation.MULTIPLY_TOTAL));
+
+            // +mana efficiency (tops the wand ladder)
+            builder.put(IBAttributes.MANA_EFFICIENCY.get(),
+                    new AttributeModifier(MANA_EFFICIENCY_UUID, "Gaia Mana Efficiency",
+                            CommonConfig.GAIA_WAND_MANA_EFFICIENCY.get(),
+                            AttributeModifier.Operation.ADDITION));
 
             return builder.build();
         }

@@ -78,6 +78,9 @@ public final class ManaBridgeManager {
                     && com.ironsbotany.common.util.ManaHelper.hasBotaniaMana(player, botaniaCost)
                     && com.ironsbotany.common.util.ManaHelper.drainBotaniaMana(player, botaniaCost)) {
                 CostRoutedTag.mark(player, tick, spellHash, issCost);
+                // Dedicated marker so the scroll's removeScrollAfterCast knows Botania paid
+                // for *this* cast specifically (not just any routed cast this tick).
+                CostRoutedTag.markScrollPaid(player, tick);
                 return ManaResolutionResult.botaniaOnly(botaniaCost);
             }
             // Insufficient Botania → fall through to normal mode handling
@@ -125,7 +128,7 @@ public final class ManaBridgeManager {
      * other ISS spells we use {@code issCost * conversionRatio}.
      */
     private static ManaResolutionResult chargeBotaniaPrimary(Player player, AbstractSpell spell, int level, int issCost) {
-        int botaniaCost = computeBotaniaCost(spell, level, issCost);
+        int botaniaCost = computeBotaniaCost(player, spell, level, issCost);
         if (botaniaCost <= 0) return ManaResolutionResult.NOOP;
         if (!ManaHelper.hasBotaniaMana(player, botaniaCost)) {
             return ManaResolutionResult.INSUFFICIENT;
@@ -155,7 +158,7 @@ public final class ManaBridgeManager {
         if (!CommonConfig.ENABLE_DUAL_COST_SPELLS.get()) return ManaResolutionResult.NOOP;
         if (!(spell instanceof AbstractBotanicalSpell botanical)) return ManaResolutionResult.NOOP;
         if (!com.ironsbotany.common.spell.config.BotanySpellConfig.isDualCostEnabled(spell)) return ManaResolutionResult.NOOP;
-        int botaniaCost = botanical.getBotaniaManaCost(level);
+        int botaniaCost = com.ironsbotany.common.util.MageArmorSets.applyBotaniaDiscount(player, botanical.getBotaniaManaCost(level));
         if (botaniaCost <= 0) return ManaResolutionResult.NOOP;
         if (!ManaHelper.hasBotaniaMana(player, botaniaCost)) {
             return ManaResolutionResult.INSUFFICIENT;
@@ -172,7 +175,7 @@ public final class ManaBridgeManager {
      */
     private static ManaResolutionResult chargeSeparate(Player player, AbstractSpell spell, int level, int issCost) {
         if (!(spell instanceof AbstractBotanicalSpell botanical)) return ManaResolutionResult.NOOP;
-        int botaniaCost = botanical.getBotaniaManaCost(level);
+        int botaniaCost = com.ironsbotany.common.util.MageArmorSets.applyBotaniaDiscount(player, botanical.getBotaniaManaCost(level));
         if (botaniaCost <= 0) return ManaResolutionResult.NOOP;
         if (!ManaHelper.hasBotaniaMana(player, botaniaCost)) {
             return ManaResolutionResult.INSUFFICIENT;
@@ -183,12 +186,16 @@ public final class ManaBridgeManager {
         return ManaResolutionResult.botaniaOnly(botaniaCost);
     }
 
-    private static int computeBotaniaCost(AbstractSpell spell, int level, int issCost) {
+    private static int computeBotaniaCost(Player player, AbstractSpell spell, int level, int issCost) {
+        int base;
         if (spell instanceof AbstractBotanicalSpell botanical) {
-            return botanical.getBotaniaManaCost(level);
+            base = botanical.getBotaniaManaCost(level);
+        } else {
+            int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
+            base = Math.max(0, issCost * ratio);
         }
-        int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
-        return Math.max(0, issCost * ratio);
+        // Full Manasteel Wizard set applies a small Botania cost discount.
+        return com.ironsbotany.common.util.MageArmorSets.applyBotaniaDiscount(player, base);
     }
 
     /**

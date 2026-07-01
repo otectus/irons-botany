@@ -14,6 +14,131 @@ Caster (a functional flower that casts ISS spells autonomously — the v2.0
 signature), Corporea Scroll Rack with spell-aware request matcher, and a
 KubeJS plugin surface for downstream addons.
 
+## [1.8.1] - Iron's Spells 3.16 compatibility & asset hotfix
+
+Player-reported release blockers: a purple/black "magic" texture, and a question
+about Iron's Spells 3.16 support. Both are resolved here. **This build now targets
+Iron's Spells 'n Spellbooks 3.16+** and no longer loads on 3.15.2 (see below);
+players still on 3.15.2 should remain on Iron's Botany 1.8.0. Item/registry IDs are
+unchanged — saves are not broken.
+
+### Fixed
+
+- **Missing Arcane Mana Altar texture rendering purple/black.** The block model
+  referenced `ironsbotany:block/arcane_mana_altar`, but the texture PNG was never
+  shipped, so the altar (and its item form and break particles) rendered as the
+  missing-texture checkerboard. Added `textures/block/arcane_mana_altar.png`.
+- **Iron's Spells 3.16 compatibility.** ISS 3.16 changed the `Scroll` constructor
+  from no-arg to `Scroll(Item.Properties)`. The reusable Elementium Scroll extends
+  `Scroll`, so the old binary threw `NoSuchMethodError` on 3.16. Updated to the new
+  constructor and rebuilt against 3.16.1 (compiles and builds clean). Because the
+  two `Scroll` constructors are mutually exclusive, this is a hard version boundary:
+  1.8.1 requires **3.16+**; 3.15.2 is no longer supported.
+- **Dreamwood Scepter double-charge.** `DreamwoodConversionHandler` and
+  `ManaBridgeManager` both route cost on `SpellPreCastEvent` at `EventPriority.LOW`.
+  The Dreamwood handler drained Botania mana without consulting the shared
+  `CostRoutedTag`, so in `BOTANIA_PRIMARY`/`HYBRID` a scepter cast could drain
+  Botania mana twice. The handler now checks-and-sets the tag, so Botania is drained
+  exactly once per cast regardless of listener order.
+
+### Changed
+
+- `mods.toml` Iron's Spells dependency range: `[1.20.1-3.15.2,)` → `[1.20.1-3.16,)`.
+- Documentation reconciled to the actual 1.8.x implementation (custom **Botany**
+  spell school, v1.8 equipment ladders, mana aggregation, Mana Mirror, upgrade-orb
+  compat). `CURSEFORGE_DESCRIPTION.md` in particular was stale (listed ISS 3.0.0 /
+  Botania 441 / Curios 5.0.0 and a "Nature school").
+
+### Added
+
+- **Asset-integrity validation** (`./gradlew validateAssets`, run automatically by
+  `build`/`check`). Fails the build if any model, blockstate, or particle JSON
+  references a texture/model that doesn't exist, or if a registered spell is missing
+  its icon — the guard that would have caught the missing altar texture.
+
+> Note: `1.7.x` release notes live in `irons-botany-1.7.0.md` at the project root;
+> this changelog jumps from 1.8.x back to 1.6.0 for the older in-repo history.
+
+## [1.8.0] - Player-feedback balance & usability pass
+
+Follows player feedback on `1.7.2`: mana integration that only worked next to a
+Mana Pool, upgrade orbs rejected by Botania casters, a backwards wand progression,
+and over-strong early mage armor with no higher tiers. Existing item/registry IDs
+are preserved — saves are not broken (display names, stats, and recipes change in
+place; new items are added alongside).
+
+### Fixed — Mana source support (highest priority)
+
+- **Unified mana aggregation.** `ManaHelper` now aggregates Botania mana across
+  *all* carried and equipped sources — Mana Tablet, Mana Ring, Greater Band of
+  Mana, Mana Mirror (remote, via its bound pool), and Iron's Botany mana items —
+  instead of the old all-or-nothing per-item `requestManaExact`. A cost that no
+  single item fully covers can now be paid from several. Two-pass (availability
+  sweep, then commit) so a cast never partially drains when it can't be afforded.
+  Nearby Mana Pools remain the final fallback.
+  - **Root cause:** the previous code asked each item for the *entire* cost
+    individually; when no single carried item covered it, the only thing that
+    worked was a Mana Pool — exactly the reported symptom.
+- New config: `enableInventoryManaSources`, `enableManaMirrorSupport`
+  (`enableManaPoolAccess` / `manaPoolSearchRadius` continue to govern the
+  nearby-pool fallback).
+
+### Fixed — Upgrade-orb compatibility
+
+- Botanical Spell Blade and the Botania wands now accept Iron's Spells upgrade
+  orbs, via the `irons_spellbooks:can_be_upgraded` data tag (the ISS-sanctioned
+  integration path). Spellbooks, the Manasteel caster, and mage armor already
+  qualified through their ISS/Forge base classes.
+
+### Changed — Spell Blade mana-generation safeguards
+
+- Mana generation now requires a real, damage-dealing hit and is rate-limited by
+  an internal cooldown, so autoclickers / attack-speed mods can't farm the mana
+  economy. New config: `terrasteelBladeManaCooldown` (a.k.a.
+  spellBladeManaGenerationCooldown); `terrasteelBladeManaPerHit` unchanged.
+
+### Added — Melee mage sword ladder
+
+- New **Elementium Spell Sword** and **Gaia Spell Sword** flank the existing
+  **Terrasteel Spell Blade**, forming a melee caster ladder
+  (Elementium → Terrasteel → Gaia). Like the blade, they boost spell power /
+  max mana / cooldown while held and generate Botania mana on a qualifying hit —
+  now sharing one `ManaGeneratingWeapon` path so the damage gate and
+  anti-autoclicker cooldown apply to all three. Config-driven
+  (`elementiumSword*` / `gaiaSword*`); accept upgrade orbs via the
+  `can_be_upgraded` tag. Crafted via smithing (Elementium from
+  `botania:elementium_sword`; Gaia upgrades the Terrasteel Spell Blade with a
+  Gaia Spirit Ingot).
+
+### Added — Wand progression ladder
+
+- Coherent **Manasteel → Elementium → Terrasteel → Gaia** caster ladder. New
+  **Terrasteel Wand** fills the late-game gap; existing wands are rebalanced and
+  re-themed in place (Manasteel Staff → "Manasteel Wand", Gaia Spirit Wand →
+  "Gaia Wand"; Livingwood Staff remains a pre-tier wood starter). Wands now scale
+  spell power / cooldown / mana efficiency monotonically and are config-driven
+  (`*WandSpellPower`, etc.).
+- **Elementium Wand** — dedicated Elementium rung (a real ISS `StaffItem` caster,
+  not a stat-stick), crafted via an Alfheim Elven Trade that upgrades the Manasteel
+  Wand. Identity: **Elven Favor** — a configurable chance on cast to refund part of
+  the spell's mana cost (`elementiumWand*` config). The **Dreamwood Scepter** now
+  reverts to its own name as a separate Alfheim ISS→Botania conversion utility
+  (it had been temporarily re-lettered as the Elementium rung). 250k Botania-mana
+  buffer; accepts upgrade orbs inherently as a casting item.
+
+### Changed — Mage armor: nerf + new tiers
+
+- **Manasteel Wizard** nerfed: per-piece spell power 0.15 → 0.05, max mana
+  150 → 50. Its strong 50%-absorb Mana Shield set bonus is **moved to the Gaia
+  set**; Manasteel's set bonus is now a small Botania spell-cost discount.
+- New **Elementium / Terrasteel / Gaia Mage** armor sets (12 items), each
+  config-driven with a distinct set bonus:
+  - Elementium — chance to refund part of a spell's mana cost.
+  - Terrasteel — incoming damage reduction while ISS mana is high (battlemage).
+  - Gaia — the endgame Mana Shield (absorbs damage by spending Botania mana).
+- Smithing-ladder recipes (each tier upgrades the previous piece). New config:
+  `*ArmorSpellPower`, `*ArmorMaxMana`, and per-set bonus tunables.
+
 ## [1.6.0] - In Development
 
 Endgame content layer. Adds the four major Botany progression items, three new

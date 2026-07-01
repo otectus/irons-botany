@@ -27,7 +27,7 @@ Craft the **Chronicle of the Green Mage** (Patchouli guidebook) for a complete i
 
 ## The Botanical Spell School
 
-9 Nature-school spells with dual-cost mechanics that consume both Botania and ISS mana. Uses ISS's built-in Nature school with **Mana Efficiency** as a custom attribute.
+9 spells in Iron's Botany's own custom **Botany** spell school — registered against ISS's `SchoolRegistry` with its own focus tag (`#ironsbotany:focus/botany`), spell-power / magic-resist attributes, and damage type. Optional dual-cost mechanics can consume both Botania and ISS mana.
 
 | Spell | Max Level | Type | Description |
 |-------|-----------|------|-------------|
@@ -216,10 +216,10 @@ Iron's Botany is fully translated into 22 languages:
 ## Requirements
 
 **Required:**
-- Minecraft Forge 1.20.1 (47.3.0+)
-- Botania 1.20.1-441+
-- Iron's Spells 'n Spellbooks 1.20.1-3.0.0+
-- Curios API 5.0.0+
+- Minecraft Forge 1.20.1 (47.4.16+)
+- Botania 1.20.1-450+
+- Iron's Spells 'n Spellbooks 1.20.1-**3.16+** (tested on 3.16.1; 3.15.2 users should use Iron's Botany 1.8.0)
+- Curios API 5.14.1+
 
 **Optional:**
 - Patchouli (in-game guidebook: *Chronicle of the Green Mage*)

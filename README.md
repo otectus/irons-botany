@@ -43,6 +43,17 @@ Iron's Botany registers its own `SchoolType` against `SchoolRegistry.SCHOOL_REGI
 
 Each spell exposes per-spell `botania_mana_cost` and `dual_cost_enabled` SpellConfigParameters — datapack-overridable at `data/<namespace>/spell_configs/<spell_id>.json`.
 
+### Supported Mana Sources (v1.8)
+
+When an Iron's Botany spell or mechanic needs Botania mana, it draws — and **aggregates across** — every source you carry or have equipped, in this order:
+
+1. **Carried & equipped mana items** — Mana Tablet, Mana Ring, Greater Band of Mana, **Mana Mirror** (remote, via its bound pool), and any Iron's Botany mana item. Mana is summed across all of them, so a cost no single item covers is still paid. *(Same sources the Botania mana HUD shows.)*
+2. **Nearby Mana Pools** — fallback when carried mana is insufficient (configurable radius).
+
+This makes spellcasting viable while exploring or bossing, away from base infrastructure. Toggles: `enableInventoryManaSources`, `enableManaMirrorSupport`, `enableManaPoolAccess` (nearby-pool fallback), `manaPoolSearchRadius`.
+
+> **Known limitation:** cross-item aggregation is best-effort over Botania's `ManaItemHandler`; third-party `ManaItem`s are supported insofar as they honor `requestMana`. Mana Mirror support is whatever Botania's `ManaItem` forwarding provides.
+
 ### Mana Network Citizenship (v1.5 + v1.6)
 
 **Arcane Mana Altar** — block entity implementing `ManaPool`, `ManaReceiver`, and `SparkAttachable` simultaneously. 1,000,000 mana capacity. Drainable by nearby players during cast resolution via `ManaBridgeManager.tryDrainFromNearbyAltar`.
@@ -68,11 +79,26 @@ Iron's Botany items also attach a per-stack `MANA_ITEM` capability via `IBCapabi
 ### Equipment
 
 **Weapons:**
-- **Terrasteel Spell Blade** — +25% spell power, +200 max mana, -20% cooldown. Attacks generate Botania mana.
-- **Manasteel Staff** *(v1.6)* — extends ISS `StaffItem`. +20 Max Mana, +5% Cast Speed, +10% Botany Spell Power.
-- **Livingwood Staff** — +10% Botanical spell power, stores 500k Botania mana.
-- **Dreamwood Scepter** — +20% Botanical spell power, converts ISS mana cost to Botania.
-- **Gaia Spirit Wand** — +30% Botanical spell power, -25% cooldowns.
+
+**Melee mage sword ladder** *(v1.8)* — reward melee aggression; real combat hits generate Botania mana (rate-limited; not autoclicker-farmable). The alternative to the pure-caster wand ladder.
+
+| Tier | Sword | Spell Power | Max Mana | Cooldown | Mana/Hit |
+|------|-------|------------|----------|----------|----------|
+| Elementium | **Elementium Spell Sword** *(new)* | +18% | +150 | -12% | 3500 |
+| Terrasteel | **Terrasteel Spell Blade** | +25% | +200 | -20% | 5000 |
+| Gaia | **Gaia Spell Sword** *(new)* | +38% | +250 | -28% | 7000 |
+
+**Wand progression ladder** *(v1.8)* — pure casters; hold one and cast from your spellbook for big caster bonuses. (Registry IDs unchanged; saves are safe.)
+
+| Tier | Wand | Spell Power | Cooldown | Mana Eff. | Material |
+|------|------|------------|----------|-----------|----------|
+| Pre  | Livingwood Staff | +10% (Nature) | — | — | Livingwood |
+| 1    | Manasteel Wand *(self-casting `StaffItem`)* | +10% Botany | -5% | +0.05 | Manasteel |
+| 2    | **Elementium Wand** *(self-casting `StaffItem`)* | +18% | -10% | +0.10 | Elementium; **Elven Favor** — chance to refund part of spell mana |
+| 3    | **Terrasteel Wand** | +28% | -15% | +0.12 | Terrasteel |
+| 4    | Gaia Wand | +40% | -25% | +0.15 | Gaia |
+
+All wand stats are config-driven. The Spell Blade keeps its melee-aggression identity (mana on hit); wands are the ranged/pure-caster path. The **Dreamwood Scepter** is a separate Alfheim utility (converts ISS mana cost → Botania), no longer the Elementium rung.
 
 **Spellbooks (v1.6):**
 - **Terrasteel Spellbook** — 12 slots, Rare. +200 Max Mana, +15% Botany Spell Power, +10% Nature Spell Power.
@@ -81,9 +107,16 @@ Iron's Botany items also attach a per-stack `MANA_ITEM` capability via `IBCapabi
 **Scrolls (v1.6):**
 - **Elementium Scroll** — reusable scroll, pulls cast cost from your Botania mana network. Falls back to single-use if mana is exhausted.
 
-**Manasteel Wizard Armor (4-piece set):**
-- +15% spell power and +150 max mana per piece
-- Set Bonus: Mana Shield absorbs 50% damage using Botania mana
+**Mage Armor progression** *(v1.8)* — entry → endgame ladder, each tier config-driven with a distinct set bonus. Per-piece values shown; a full set is 4×.
+
+| Tier | Set | Spell Power / pc | Max Mana / pc | Set Bonus |
+|------|-----|------------------|---------------|-----------|
+| Entry | **Manasteel Wizard** | +5% *(was +15%)* | +50 *(was +150)* | Small Botania spell-cost discount |
+| Mid   | **Elementium Mage** *(new)* | +8% | +75 | Chance to refund part of spell mana (+0.03 mana eff./pc) |
+| Late  | **Terrasteel Mage** *(new)* | +12% | +100 | Reduced incoming damage while mana is high (-3% CDR/pc) |
+| Endgame | **Gaia Mage** *(new)* | +15% | +125 | Mana Shield — absorbs 50% damage with Botania mana (-4% CDR/pc) |
+
+Manasteel was nerfed so it's a true entry set; the strong 50%-absorb Mana Shield moved up to the Gaia set. New tiers craft via a smithing ladder (each upgrades the previous piece).
 
 **Curios:**
 - **Botanical Focus** — passive Botania-to-ISS mana conversion when held active.
@@ -95,6 +128,7 @@ Iron's Botany items also attach a per-stack `MANA_ITEM` capability via `IBCapabi
 **Upgrade Orbs** (used at the Arcane Anvil; crafted at the Runic Altar in v1.5):
 - 4 original orbs: Flora, Pool, Bursting, Terran Might
 - 8 ISS-school orbs: Fire / Frost / Lightning / Holy / Ender / Blood / Nature / Eldritch power
+- **Accepts upgrade orbs** *(v1.8)*: Botanical Spell Blade, all wands (Livingwood/Manasteel/Elementium/Terrasteel/Gaia), spellbooks, and mage armor — via the `irons_spellbooks:can_be_upgraded` tag. Both Iron's Botany and Iron's Spells orbs work.
 
 ### Petal Apothecary, Runic Altar, Terra Plate, Alfheim Portal
 
@@ -135,11 +169,11 @@ Fully translated into 22+ languages.
 **Required:**
 - Minecraft Forge 1.20.1 (47.4.16+)
 - Botania 1.20.1-450+
-- Iron's Spells 'n Spellbooks 1.20.1-3.15.2+
+- Iron's Spells 'n Spellbooks 1.20.1-**3.16+** (tested on 3.16.1; on 3.15.2 use Iron's Botany 1.8.0)
 - Curios API 5.14.1+
 
 **Optional:**
-- Patchouli (in-game guidebook: *Botanical Grimoire*)
+- Patchouli (in-game guidebook: *Chronicle of the Green Mage*)
 - Ars 'n Spells (auto-detected via reflection; cost routing yields cleanly when present)
 
 ## Installation
