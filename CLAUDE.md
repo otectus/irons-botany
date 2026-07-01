@@ -3,7 +3,7 @@
 ## Quick Reference
 - **Mod ID**: `ironsbotany`
 - **Package**: `com.ironsbotany`
-- **Version**: 1.8.1 (targets Iron's Spells 3.16+)
+- **Version**: 1.9.0 (targets Iron's Spells 3.16+)
 - **MC**: 1.20.1 | **Forge**: 47.4.16 | **Java**: 17
 - **Mappings**: Official
 
@@ -71,19 +71,26 @@ and damage type at `data/ironsbotany/damage_type/botany.json`. Botanical spells 
 ## Per-Spell SpellConfigParameter
 
 `BotanySpellConfig` registers `botania_mana_cost` (Integer) and `dual_cost_enabled` (Boolean)
-per-spell parameters via `RegisterConfigParametersEvent`. Server operators override these via
-JSON datapack at `data/<namespace>/spell_configs/<spell_id>.json`. The default sentinel of
-`-1` for cost means "fall back to the constructor-supplied ladder."
+per-spell parameters via `RegisterConfigParametersEvent`. Server operators override these through
+ISS's own spell-config datapack mechanism (its `SpellConfigManager` subconfig folder), keyed by
+the parameter ids. The default sentinel of `-1` for cost means "fall back to the
+constructor-supplied ladder." Reads are guarded against ISS's `SpellConfigManager` not yet being
+initialized (client-side pre-sync).
 
 ## Mana Network Citizenship
 
 Iron's Botany items (Livingwood Staff, Botanical Focus, Botanical Ring, etc.) attach a
 `MANA_ITEM` capability via `IBCapabilityHandler` (`AttachCapabilitiesEvent<ItemStack>`).
-Storage is per-stack NBT under the `ironsbotany_mana` key, capped per item via `capacityFor`.
+Storage is per-stack NBT under the `ironsbotany_mana` key, capped per item via `capacityFor`
+(each cap now config-driven under the "Mana Network Capacities" config group). The Livingwood
+Staff's own tooltip/bar/drain logic reads/writes that same `ironsbotany_mana` key, so the item
+and the network share one value.
 
 The **Arcane Mana Altar** (`ArcaneManaAltarBlockEntity`) implements `ManaPool`,
-`ManaReceiver`, and `SparkAttachable` simultaneously. Players in range can draw from it
-during cast resolution via `ManaBridgeManager.tryDrainFromNearbyAltar`.
+`ManaReceiver`, and `SparkAttachable` simultaneously (its cap is config-driven via
+`arcaneAltarMaxMana`). Because it is a `ManaPool`, a player casting in range draws from it
+through the normal Botania pool path (`ManaHelper.findAndDrainPool`, gated by
+`enableManaPoolAccess`) — no separate altar scan is needed.
 
 ## Conventions
 - Registration: DeferredRegister on MOD bus

@@ -14,6 +14,103 @@ Caster (a functional flower that casts ISS spells autonomously — the v2.0
 signature), Corporea Scroll Rack with spell-aware request matcher, and a
 KubeJS plugin surface for downstream addons.
 
+## [1.9.0] - Stability, correctness & the school-migration finish line
+
+A full-codebase audit pass. Two advertised features that never actually worked now do,
+the half-finished NATURE→BOTANY school migration is completed across every subsystem, and
+a batch of correctness/duplication/performance bugs are fixed. Item and registry IDs are
+unchanged — **saves are not broken**. Still targets **Iron's Spells 'n Spellbooks 3.16+**.
+
+### Fixed — behavior features that were inert
+
+- **BOTANIA_PRIMARY no longer double-charges.** The mode drained Botania mana but never
+  cancelled ISS's own debit, so casting in `BOTANIA_PRIMARY` charged the player *both*
+  pools. `ChangeManaEvent` handling now refunds the ISS debit for any cast Botania paid
+  for (BOTANIA_PRIMARY and Elementium Scroll), tracked via a per-tick "Botania-paid"
+  marker. HYBRID/SEPARATE dual-cost casts intentionally still pay both.
+- **Elementium Scroll "Botania pays, scroll retained" now triggers.** Scroll spells report
+  0 ISS mana cost, so the old `issCost × ratio` Botania price was always 0 and the scroll
+  was consumed the vanilla way every time. The scroll now draws a configurable flat cost
+  (`elementiumScrollManaCost`, default 10 000) and is retained when Botania covers it.
+- **Casting-channel mana-cost modifiers now apply.** Livingwood Staff (−10%), Dreamwood
+  Focus (+10%) and Terra Rod (+30%) advertised a mana-cost modifier that was never
+  consumed. The channel's multiplier is now folded into the Botania cost the bridge
+  computes.
+
+### Fixed — school migration (NATURE → BOTANY)
+
+Botanical spells report the custom **Botany** school, but several subsystems still compared
+against ISS's Nature school, so their mechanics were silently dead. Repointed:
+
+- **Gaia Spell Trials** Phase-2 "botanical spells hit Gaia harder" vulnerability + the
+  `botanicalSpellsUsed` counter.
+- **Corporea** spell-circle reagent mapping (botanical spells now map to the earth rune, not
+  the generic mana rune).
+- **Spell-triggered mana events** trigger typing, and the **Livingwood Staff channel**
+  eligibility check.
+- **Alfheim dual-school crafting** now yields compatible schools for a Botany primary (was
+  empty), and **persists both primary and secondary schools** to NBT (the primary was
+  previously dropped).
+- The **Botanical Focus** now powers the Botany school: `ironsbotany:botanical_focus` was
+  added to `#ironsbotany:focus/botany` and removed from ISS's `#irons_spellbooks:nature_focus`.
+
+### Fixed — correctness & exploits
+
+- **Livingwood Staff split mana store.** The staff's tooltip/bar/drain read a different NBT
+  key (`IronsBotany_BotaniaMana`) than the Botania `MANA_ITEM` capability
+  (`ironsbotany_mana`), so Spark deposits and HUD aggregation were invisible to the staff.
+  Both now share `ironsbotany_mana`.
+- **Rune Scroll Fusion duplication exploit.** The result copied the input scroll stack
+  without resetting its count, so N scrolls + 1 rune yielded N enhanced scrolls while
+  consuming one of each. Result count is now clamped to 1. The recipe serializer also no
+  longer NPEs when the optional `category` field is omitted.
+- **Piercing Botanical Burst projectiles now pierce.** The `onHit` override discarded the
+  projectile on first contact, killing the piercing path and double-spawning impact
+  particles. It now survives live piercing hits and only finalizes once.
+- **Flower auras can no longer register against `minecraft:air`.** An unknown/renamed block
+  id resolves to AIR (not null); the guard now excludes AIR, preventing an aura that would
+  match near every position around every player.
+- **Corporea reagent cache** is now keyed by spell *and level* (reagents scale with level)
+  and hands out copies, so cached prototypes are no longer mutated across players/casts.
+- **Botania→ISS conversion over-drain.** `tryConvertManaToISS` drained the full transfer
+  rate but granted only the floored ISS conversion; it now drains exactly the Botania that
+  maps to the ISS actually added.
+- **Reservoir/conduit free-mana underflow.** A config-lowered reservoir capacity could make
+  `addMana` return negative and create mana; the accepted amount is now clamped to ≥ 0.
+- **Gaia's Blessing** drained 100 000 mana on *every* `ModifySpellLevelEvent` firing (many
+  per cast) via a large block-entity cube scan; it now drains once per cast-tick.
+
+### Fixed — stability & hardening
+
+- `ManaBridgeManager.resolveCost` is wrapped defensively — a third-party Botania/ANS
+  exception can no longer abort or crash a cast.
+- **Ars 'n Spells compat** no longer permanently disables itself after an ANS mode switch:
+  the reflective `getMaxMana` method is re-resolved per concrete bridge class instead of
+  being cached across incompatible bridge implementations.
+- **Daybloom Amulet** uses a *transient* attribute modifier (was permanent), so its
+  day-only buff can never bake permanently into a player's save.
+- **Arcane Mana Altar** resolves its attached spark lazily and drops the reference once the
+  spark entity is gone (previously a removed spark blocked all future attachments).
+- `BotanySpellConfig` reads are guarded against ISS's `SpellConfigManager` being
+  uninitialized (client-side, pre-config-sync).
+- `SpellCastSyncPacket` no longer double-enqueues its handler and now declares an explicit
+  `PLAY_TO_CLIENT` direction. `SparkSwarmEntity` lifetime is a plain server field instead of
+  per-tick synched data (was spamming a metadata packet every tick and flickering on the
+  client).
+- Spell-catalyst global power multiplier now scales only each catalyst's own contribution
+  instead of compounding over the full accumulated damage multiplier.
+
+### Changed
+
+- **New config group "Mana Network Capacities":** every mana-network item cap (previously
+  hardcoded) and the Arcane Mana Altar pool cap are now configurable, plus the new
+  `elementiumScrollManaCost`.
+- Removed the dead, redundant `ManaBridgeManager.tryDrainFromNearbyAltar` cube scan (the
+  altar is a `ManaPool`, already covered by the normal pool-draw path).
+- Note on design intent: in HYBRID/SEPARATE modes a Botanical cast is cancelled when Botania
+  is insufficient even if ISS mana is available — dual-cost is mandatory by design.
+- Documentation reconciled to the 1.9.0 behavior (CLAUDE.md, README, CurseForge description).
+
 ## [1.8.1] - Iron's Spells 3.16 compatibility & asset hotfix
 
 Player-reported release blockers: a purple/black "magic" texture, and a question
