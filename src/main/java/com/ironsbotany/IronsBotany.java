@@ -1,16 +1,12 @@
 package com.ironsbotany;
 
-import com.ironsbotany.common.casting.CastingChannelRegistration;
 import com.ironsbotany.common.config.ClientConfig;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.config.ConfigHelper;
-import com.ironsbotany.common.config.ProgressionConfig;
 import com.ironsbotany.common.flower.FlowerAuraRegistration;
-import com.ironsbotany.common.loot.IBLootModifiers;
 import com.ironsbotany.common.network.PacketHandler;
 import com.ironsbotany.common.registry.*;
 import com.ironsbotany.common.spell.catalyst.CatalystRegistration;
-import com.ironsbotany.common.util.IBRegistryHealthCheck;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -33,18 +29,19 @@ public class IronsBotany {
         IBItems.register(modEventBus);
         IBBlocks.register(modEventBus);
         IBSpells.register(modEventBus);
+        IBAttributes.register(modEventBus);
+        IBSchools.register(modEventBus);
+        com.ironsbotany.common.loot.IBLootModifiers.register(modEventBus);
         IBEntities.register(modEventBus);
         IBRecipeTypes.register(modEventBus);
         IBCreativeTabs.register(modEventBus);
         IBSounds.register(modEventBus);
         IBParticles.register(modEventBus);
         IBBlockEntities.register(modEventBus);
-        IBLootModifiers.register(modEventBus);
 
         // Register configs
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CommonConfig.SPEC);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ProgressionConfig.SPEC);
 
         // Register setup
         modEventBus.addListener(this::commonSetup);
@@ -62,18 +59,12 @@ public class IronsBotany {
             
             // Register spell catalysts
             CatalystRegistration.registerCatalysts();
-
+            
             // Register flower auras
             FlowerAuraRegistration.registerFlowerAuras();
 
-            // Register casting channels (hardware vs software profiles)
-            CastingChannelRegistration.registerChannels();
-
             // Validate config combinations
             ConfigHelper.validateConfig();
-
-            // Verify deep-synergy registries are populated; throw in dev, warn in prod.
-            IBRegistryHealthCheck.runAfterSetup();
 
             LOGGER.info("Iron's Botany common setup complete!");
         });

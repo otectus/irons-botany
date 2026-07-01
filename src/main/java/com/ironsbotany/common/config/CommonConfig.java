@@ -2,6 +2,21 @@ package com.ironsbotany.common.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
+import java.util.List;
+
+/**
+ * Server config spec for Iron's Botany.
+ *
+ * <p><b>Reserved / not-yet-wired knobs (as of 1.8):</b> a handful of options belong to
+ * roadmap systems that aren't fully implemented yet, so changing them currently has no
+ * effect. They are kept to preserve the config layout across versions. These are:
+ * {@code BIDIRECTIONAL_CONVERSION}, {@code ENABLE_BOTANICAL_SCHOOL} (the school is always
+ * registered), {@code ENABLE_CROSS_LOOT}, {@code UPGRADE_ORB_EFFECTIVENESS},
+ * {@code CHANNEL_POWER_MULTIPLIER}, {@code ALLOW_AURA_STACKING}, the {@code MANA_EVENT_*}
+ * trio (only Water Fill is functional), {@code AUTO_REQUEST_REAGENTS},
+ * {@code CORPOREA_SEARCH_RADIUS}, {@code ALFHEIM_POWER_MULTIPLIER}, and
+ * {@code ENABLE_DUAL_SCHOOL_SCROLLS}. See {@code PHASE_7_PLAN.md} for the roadmap.
+ */
 public class CommonConfig {
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
     public static final ForgeConfigSpec SPEC;
@@ -13,6 +28,7 @@ public class CommonConfig {
     // Mana System
     public static final ForgeConfigSpec.EnumValue<ManaUnificationMode> MANA_UNIFICATION_MODE;
     public static final ForgeConfigSpec.IntValue MANA_CONVERSION_RATIO;
+    public static final ForgeConfigSpec.IntValue ELEMENTIUM_SCROLL_MANA_COST;
     public static final ForgeConfigSpec.BooleanValue ENABLE_DUAL_COST_SPELLS;
     public static final ForgeConfigSpec.IntValue SPELL_RESERVOIR_CAPACITY;
     public static final ForgeConfigSpec.IntValue MANA_TRANSFER_RATE;
@@ -24,9 +40,14 @@ public class CommonConfig {
     public static final ForgeConfigSpec.BooleanValue BIDIRECTIONAL_CONVERSION;
     public static final ForgeConfigSpec.IntValue REVERSE_CONVERSION_RATIO;
     public static final ForgeConfigSpec.IntValue BLOCK_ENTITY_TRANSFER_RATE;
-    // Mana Pool Access
+    // Mana Source Access
+    public static final ForgeConfigSpec.BooleanValue ENABLE_INVENTORY_MANA_SOURCES;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_MANA_MIRROR_SUPPORT;
     public static final ForgeConfigSpec.BooleanValue ENABLE_MANA_POOL_ACCESS;
     public static final ForgeConfigSpec.IntValue MANA_POOL_SEARCH_RADIUS;
+
+    // Cross-bridge priority chain (Phase 1B)
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> MANA_PRIORITY_CHAIN;
 
     // Spells
     public static final ForgeConfigSpec.DoubleValue BOTANICAL_SPELL_POWER_MULTIPLIER;
@@ -40,6 +61,19 @@ public class CommonConfig {
     public static final ForgeConfigSpec.IntValue TERRASTEEL_BLADE_MAX_MANA;
     public static final ForgeConfigSpec.DoubleValue TERRASTEEL_BLADE_MANA_COST_REDUCTION;
     public static final ForgeConfigSpec.IntValue TERRASTEEL_BLADE_MANA_PER_HIT;
+    public static final ForgeConfigSpec.IntValue TERRASTEEL_BLADE_MANA_COOLDOWN;
+
+    // Equipment - Elementium Mage Sword
+    public static final ForgeConfigSpec.DoubleValue ELEMENTIUM_SWORD_SPELL_POWER;
+    public static final ForgeConfigSpec.IntValue ELEMENTIUM_SWORD_MAX_MANA;
+    public static final ForgeConfigSpec.DoubleValue ELEMENTIUM_SWORD_COOLDOWN_REDUCTION;
+    public static final ForgeConfigSpec.IntValue ELEMENTIUM_SWORD_MANA_PER_HIT;
+
+    // Equipment - Gaia Mage Sword
+    public static final ForgeConfigSpec.DoubleValue GAIA_SWORD_SPELL_POWER;
+    public static final ForgeConfigSpec.IntValue GAIA_SWORD_MAX_MANA;
+    public static final ForgeConfigSpec.DoubleValue GAIA_SWORD_COOLDOWN_REDUCTION;
+    public static final ForgeConfigSpec.IntValue GAIA_SWORD_MANA_PER_HIT;
 
     // Equipment - Livingwood Staff
     public static final ForgeConfigSpec.DoubleValue LIVINGWOOD_STAFF_SPELL_POWER;
@@ -49,13 +83,54 @@ public class CommonConfig {
     public static final ForgeConfigSpec.DoubleValue DREAMWOOD_SCEPTER_SPELL_POWER;
     public static final ForgeConfigSpec.DoubleValue DREAMWOOD_CONVERSION_PERCENT;
 
+    // Equipment - Elementium Wand
+    public static final ForgeConfigSpec.DoubleValue ELEMENTIUM_WAND_SPELL_POWER;
+    public static final ForgeConfigSpec.DoubleValue ELEMENTIUM_WAND_COOLDOWN_REDUCTION;
+    public static final ForgeConfigSpec.DoubleValue ELEMENTIUM_WAND_MANA_EFFICIENCY;
+    public static final ForgeConfigSpec.DoubleValue ELEMENTIUM_WAND_REFUND_CHANCE;
+    public static final ForgeConfigSpec.DoubleValue ELEMENTIUM_WAND_REFUND_PERCENT;
+
+    // Equipment - Terrasteel Wand
+    public static final ForgeConfigSpec.DoubleValue TERRASTEEL_WAND_SPELL_POWER;
+    public static final ForgeConfigSpec.DoubleValue TERRASTEEL_WAND_COOLDOWN_REDUCTION;
+    public static final ForgeConfigSpec.DoubleValue TERRASTEEL_WAND_MANA_EFFICIENCY;
+
     // Equipment - Gaia Spirit Wand
     public static final ForgeConfigSpec.DoubleValue GAIA_WAND_SPELL_POWER;
     public static final ForgeConfigSpec.DoubleValue GAIA_WAND_COOLDOWN_REDUCTION;
+    public static final ForgeConfigSpec.DoubleValue GAIA_WAND_MANA_EFFICIENCY;
 
-    // Equipment - Manasteel Armor
+    // Equipment - Mage Armor (per-piece spell power + max mana, by tier)
     public static final ForgeConfigSpec.DoubleValue MANASTEEL_ARMOR_SPELL_POWER;
     public static final ForgeConfigSpec.IntValue MANASTEEL_ARMOR_MAX_MANA;
+    public static final ForgeConfigSpec.DoubleValue ELEMENTIUM_ARMOR_SPELL_POWER;
+    public static final ForgeConfigSpec.IntValue ELEMENTIUM_ARMOR_MAX_MANA;
+    public static final ForgeConfigSpec.DoubleValue ELEMENTIUM_ARMOR_MANA_EFFICIENCY;
+    public static final ForgeConfigSpec.DoubleValue TERRASTEEL_ARMOR_SPELL_POWER;
+    public static final ForgeConfigSpec.IntValue TERRASTEEL_ARMOR_MAX_MANA;
+    public static final ForgeConfigSpec.DoubleValue TERRASTEEL_ARMOR_COOLDOWN_REDUCTION;
+    public static final ForgeConfigSpec.DoubleValue GAIA_ARMOR_SPELL_POWER;
+    public static final ForgeConfigSpec.IntValue GAIA_ARMOR_MAX_MANA;
+    public static final ForgeConfigSpec.DoubleValue GAIA_ARMOR_COOLDOWN_REDUCTION;
+    // Mage Armor set bonuses
+    public static final ForgeConfigSpec.DoubleValue MANASTEEL_SET_COST_DISCOUNT;
+    public static final ForgeConfigSpec.DoubleValue ELEMENTIUM_SET_REFUND_CHANCE;
+    public static final ForgeConfigSpec.DoubleValue TERRASTEEL_SET_DAMAGE_REDUCTION;
+    public static final ForgeConfigSpec.DoubleValue TERRASTEEL_SET_MANA_THRESHOLD;
+    public static final ForgeConfigSpec.DoubleValue GAIA_SET_ABSORB_PERCENT;
+
+    // Mana Network Item Capacities (Botania MANA_ITEM cap per stack; and the Arcane Mana Altar)
+    public static final ForgeConfigSpec.IntValue DREAMWOOD_SCEPTER_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue ELEMENTIUM_WAND_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue TERRASTEEL_WAND_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue GAIA_WAND_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue MANASTEEL_STAFF_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue TERRASTEEL_SPELLBOOK_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue ARCANE_CODEX_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue MANA_RESERVOIR_RING_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue BOTANICAL_FOCUS_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue BOTANICAL_RING_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue ARCANE_ALTAR_MAX_MANA;
 
     // Balance
     public static final ForgeConfigSpec.BooleanValue ENABLE_CROSS_LOOT;
@@ -128,12 +203,6 @@ public class CommonConfig {
     public static final ForgeConfigSpec.BooleanValue ENABLE_DUAL_SCHOOL_SCROLLS;
     public static final ForgeConfigSpec.BooleanValue ENABLE_SPELLBOOK_ATTUNEMENT;
 
-    // 1.7.0 — Phase 4 Content Expansion
-    public static final ForgeConfigSpec.BooleanValue ENABLE_POOL_ATTUNEMENT;
-    public static final ForgeConfigSpec.IntValue POOL_ATTUNEMENT_RANGE;
-    public static final ForgeConfigSpec.IntValue POOL_ATTUNEMENT_BANDWIDTH;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_ELVEN_BLOOM_SCROLLS;
-
     static {
         BUILDER.push("Master Toggles");
         BUILDER.comment("=".repeat(60));
@@ -171,7 +240,15 @@ public class CommonConfig {
                 .comment("How much Botania mana equals 1 ISS mana (default: 1000)",
                          "Only used in HYBRID and ISS_PRIMARY modes")
                 .defineInRange("conversionRatio", 1000, 100, 10000);
-        
+
+        ELEMENTIUM_SCROLL_MANA_COST = BUILDER
+                .comment("Botania mana an Elementium Scroll draws to cast without consuming itself.",
+                         "Scroll spells usually report 0 ISS mana cost, so this flat floor is what",
+                         "the scroll actually pays; if Botania can't cover it the scroll is consumed",
+                         "the vanilla single-use way. Raised to conversionRatio*issCost for the rare",
+                         "scroll whose spell does carry a mana cost.")
+                .defineInRange("elementiumScrollManaCost", 10000, 0, 1000000);
+
         BIDIRECTIONAL_CONVERSION = BUILDER
                 .comment("Allow converting ISS mana back to Botania mana",
                          "Only used in HYBRID mode")
@@ -211,14 +288,45 @@ public class CommonConfig {
                 .comment("ISS mana transferred per second from functional blocks (Conduit, Reservoir) to nearby players")
                 .defineInRange("blockEntityTransferRate", 5, 1, 100);
 
+        ENABLE_INVENTORY_MANA_SOURCES = BUILDER
+                .comment("Allow spells/mechanics to draw Botania mana from carried and equipped mana items",
+                         "(Mana Tablet, Mana Ring, Greater Band of Mana, Mana Mirror, our own mana items, etc.).",
+                         "Mana is aggregated across ALL such sources, matching the Botania mana HUD.",
+                         "Disable to force pool-only behavior.")
+                .define("enableInventoryManaSources", true);
+
+        ENABLE_MANA_MIRROR_SUPPORT = BUILDER
+                .comment("Allow the Mana Mirror to act as a remote mana source for spells/mechanics.",
+                         "The Mirror forwards to its bound pool via Botania's ManaItem API.",
+                         "Requires enableInventoryManaSources. When false, the Mana Mirror is skipped.")
+                .define("enableManaMirrorSupport", true);
+
         ENABLE_MANA_POOL_ACCESS = BUILDER
                 .comment("Allow spells to draw Botania mana directly from nearby mana pools",
-                         "When enabled, spells check nearby pools as a fallback if inventory mana is insufficient")
+                         "When enabled, spells check nearby pools as a fallback if inventory mana is insufficient",
+                         "(this is the 'enableNearbyManaPoolFallback' behavior)")
                 .define("enableManaPoolAccess", true);
 
         MANA_POOL_SEARCH_RADIUS = BUILDER
-                .comment("Radius to search for Botania mana pools when drawing mana for spells")
+                .comment("Radius to search for Botania mana pools when drawing mana for spells",
+                         "(this is the 'manaSourceSearchRadius' for the nearby-pool fallback)")
                 .defineInRange("manaPoolSearchRadius", 8, 4, 16);
+
+        MANA_PRIORITY_CHAIN = BUILDER
+                .comment("Cross-bridge mana resource ordering. Sources are tried in",
+                         "list order; absent mods are skipped. Tokens: botania, ars, iss.",
+                         "(\"lp\" and \"aura\" are also accepted as forward-compat placeholders",
+                         "but are currently inactive and always skipped.)",
+                         "Default: [\"botania\", \"ars\", \"iss\"] — Botania pays first, then",
+                         "Ars 'n Spells if loaded, then ISS as the safety-net fallback.")
+                .defineList("manaPriorityChain",
+                        java.util.List.of("botania", "ars", "iss"),
+                        token -> token instanceof String s
+                                && (s.equalsIgnoreCase("botania")
+                                    || s.equalsIgnoreCase("ars")
+                                    || s.equalsIgnoreCase("iss")
+                                    || s.equalsIgnoreCase("lp")
+                                    || s.equalsIgnoreCase("aura")));
         BUILDER.pop();
 
         BUILDER.push("Spells");
@@ -262,8 +370,49 @@ public class CommonConfig {
                 .defineInRange("terrasteelBladeCostReduction", 0.2, 0.0, 0.5);
 
         TERRASTEEL_BLADE_MANA_PER_HIT = BUILDER
-                .comment("Botania mana generated per melee hit with Terrasteel Spell Blade")
+                .comment("Botania mana generated per qualifying melee hit with Terrasteel Spell Blade",
+                         "(a.k.a. spellBladeManaGeneration). Only real, damage-dealing hits qualify,",
+                         "and generation is rate-limited by spellBladeManaGenerationCooldown.")
                 .defineInRange("terrasteelBladeManaPerHit", 5000, 0, 50000);
+
+        TERRASTEEL_BLADE_MANA_COOLDOWN = BUILDER
+                .comment("Minimum ticks between Terrasteel Spell Blade mana-generation procs",
+                         "(a.k.a. spellBladeManaGenerationCooldown). Prevents autoclicker / high-attack-speed",
+                         "farming. 20 ticks = 1 second. Set to 0 to allow generation on every hit.",
+                         "This cooldown also gates the Elementium / Gaia Mage Swords.")
+                .defineInRange("terrasteelBladeManaCooldown", 10, 0, 200);
+        BUILDER.pop();
+
+        BUILDER.push("Elementium Mage Sword");
+        ELEMENTIUM_SWORD_SPELL_POWER = BUILDER
+                .comment("Spell power bonus from Elementium Mage Sword (0.18 = +18%).",
+                         "Mid melee-caster rung, below the Terrasteel Spell Blade.")
+                .defineInRange("elementiumSwordSpellPower", 0.18, 0.0, 1.0);
+        ELEMENTIUM_SWORD_MAX_MANA = BUILDER
+                .comment("Max mana bonus from Elementium Mage Sword")
+                .defineInRange("elementiumSwordMaxMana", 150, 0, 1000);
+        ELEMENTIUM_SWORD_COOLDOWN_REDUCTION = BUILDER
+                .comment("Cooldown reduction from Elementium Mage Sword (0.12 = -12%)")
+                .defineInRange("elementiumSwordCooldownReduction", 0.12, 0.0, 0.5);
+        ELEMENTIUM_SWORD_MANA_PER_HIT = BUILDER
+                .comment("Botania mana generated per qualifying melee hit with Elementium Mage Sword")
+                .defineInRange("elementiumSwordManaPerHit", 3500, 0, 50000);
+        BUILDER.pop();
+
+        BUILDER.push("Gaia Mage Sword");
+        GAIA_SWORD_SPELL_POWER = BUILDER
+                .comment("Spell power bonus from Gaia Mage Sword (0.38 = +38%).",
+                         "Endgame melee caster — tops the melee ladder, above the Terrasteel Spell Blade.")
+                .defineInRange("gaiaSwordSpellPower", 0.38, 0.0, 1.0);
+        GAIA_SWORD_MAX_MANA = BUILDER
+                .comment("Max mana bonus from Gaia Mage Sword")
+                .defineInRange("gaiaSwordMaxMana", 250, 0, 1000);
+        GAIA_SWORD_COOLDOWN_REDUCTION = BUILDER
+                .comment("Cooldown reduction from Gaia Mage Sword (0.28 = -28%)")
+                .defineInRange("gaiaSwordCooldownReduction", 0.28, 0.0, 0.5);
+        GAIA_SWORD_MANA_PER_HIT = BUILDER
+                .comment("Botania mana generated per qualifying melee hit with Gaia Mage Sword")
+                .defineInRange("gaiaSwordManaPerHit", 7000, 0, 50000);
         BUILDER.pop();
 
         BUILDER.push("Livingwood Staff");
@@ -286,24 +435,165 @@ public class CommonConfig {
                 .defineInRange("dreamwoodConversionPercent", 1.0, 0.1, 1.0);
         BUILDER.pop();
 
-        BUILDER.push("Gaia Spirit Wand");
-        GAIA_WAND_SPELL_POWER = BUILDER
-                .comment("Spell power bonus from Gaia Spirit Wand (0.3 = +30%)")
-                .defineInRange("gaiaWandSpellPower", 0.3, 0.0, 1.0);
-
-        GAIA_WAND_COOLDOWN_REDUCTION = BUILDER
-                .comment("Cooldown reduction from Gaia Spirit Wand (0.25 = -25%)")
-                .defineInRange("gaiaWandCooldownReduction", 0.25, 0.0, 0.5);
+        BUILDER.push("Elementium Wand");
+        BUILDER.comment("Elementium rung of the wand ladder: a real ISS caster (StaffItem) with",
+                        "Alfheim 'Elven Favor' efficiency.");
+        ELEMENTIUM_WAND_SPELL_POWER = BUILDER
+                .comment("Spell power bonus from Elementium Wand (0.18 = +18%)")
+                .defineInRange("elementiumWandSpellPower", 0.18, 0.0, 1.0);
+        ELEMENTIUM_WAND_COOLDOWN_REDUCTION = BUILDER
+                .comment("Cooldown reduction from Elementium Wand (0.10 = -10%)")
+                .defineInRange("elementiumWandCooldownReduction", 0.10, 0.0, 0.5);
+        ELEMENTIUM_WAND_MANA_EFFICIENCY = BUILDER
+                .comment("Mana efficiency bonus from Elementium Wand (0.10)")
+                .defineInRange("elementiumWandManaEfficiency", 0.10, 0.0, 1.0);
+        ELEMENTIUM_WAND_REFUND_CHANCE = BUILDER
+                .comment("Elven Favor: chance (0.0-1.0) on cast to refund part of the spell's mana cost while holding the wand")
+                .defineInRange("elementiumWandRefundChance", 0.15, 0.0, 1.0);
+        ELEMENTIUM_WAND_REFUND_PERCENT = BUILDER
+                .comment("Elven Favor: fraction of the spell's mana cost refunded when it procs (0.25 = 25%)")
+                .defineInRange("elementiumWandRefundPercent", 0.25, 0.0, 1.0);
         BUILDER.pop();
 
-        BUILDER.push("Manasteel Armor");
+        BUILDER.push("Terrasteel Wand");
+        TERRASTEEL_WAND_SPELL_POWER = BUILDER
+                .comment("Spell power bonus from Terrasteel Wand (0.28 = +28%).",
+                         "Late Botania caster tier — strong ranged casting, rivals the Spell Blade.")
+                .defineInRange("terrasteelWandSpellPower", 0.28, 0.0, 1.0);
+
+        TERRASTEEL_WAND_COOLDOWN_REDUCTION = BUILDER
+                .comment("Cooldown reduction from Terrasteel Wand (0.15 = -15%)")
+                .defineInRange("terrasteelWandCooldownReduction", 0.15, 0.0, 0.5);
+
+        TERRASTEEL_WAND_MANA_EFFICIENCY = BUILDER
+                .comment("Mana efficiency bonus from Terrasteel Wand (0.12)")
+                .defineInRange("terrasteelWandManaEfficiency", 0.12, 0.0, 1.0);
+        BUILDER.pop();
+
+        BUILDER.push("Gaia Spirit Wand");
+        GAIA_WAND_SPELL_POWER = BUILDER
+                .comment("Spell power bonus from Gaia Wand (0.4 = +40%).",
+                         "Endgame best pure-caster wand — must out-class the cheaper Terrasteel tiers.")
+                .defineInRange("gaiaWandSpellPower", 0.4, 0.0, 1.0);
+
+        GAIA_WAND_COOLDOWN_REDUCTION = BUILDER
+                .comment("Cooldown reduction from Gaia Wand (0.25 = -25%)")
+                .defineInRange("gaiaWandCooldownReduction", 0.25, 0.0, 0.5);
+
+        GAIA_WAND_MANA_EFFICIENCY = BUILDER
+                .comment("Mana efficiency bonus from Gaia Wand (0.15)")
+                .defineInRange("gaiaWandManaEfficiency", 0.15, 0.0, 1.0);
+        BUILDER.pop();
+
+        BUILDER.push("Mage Armor");
+        BUILDER.comment("Entry -> endgame mage armor ladder: Manasteel -> Elementium -> Terrasteel -> Gaia.",
+                        "Values are PER PIECE; a full set is 4x these. Tune for your modpack's power curve.");
+
         MANASTEEL_ARMOR_SPELL_POWER = BUILDER
-                .comment("Spell power bonus per piece of Manasteel Wizard Armor")
-                .defineInRange("manasteelArmorSpellPower", 0.15, 0.0, 1.0);
+                .comment("Spell power bonus per piece of Manasteel Wizard Armor (entry tier).",
+                         "Nerfed from 0.15 -> 0.05 so it no longer trivializes early progression.")
+                .defineInRange("manasteelArmorSpellPower", 0.05, 0.0, 1.0);
 
         MANASTEEL_ARMOR_MAX_MANA = BUILDER
-                .comment("Max mana bonus per piece of Manasteel Wizard Armor")
-                .defineInRange("manasteelArmorMaxMana", 150, 0, 500);
+                .comment("Max mana bonus per piece of Manasteel Wizard Armor (nerfed from 150 -> 50)")
+                .defineInRange("manasteelArmorMaxMana", 50, 0, 500);
+
+        ELEMENTIUM_ARMOR_SPELL_POWER = BUILDER
+                .comment("Spell power bonus per piece of Elementium Mage Armor (mid tier)")
+                .defineInRange("elementiumArmorSpellPower", 0.08, 0.0, 1.0);
+
+        ELEMENTIUM_ARMOR_MAX_MANA = BUILDER
+                .comment("Max mana bonus per piece of Elementium Mage Armor")
+                .defineInRange("elementiumArmorMaxMana", 75, 0, 1000);
+
+        ELEMENTIUM_ARMOR_MANA_EFFICIENCY = BUILDER
+                .comment("Mana efficiency bonus per piece of Elementium Mage Armor")
+                .defineInRange("elementiumArmorManaEfficiency", 0.03, 0.0, 1.0);
+
+        TERRASTEEL_ARMOR_SPELL_POWER = BUILDER
+                .comment("Spell power bonus per piece of Terrasteel Mage Armor (late tier)")
+                .defineInRange("terrasteelArmorSpellPower", 0.12, 0.0, 1.0);
+
+        TERRASTEEL_ARMOR_MAX_MANA = BUILDER
+                .comment("Max mana bonus per piece of Terrasteel Mage Armor")
+                .defineInRange("terrasteelArmorMaxMana", 100, 0, 1000);
+
+        TERRASTEEL_ARMOR_COOLDOWN_REDUCTION = BUILDER
+                .comment("Cooldown reduction per piece of Terrasteel Mage Armor (0.03 = -3%)")
+                .defineInRange("terrasteelArmorCooldownReduction", 0.03, 0.0, 0.25);
+
+        GAIA_ARMOR_SPELL_POWER = BUILDER
+                .comment("Spell power bonus per piece of Gaia Mage Armor (endgame tier)")
+                .defineInRange("gaiaArmorSpellPower", 0.15, 0.0, 1.0);
+
+        GAIA_ARMOR_MAX_MANA = BUILDER
+                .comment("Max mana bonus per piece of Gaia Mage Armor")
+                .defineInRange("gaiaArmorMaxMana", 125, 0, 1000);
+
+        GAIA_ARMOR_COOLDOWN_REDUCTION = BUILDER
+                .comment("Cooldown reduction per piece of Gaia Mage Armor (0.04 = -4%)")
+                .defineInRange("gaiaArmorCooldownReduction", 0.04, 0.0, 0.25);
+        BUILDER.pop();
+
+        BUILDER.push("Mage Armor Set Bonuses");
+        MANASTEEL_SET_COST_DISCOUNT = BUILDER
+                .comment("Full Manasteel Wizard set: Botania mana-cost discount on Botanical spell casts (0.05 = -5%)")
+                .defineInRange("manasteelSetCostDiscount", 0.05, 0.0, 0.5);
+
+        ELEMENTIUM_SET_REFUND_CHANCE = BUILDER
+                .comment("Full Elementium Mage set: chance (0.0-1.0) to refund part of a spell's mana cost")
+                .defineInRange("elementiumSetRefundChance", 0.10, 0.0, 1.0);
+
+        TERRASTEEL_SET_DAMAGE_REDUCTION = BUILDER
+                .comment("Full Terrasteel Mage set: incoming damage reduction while above the mana threshold (0.20 = -20%)")
+                .defineInRange("terrasteelSetDamageReduction", 0.20, 0.0, 0.75);
+
+        TERRASTEEL_SET_MANA_THRESHOLD = BUILDER
+                .comment("Full Terrasteel Mage set: fraction of max ISS mana required for the damage-reduction bonus")
+                .defineInRange("terrasteelSetManaThreshold", 0.50, 0.0, 1.0);
+
+        GAIA_SET_ABSORB_PERCENT = BUILDER
+                .comment("Full Gaia Mage set (endgame Mana Shield): fraction of incoming damage absorbed by spending Botania mana",
+                         "This is the strong 50% absorb formerly on Manasteel, now gated behind the Gaia tier.")
+                .defineInRange("gaiaSetAbsorbPercent", 0.50, 0.0, 0.90);
+        BUILDER.pop();
+
+        BUILDER.push("Mana Network Capacities");
+        BUILDER.comment("Max Botania mana each mana-network item stores (Spark-fillable, HUD-aggregated),",
+                        "plus the Arcane Mana Altar's pool cap. Previously hardcoded.");
+        DREAMWOOD_SCEPTER_MANA_CAPACITY = BUILDER
+                .comment("Dreamwood Scepter mana capacity")
+                .defineInRange("dreamwoodScepterManaCapacity", 250_000, 0, 100_000_000);
+        ELEMENTIUM_WAND_MANA_CAPACITY = BUILDER
+                .comment("Elementium Wand mana capacity")
+                .defineInRange("elementiumWandManaCapacity", 250_000, 0, 100_000_000);
+        TERRASTEEL_WAND_MANA_CAPACITY = BUILDER
+                .comment("Terrasteel Wand mana capacity")
+                .defineInRange("terrasteelWandManaCapacity", 500_000, 0, 100_000_000);
+        GAIA_WAND_MANA_CAPACITY = BUILDER
+                .comment("Gaia Spirit Wand mana capacity")
+                .defineInRange("gaiaWandManaCapacity", 1_000_000, 0, 100_000_000);
+        MANASTEEL_STAFF_MANA_CAPACITY = BUILDER
+                .comment("Manasteel Staff mana capacity")
+                .defineInRange("manasteelStaffManaCapacity", 50_000, 0, 100_000_000);
+        TERRASTEEL_SPELLBOOK_MANA_CAPACITY = BUILDER
+                .comment("Terrasteel Spellbook mana capacity")
+                .defineInRange("terrasteelSpellbookManaCapacity", 200_000, 0, 100_000_000);
+        ARCANE_CODEX_MANA_CAPACITY = BUILDER
+                .comment("Arcane Codex mana capacity")
+                .defineInRange("arcaneCodexManaCapacity", 500_000, 0, 100_000_000);
+        MANA_RESERVOIR_RING_MANA_CAPACITY = BUILDER
+                .comment("Mana Reservoir Ring mana capacity")
+                .defineInRange("manaReservoirRingManaCapacity", 200_000, 0, 100_000_000);
+        BOTANICAL_FOCUS_MANA_CAPACITY = BUILDER
+                .comment("Botanical Focus mana capacity")
+                .defineInRange("botanicalFocusManaCapacity", 50_000, 0, 100_000_000);
+        BOTANICAL_RING_MANA_CAPACITY = BUILDER
+                .comment("Botanical Ring mana capacity")
+                .defineInRange("botanicalRingManaCapacity", 25_000, 0, 100_000_000);
+        ARCANE_ALTAR_MAX_MANA = BUILDER
+                .comment("Arcane Mana Altar pool capacity")
+                .defineInRange("arcaneAltarMaxMana", 1_000_000, 0, 100_000_000);
         BUILDER.pop();
 
         BUILDER.pop(); // Equipment
@@ -470,11 +760,8 @@ public class CommonConfig {
 
         BUILDER.push("Corporea Logistics");
         ENABLE_CORPOREA_LOGISTICS = BUILDER
-                .comment("EXPERIMENTAL: Enable Corporea integration for spell logistics.",
-                         "Off by default — when enabled, only ritual-grade spells",
-                         "(Gaia's Wrath, Mana Rebirth) request reagents via Corporea.",
-                         "See the 1.7.0 audit for the rationale on tight scoping.")
-                .define("enableCorporeaLogistics", false);
+                .comment("Enable Corporea integration for spell logistics")
+                .define("enableCorporeaLogistics", true);
         
         AUTO_REQUEST_REAGENTS = BUILDER
                 .comment("Automatically request spell reagents from Corporea")
@@ -501,36 +788,6 @@ public class CommonConfig {
         ENABLE_SPELLBOOK_ATTUNEMENT = BUILDER
                 .comment("Enable spellbook attunement in Alfheim")
                 .define("enableSpellbookAttunement", true);
-        BUILDER.pop();
-
-        BUILDER.push("Phase 4 — Content Expansion");
-        BUILDER.comment("=".repeat(60));
-        BUILDER.comment("New 1.7.0 features. Defaults follow the 1.7.0 audit.");
-        BUILDER.comment("=".repeat(60));
-
-        ENABLE_POOL_ATTUNEMENT = BUILDER
-                .comment("Pool Attunement Charm: a worn curio that binds one Botania",
-                         "mana pool as a supplementary source for Nature-school spells.",
-                         "Binding requires the Spell Overcharge unlock (Gaia Guardian kill).")
-                .define("enablePoolAttunement", true);
-
-        POOL_ATTUNEMENT_RANGE = BUILDER
-                .comment("Maximum block-distance between the player and a bound pool",
-                         "for the pool to contribute mana. Pools beyond this range are",
-                         "ignored even if bound.")
-                .defineInRange("poolAttunementRange", 64, 8, 256);
-
-        POOL_ATTUNEMENT_BANDWIDTH = BUILDER
-                .comment("Maximum Botania mana a bound pool can supply per cast",
-                         "(cap; smaller costs draw less). Prevents the charm from",
-                         "becoming an infinite battery for every spell.")
-                .defineInRange("poolAttunementBandwidth", 50000, 1000, 1000000);
-
-        ENABLE_ELVEN_BLOOM_SCROLLS = BUILDER
-                .comment("EXPERIMENTAL: Enable Elven Bloom Scrolls — rune-enhanced",
-                         "scrolls crafted near an Alfheim portal gain +1 effective",
-                         "spell level. Off by default; enable for pack-side endgame.")
-                .define("enableElvenBloomScrolls", false);
         BUILDER.pop();
 
         SPEC = BUILDER.build();

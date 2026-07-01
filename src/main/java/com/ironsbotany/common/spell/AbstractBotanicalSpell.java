@@ -8,11 +8,10 @@ import com.ironsbotany.common.config.ConfigHelper;
 import com.ironsbotany.common.corporea.SpellCircleReagentSystem;
 import com.ironsbotany.common.network.PacketHandler;
 import com.ironsbotany.common.network.SpellCastSyncPacket;
-import com.ironsbotany.common.progression.ProgressionGates;
 import com.ironsbotany.common.spell.SpellManaNetworkIntegration;
 import com.ironsbotany.common.flower.ActiveFlowerAura;
 import com.ironsbotany.common.flower.FlowerAuraRegistry;
-import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
+import com.ironsbotany.common.registry.IBSchools;
 import com.ironsbotany.common.spell.catalyst.CatalystEffect;
 import com.ironsbotany.common.spell.catalyst.SpellCatalystRegistry;
 import com.ironsbotany.common.spell.catalyst.SpellContext;
@@ -51,30 +50,48 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
     }
 
     /**
-     * Calculate Botania mana cost for a given spell level
+     * Calculate Botania mana cost for a given spell level. Honours the
+     * datapack-overridable {@code botania_mana_cost} SpellConfigParameter
+     * when set; otherwise uses the constructor-supplied ladder.
      */
     public int getBotaniaManaCost(int spellLevel) {
-        return baseBotaniaManaCost + (botaniaManaCostPerLevel * (spellLevel - 1));
+        // Spell levels are 1-based; clamp defensively so a stray level 0 can't make the
+        // ladder subtract a full per-level step and yield a negative ("free") cost.
+        int effectiveLevel = Math.max(1, spellLevel);
+        int fallback = baseBotaniaManaCost + (botaniaManaCostPerLevel * (effectiveLevel - 1));
+        return Math.max(0, com.ironsbotany.common.spell.config.BotanySpellConfig.resolveBotaniaCost(this, fallback));
     }
 
     /**
-     * Ritual-grade spells participate in Corporea reagent logistics when
-     * enabled. Default is {@code false}; only true endgame spells (Gaia's
-     * Wrath, Mana Rebirth) override to {@code true}. Tightens the scope
-     * the 1.7.0 audit flagged for {@code SpellCircleReagentSystem}.
+     * Per-spell power multiplier (config knob); 1.0 by default. Concrete spells
+     * override to return their {@code *_POWER} config so server operators can tune
+     * each spell individually. Composed with the global botanical power multiplier.
      */
-    public boolean isRitualGrade() {
-        return false;
+    protected double perSpellPowerMultiplier() {
+        return 1.0;
     }
 
-    private static boolean hasElvenBloomScroll(Player player) {
-        return isElvenBloom(player.getMainHandItem()) || isElvenBloom(player.getOffhandItem());
+    /**
+     * Per-spell cooldown multiplier (config knob); 1.0 by default. Concrete spells
+     * override to return their {@code *_COOLDOWN} config. Composed with the global
+     * spell cooldown multiplier.
+     */
+    protected double perSpellCooldownMultiplier() {
+        return 1.0;
     }
 
-    private static boolean isElvenBloom(ItemStack stack) {
-        if (stack.isEmpty()) return false;
-        var tag = stack.getTag();
-        return tag != null && tag.getBoolean(DataKeys.ELVEN_BLOOM);
+    @Override
+    public float getSpellPower(int spellLevel, net.minecraft.world.entity.Entity sourceEntity) {
+        double mult = com.ironsbotany.common.config.CommonConfig.BOTANICAL_SPELL_POWER_MULTIPLIER.get()
+                * perSpellPowerMultiplier();
+        return (float) (super.getSpellPower(spellLevel, sourceEntity) * mult);
+    }
+
+    @Override
+    public int getSpellCooldown() {
+        double mult = com.ironsbotany.common.config.CommonConfig.SPELL_COOLDOWN_MULTIPLIER.get()
+                * perSpellCooldownMultiplier();
+        return Math.max(0, (int) Math.round(super.getSpellCooldown() * mult));
     }
 
     @Override
@@ -131,21 +148,8 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
             // Apply Alfheim portal proximity boost
             AlfheimSpellBoost.applyAlfheimBoost(context, this, player);
 
-            // Spell Overcharge — permanent +5% damage on Nature spells once the
-            // player has earned the Gaia Guardian advancement (unified progression).
-            if (ProgressionGates.isOverchargeUnlocked(player)) {
-                context.multiplyDamage(1.05f);
-            }
-
-            // Elven Bloom Scroll bonus — +15% damage and -10% cooldown when the
-            // cast is invoked via a scroll crafted near an Alfheim portal.
-            if (hasElvenBloomScroll(player)) {
-                context.multiplyDamage(1.15f);
-                context.multiplyCooldown(0.9f);
-            }
-
             // Apply spellbook attunement bonuses
-            if (ConfigHelper.isAlfheimEnabled()) {
+            if (ConfigHelper.isAlfheimEnabled() && CommonConfig.ENABLE_SPELLBOOK_ATTUNEMENT.get()) {
                 ItemStack mainHand = player.getMainHandItem();
                 ItemStack offHand = player.getOffhandItem();
                 ItemStack spellbook = SpellbookAttunement.isAttuned(mainHand) ? mainHand :
@@ -165,10 +169,11 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
                 return;
             }
 
-            // Single authoritative Botania mana payment for all unification modes.
-            if (!BotanicalManaPayment.pay(player, context, this, spellLevel)) {
-                return;
-            }
+            // Mana cost is routed centrally via ManaBridgeManager from
+            // SpellPreCastEvent. By the time we reach onCast() the player
+            // has already paid (or the cast was cancelled). The bridge's
+            // CostRoutedTag makes this idempotent if a downstream caller
+            // re-enters the path.
 
             // Show catalyst activation effects
             if (!catalysts.isEmpty()) {
@@ -373,6 +378,6 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
 
     @Override
     public SchoolType getSchoolType() {
-        return SchoolRegistry.NATURE.get();
+        return IBSchools.BOTANY.get();
     }
 }

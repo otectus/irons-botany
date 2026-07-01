@@ -31,6 +31,7 @@ public final class ArsNSpellsCompat {
     private static Method getCurrentModeMethod;
     private static Method getBridgeMethod;
     private static Method bridgeGetMaxManaMethod;
+    private static Class<?> bridgeGetMaxManaMethodClass;
     private static Field conversionRateField;
     private static Method configValueGetMethod;
 
@@ -72,6 +73,21 @@ public final class ArsNSpellsCompat {
     }
 
     /**
+     * True if Iron's Botany should yield cost routing to Ars 'n Spells
+     * for this cast. Returns true when ANS is loaded and currently in a
+     * mode where ANS owns the player-side mana pool.
+     *
+     * <p>This check is consulted by {@link com.ironsbotany.common.bridge.ManaBridgeManager}
+     * before charging Botania, so a player running both bridges only ever
+     * pays once per cast.
+     */
+    public static boolean shouldDeferRouting() {
+        if (!isLoaded()) return false;
+        String mode = getActiveMode();
+        return "ARS_PRIMARY".equals(mode) || "HYBRID".equals(mode);
+    }
+
+    /**
      * Effective max mana for the player — honours ANS's bridge under
      * ARS_PRIMARY, falls back to ISS MAX_MANA attribute otherwise.
      */
@@ -96,8 +112,15 @@ public final class ArsNSpellsCompat {
             }
             Object bridge = getBridgeMethod.invoke(null);
             if (bridge == null) return Float.NaN;
-            if (bridgeGetMaxManaMethod == null) {
-                bridgeGetMaxManaMethod = bridge.getClass().getMethod("getMaxMana", Player.class);
+            // Cache the getMaxMana Method per concrete bridge class. BridgeManager.getBridge()
+            // returns different impls (IronsBridge vs ArsNativeBridge) depending on the active
+            // mode, so a Method cached from one impl would throw IllegalArgumentException when
+            // invoked on another after a runtime mode switch — which markFailed() would then
+            // latch, disabling ALL ANS integration for the session.
+            Class<?> bridgeClass = bridge.getClass();
+            if (bridgeGetMaxManaMethod == null || bridgeGetMaxManaMethodClass != bridgeClass) {
+                bridgeGetMaxManaMethod = bridgeClass.getMethod("getMaxMana", Player.class);
+                bridgeGetMaxManaMethodClass = bridgeClass;
             }
             Object result = bridgeGetMaxManaMethod.invoke(bridge, player);
             return result instanceof Float f ? f : Float.NaN;

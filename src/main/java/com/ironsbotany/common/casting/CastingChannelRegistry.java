@@ -38,8 +38,4 @@ public class CastingChannelRegistry {
     public static Map<ResourceLocation, CastingChannel> getAllChannels() {
         return new HashMap<>(CHANNELS);
     }
-
-    public static int getItemBindingCount() {
-        return ITEM_CHANNELS.size();
-    }
 }

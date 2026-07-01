@@ -23,11 +23,51 @@ public class IBItems {
     public static final RegistryObject<Item> TERRASTEEL_SPELL_BLADE = ITEMS.register("terrasteel_spell_blade",
             () -> new TerrasteelSpellBladeItem(new Item.Properties().stacksTo(1).durability(3000)));
 
+    // Mage swords — melee caster ladder around the Terrasteel Spell Blade (Elementium -> Terrasteel -> Gaia)
+    public static final RegistryObject<Item> ELEMENTIUM_MAGE_SWORD = ITEMS.register("elementium_mage_sword",
+            () -> new MageSwordItem(MageSwordItem.Tier.ELEMENTIUM, new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> GAIA_MAGE_SWORD = ITEMS.register("gaia_mage_sword",
+            () -> new MageSwordItem(MageSwordItem.Tier.GAIA, new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> LIVINGWOOD_STAFF = ITEMS.register("livingwood_staff",
             () -> new LivingwoodStaffItem(new Item.Properties().stacksTo(1).durability(1000)));
 
+    // Manasteel Staff (Phase 6.2) — extends ISS StaffItem; mana cap attached via IBCapabilityHandler
+    public static final RegistryObject<Item> MANASTEEL_STAFF = ITEMS.register("manasteel_staff",
+            () -> new ManasteelStaffItem(new Item.Properties().stacksTo(1).durability(750)));
+
+    // Spellbooks (Phase 6.3) — ISS SpellBook subclasses with multi-attribute containers
+    public static final RegistryObject<Item> TERRASTEEL_SPELLBOOK = ITEMS.register("terrasteel_spellbook",
+            TerrasteelSpellbookItem::new);
+
+    public static final RegistryObject<Item> ARCANE_CODEX = ITEMS.register("arcane_codex",
+            ArcaneCodexItem::new);
+
+    // Elementium Scroll (Phase 6.4) — reusable scroll; pulls cost from Botania mana network
+    public static final RegistryObject<Item> ELEMENTIUM_SCROLL = ITEMS.register("elementium_scroll",
+            ElementiumScrollItem::new);
+
+    // New curios (Phase 6.5)
+    public static final RegistryObject<Item> MANA_RESERVOIR_RING = ITEMS.register("mana_reservoir_ring",
+            () -> new ManaReservoirRingItem(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> DAYBLOOM_AMULET = ITEMS.register("daybloom_amulet",
+            () -> new DaybloomAmuletItem(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> GAIAS_BLESSING = ITEMS.register("gaias_blessing",
+            () -> new GaiasBlessingItem(new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> DREAMWOOD_SCEPTER = ITEMS.register("dreamwood_scepter",
             () -> new DreamwoodScepterItem(new Item.Properties().stacksTo(1).durability(2000)));
+
+    // Elementium Wand — Elementium rung of the wand ladder; real ISS StaffItem caster
+    public static final RegistryObject<Item> ELEMENTIUM_WAND = ITEMS.register("elementium_wand",
+            () -> new ElementiumWandItem(new Item.Properties().stacksTo(1).durability(1500)));
+
+    // Terrasteel Wand — late-Botania caster rung between Elementium and Gaia
+    public static final RegistryObject<Item> TERRASTEEL_WAND = ITEMS.register("terrasteel_wand",
+            () -> new TerrasteelWandItem(new Item.Properties().stacksTo(1).durability(2500)));
 
     public static final RegistryObject<Item> GAIA_SPIRIT_WAND = ITEMS.register("gaia_spirit_wand",
             () -> new GaiaSpiritWandItem(new Item.Properties().stacksTo(1).durability(5000)));
@@ -46,8 +86,28 @@ public class IBItems {
                     net.minecraft.world.item.ArmorItem.Type.LEGGINGS, new Item.Properties()));
 
     public static final RegistryObject<Item> MANASTEEL_WIZARD_BOOTS = ITEMS.register("manasteel_wizard_boots",
-            () -> new ManasteelWizardArmorItem(IBArmorMaterials.MANASTEEL_WIZARD, 
+            () -> new ManasteelWizardArmorItem(IBArmorMaterials.MANASTEEL_WIZARD,
                     net.minecraft.world.item.ArmorItem.Type.BOOTS, new Item.Properties()));
+
+    // Armor - Mage tiers above Manasteel (Elementium -> Terrasteel -> Gaia)
+    public static final RegistryObject<Item> ELEMENTIUM_MAGE_HELMET = registerMageArmor("elementium_mage_helmet", MageArmorItem.Tier.ELEMENTIUM, net.minecraft.world.item.ArmorItem.Type.HELMET);
+    public static final RegistryObject<Item> ELEMENTIUM_MAGE_CHESTPLATE = registerMageArmor("elementium_mage_chestplate", MageArmorItem.Tier.ELEMENTIUM, net.minecraft.world.item.ArmorItem.Type.CHESTPLATE);
+    public static final RegistryObject<Item> ELEMENTIUM_MAGE_LEGGINGS = registerMageArmor("elementium_mage_leggings", MageArmorItem.Tier.ELEMENTIUM, net.minecraft.world.item.ArmorItem.Type.LEGGINGS);
+    public static final RegistryObject<Item> ELEMENTIUM_MAGE_BOOTS = registerMageArmor("elementium_mage_boots", MageArmorItem.Tier.ELEMENTIUM, net.minecraft.world.item.ArmorItem.Type.BOOTS);
+
+    public static final RegistryObject<Item> TERRASTEEL_MAGE_HELMET = registerMageArmor("terrasteel_mage_helmet", MageArmorItem.Tier.TERRASTEEL, net.minecraft.world.item.ArmorItem.Type.HELMET);
+    public static final RegistryObject<Item> TERRASTEEL_MAGE_CHESTPLATE = registerMageArmor("terrasteel_mage_chestplate", MageArmorItem.Tier.TERRASTEEL, net.minecraft.world.item.ArmorItem.Type.CHESTPLATE);
+    public static final RegistryObject<Item> TERRASTEEL_MAGE_LEGGINGS = registerMageArmor("terrasteel_mage_leggings", MageArmorItem.Tier.TERRASTEEL, net.minecraft.world.item.ArmorItem.Type.LEGGINGS);
+    public static final RegistryObject<Item> TERRASTEEL_MAGE_BOOTS = registerMageArmor("terrasteel_mage_boots", MageArmorItem.Tier.TERRASTEEL, net.minecraft.world.item.ArmorItem.Type.BOOTS);
+
+    public static final RegistryObject<Item> GAIA_MAGE_HELMET = registerMageArmor("gaia_mage_helmet", MageArmorItem.Tier.GAIA, net.minecraft.world.item.ArmorItem.Type.HELMET);
+    public static final RegistryObject<Item> GAIA_MAGE_CHESTPLATE = registerMageArmor("gaia_mage_chestplate", MageArmorItem.Tier.GAIA, net.minecraft.world.item.ArmorItem.Type.CHESTPLATE);
+    public static final RegistryObject<Item> GAIA_MAGE_LEGGINGS = registerMageArmor("gaia_mage_leggings", MageArmorItem.Tier.GAIA, net.minecraft.world.item.ArmorItem.Type.LEGGINGS);
+    public static final RegistryObject<Item> GAIA_MAGE_BOOTS = registerMageArmor("gaia_mage_boots", MageArmorItem.Tier.GAIA, net.minecraft.world.item.ArmorItem.Type.BOOTS);
+
+    private static RegistryObject<Item> registerMageArmor(String name, MageArmorItem.Tier tier, net.minecraft.world.item.ArmorItem.Type type) {
+        return ITEMS.register(name, () -> new MageArmorItem(tier, type, new Item.Properties()));
+    }
 
     // Upgrade Orbs
     public static final RegistryObject<Item> ORB_OF_FLORA = ITEMS.register("orb_of_flora",
@@ -76,9 +136,40 @@ public class IBItems {
     public static final RegistryObject<Item> BOTANICAL_GRIMOIRE = ITEMS.register("botanical_grimoire",
             () -> new com.ironsbotany.common.item.BotanicalGrimoireItem(new Item.Properties().stacksTo(1)));
 
-    // 1.7.0 — Pool Attunement Charm (curios charm slot)
-    public static final RegistryObject<Item> POOL_ATTUNEMENT_CHARM = ITEMS.register("pool_attunement_charm",
-            () -> new com.ironsbotany.common.item.PoolAttunementCharm(new Item.Properties().stacksTo(1)));
+    // Mana Inks (Phase 2B) — petal apothecary outputs that replace vanilla ink for ISS scroll forging
+    public static final RegistryObject<Item> MINOR_MANA_INK = ITEMS.register("minor_mana_ink",
+            () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.minor_mana_ink.tooltip"));
+
+    public static final RegistryObject<Item> GREATER_MANA_INK = ITEMS.register("greater_mana_ink",
+            () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.greater_mana_ink.tooltip"));
+
+    public static final RegistryObject<Item> PRIME_MANA_INK = ITEMS.register("prime_mana_ink",
+            () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.prime_mana_ink.tooltip"));
+
+    // School-tied upgrade orbs (Phase 2C) — runic altar outputs, one per ISS school's spell-power attribute
+    public static final RegistryObject<Item> ORB_OF_FIRE_POWER = ITEMS.register("orb_of_fire_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.FLORA_ORB_TYPE, "fire"));
+
+    public static final RegistryObject<Item> ORB_OF_FROST_POWER = ITEMS.register("orb_of_frost_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.POOL_ORB_TYPE, "frost"));
+
+    public static final RegistryObject<Item> ORB_OF_LIGHTNING_POWER = ITEMS.register("orb_of_lightning_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.BURSTING_ORB_TYPE, "lightning"));
+
+    public static final RegistryObject<Item> ORB_OF_HOLY_POWER = ITEMS.register("orb_of_holy_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.FLORA_ORB_TYPE, "holy"));
+
+    public static final RegistryObject<Item> ORB_OF_ENDER_POWER = ITEMS.register("orb_of_ender_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.POOL_ORB_TYPE, "ender"));
+
+    public static final RegistryObject<Item> ORB_OF_BLOOD_POWER = ITEMS.register("orb_of_blood_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.BURSTING_ORB_TYPE, "blood"));
+
+    public static final RegistryObject<Item> ORB_OF_NATURE_POWER = ITEMS.register("orb_of_nature_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.TERRAN_ORB_TYPE, "nature"));
+
+    public static final RegistryObject<Item> ORB_OF_ELDRITCH_POWER = ITEMS.register("orb_of_eldritch_power",
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.TERRAN_ORB_TYPE, "eldritch"));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

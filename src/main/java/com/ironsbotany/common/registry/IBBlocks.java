@@ -1,6 +1,7 @@
 package com.ironsbotany.common.registry;
 
 import com.ironsbotany.IronsBotany;
+import com.ironsbotany.common.block.ArcaneManaAltarBlock;
 import com.ironsbotany.common.block.ManaConduitBlock;
 import com.ironsbotany.common.block.SpellReservoirBlock;
 import net.minecraft.world.item.BlockItem;
@@ -29,6 +30,13 @@ public class IBBlocks {
             () -> new ManaConduitBlock(BlockBehaviour.Properties.of()
                     .strength(2.0F)
                     .noOcclusion()));
+
+    // Arcane Mana Altar (Phase 3B) — full Botania mana pool, accepts sparks, drainable for spell costs
+    public static final RegistryObject<Block> ARCANE_MANA_ALTAR = registerBlock("arcane_mana_altar",
+            () -> new ArcaneManaAltarBlock(BlockBehaviour.Properties.of()
+                    .strength(3.0F, 12.0F)
+                    .noOcclusion()
+                    .lightLevel(state -> 7)));
 
     // Helper method to register block with item
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block) {

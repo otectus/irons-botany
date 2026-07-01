@@ -3,7 +3,7 @@ package com.ironsbotany.common.item;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.ironsbotany.common.config.CommonConfig;
-import com.ironsbotany.common.util.DataKeys;
+import com.ironsbotany.common.item.cap.ItemManaStorage;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -47,15 +47,18 @@ public class LivingwoodStaffItem extends Item {
         return CommonConfig.LIVINGWOOD_STAFF_MANA_CAPACITY.get();
     }
 
+    // Reads/writes the SAME NBT key as the attached Botania MANA_ITEM capability
+    // (ItemManaStorage.NBT_KEY) so the staff's tooltip/bar/drain and the mana network
+    // (Spark deposits, HUD aggregation) all see one shared value — not two disjoint stores.
     public int getStoredMana(ItemStack stack) {
         if (stack.hasTag()) {
-            return stack.getTag().getInt(DataKeys.BOTANIA_MANA);
+            return stack.getTag().getInt(ItemManaStorage.NBT_KEY);
         }
         return 0;
     }
 
     public void setStoredMana(ItemStack stack, int mana) {
-        stack.getOrCreateTag().putInt(DataKeys.BOTANIA_MANA, Mth.clamp(mana, 0, getManaCapacity()));
+        stack.getOrCreateTag().putInt(ItemManaStorage.NBT_KEY, Mth.clamp(mana, 0, getManaCapacity()));
     }
 
     public int addMana(ItemStack stack, int amount) {

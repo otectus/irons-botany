@@ -46,6 +46,16 @@ public class ManaBloomSpell extends AbstractBotanicalSpell {
     }
 
     @Override
+    protected double perSpellPowerMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.MANA_BLOOM_POWER.get();
+    }
+
+    @Override
+    protected double perSpellCooldownMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.MANA_BLOOM_COOLDOWN.get();
+    }
+
+    @Override
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.COMMON)

@@ -1,0 +1,16 @@
+{
+  "type": "botania:petal_apothecary",
+  "ingredients": [
+    { "tag": "botania:petals/blue" },
+    { "tag": "botania:petals/black" },
+    { "item": "minecraft:ink_sac" },
+    { "item": "botania:mana_powder" }
+  ],
+  "output": {
+    "item": "ironsbotany:minor_mana_ink",
+    "count": 2
+  },
+  "reagent": {
+    "tag": "botania:seed_apothecary_reagent"
+  }
+}

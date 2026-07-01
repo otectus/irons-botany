@@ -31,8 +31,13 @@ public class ManaRebirthSpell extends AbstractBotanicalSpell {
     }
 
     @Override
-    public boolean isRitualGrade() {
-        return true;
+    protected double perSpellPowerMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.MANA_REBIRTH_POWER.get();
+    }
+
+    @Override
+    protected double perSpellCooldownMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.MANA_REBIRTH_COOLDOWN.get();
     }
 
     @Override

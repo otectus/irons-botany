@@ -105,7 +105,9 @@ public class SpellLogisticsSystem {
             registryName = "botania:rune_water";
         } else if (school == SchoolRegistry.LIGHTNING.get()) {
             registryName = "botania:rune_air";
-        } else if (school == SchoolRegistry.NATURE.get()) {
+        } else if (school == com.ironsbotany.common.registry.IBSchools.BOTANY.get()
+                || school == SchoolRegistry.NATURE.get()) {
+            // Botanical spells report the custom Botany school; map them to the earth rune.
             registryName = "botania:rune_earth";
         } else {
             registryName = "botania:rune_mana";

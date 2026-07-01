@@ -2,7 +2,6 @@ package com.ironsbotany.common.entity;
 
 import com.ironsbotany.common.registry.IBEntities;
 import com.ironsbotany.common.registry.IBParticles;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -153,18 +152,30 @@ public class BotanicalBurstProjectile extends ThrowableProjectile {
 
     @Override
     protected void onHit(HitResult result) {
+        // super.onHit dispatches to onHitEntity / onHitBlock, which decide whether a
+        // piercing projectile survives. Do NOT unconditionally discard afterwards, or
+        // piercing never works and impact particles fire twice.
         super.onHit(result);
+        if (this.level().isClientSide) return;
 
-        if (!this.level().isClientSide) {
-            if (this.level() instanceof ServerLevel serverLevel) {
-                serverLevel.sendParticles(
-                    IBParticles.BOTANICAL_BURST.get(),
-                    this.getX(), this.getY(), this.getZ(),
-                    15, 0.25, 0.25, 0.25, 0.1
-                );
-            }
-            this.discard();
+        // A piercing projectile that passed through a live entity is still in flight —
+        // onHitEntity already applied damage + particles and left it alive.
+        boolean isPiercing = this.getPersistentData().getBoolean("piercing");
+        if (result.getType() == HitResult.Type.ENTITY && isPiercing && !this.isRemoved()) {
+            return;
         }
+        // onHitEntity already finalized this hit (particles + discard) — don't double up.
+        if (this.isRemoved()) return;
+
+        // Block hit (or a non-piercing entity hit that didn't already discard): finalize.
+        if (this.level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(
+                IBParticles.BOTANICAL_BURST.get(),
+                this.getX(), this.getY(), this.getZ(),
+                15, 0.25, 0.25, 0.25, 0.1
+            );
+        }
+        this.discard();
     }
 
     @Override

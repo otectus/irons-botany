@@ -30,8 +30,13 @@ public class GaiaWrathSpell extends AbstractBotanicalSpell {
     }
 
     @Override
-    public boolean isRitualGrade() {
-        return true;
+    protected double perSpellPowerMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.GAIA_WRATH_POWER.get();
+    }
+
+    @Override
+    protected double perSpellCooldownMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.GAIA_WRATH_COOLDOWN.get();
     }
 
     @Override

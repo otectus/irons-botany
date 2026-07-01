@@ -5,226 +5,401 @@ All notable changes to Iron's Botany will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.7.2] - 2026-05-15
+## [Unreleased] — v2.0 planning
 
-- **Removed duplicate "Chronicle of the Green Mage 1st Edition" book.**
-  1.7.1 left Patchouli's auto-generated `patchouli:guide_book` instance
-  alongside the IB-registered `ironsbotany:botanical_grimoire` item, so
-  the player saw two near-identical books. Added Botania-style
-  `dont_generate_book: true` + `custom_book_item: "ironsbotany:botanical_grimoire"`
-  to `book.json`, suppressing the auto-spawn and binding the
-  pre-existing IB item as the canonical book item.
+The forward-looking v2.0 roadmap is captured in
+[`PHASE_7_PLAN.md`](PHASE_7_PLAN.md) at the project root. Headline features:
+six ISS-school generating flowers (mana feedback from spell casts), the Verdant
+Caster (a functional flower that casts ISS spells autonomously — the v2.0
+signature), Corporea Scroll Rack with spell-aware request matcher, and a
+KubeJS plugin surface for downstream addons.
 
-## [1.7.1] - 2026-05-15
+## [1.9.0] - Stability, correctness & the school-migration finish line
 
-Post-1.7.0 bug patch driven by launch-log analysis on the user's CurseForge
-instance plus two reported gameplay defects. Every issue resolved here was
-either blocking a feature shipped by 1.7.0 or visible in the log.
+A full-codebase audit pass. Two advertised features that never actually worked now do,
+the half-finished NATURE→BOTANY school migration is completed across every subsystem, and
+a batch of correctness/duplication/performance bugs are fixed. Item and registry IDs are
+unchanged — **saves are not broken**. Still targets **Iron's Spells 'n Spellbooks 3.16+**.
 
-### Critical fixes
+### Fixed — behavior features that were inert
 
-- **Patchouli book ("Chronicle of the Green Mage") now loads.** 1.7.0 left
-  `use_resource_pack` implicitly false and kept all book content under
-  `data/`, but Patchouli 1.20+ removed that mode and now requires content
-  under `assets/`. Set `use_resource_pack: true` in `book.json`; moved all
-  27 content files (5 categories + 22 entries) from
-  `data/ironsbotany/patchouli_books/botanical_grimoire/en_us/` to
-  `assets/ironsbotany/patchouli_books/botanical_grimoire/en_us/`.
-  `BotanicalGrimoireItem.use()` already called the right API; once the
-  book loads, right-clicking the Chronicle now opens the book.
-- **Spell scroll recipes (9 files) now craft.** The earlier recipes used
-  `irons_spellbooks:scroll_forge` as a recipe TYPE, but ISS 3.15.2's
-  scroll_forge is only a BLOCK with hardcoded Java logic — there has
-  never been a JSON recipe type by that name. Added a new
-  `IBSpellScrollRecipe` (custom CustomRecipe) registered as
-  `ironsbotany:ib_spell_scroll`, taking an ink + focus ingredient pair
-  and producing an `irons_spellbooks:scroll` carrying an
-  `ISpellContainer` bound to the configured IB spell at level 1.
-  Rewrote all 9 scroll recipe JSONs against the new schema.
-- **Petal Apothecary recipes (3 files) now load.** `spell_petal`,
-  `botanical_focus`, and `botanical_ring` all omitted Botania's required
-  `reagent` field, so deserialization threw "Item cannot be null".
-  Added `"reagent": { "tag": "botania:seed_apothecary_reagent" }` to
-  each.
-- **Runic Altar `botanical_grimoire` and Elven Trade `orb_of_terran_might`
-  now load.** They referenced `irons_spellbooks:wisdom_orb` and
-  `irons_spellbooks:upgrade_orb_legendary`, neither of which exists in
-  ISS 3.15.2. Swapped to `minecraft:enchanted_book` and
-  `irons_spellbooks:nature_upgrade_orb` respectively.
-- **Botanical Focus Siphon Mode is now actually toggleable.** Curios was
-  intercepting every right-click in hand to auto-equip, so `Item.use()`
-  (the siphon toggle) never fired. Overrode `canEquipFromUse()` to
-  return true only when the player is sneaking; regular right-click
-  passes through to `use()` and toggles siphon mode. Tooltip updated:
-  "Right-click in hand to toggle Siphon Mode" + new line "Sneak +
-  right-click to equip to Curios slot".
+- **BOTANIA_PRIMARY no longer double-charges.** The mode drained Botania mana but never
+  cancelled ISS's own debit, so casting in `BOTANIA_PRIMARY` charged the player *both*
+  pools. `ChangeManaEvent` handling now refunds the ISS debit for any cast Botania paid
+  for (BOTANIA_PRIMARY and Elementium Scroll), tracked via a per-tick "Botania-paid"
+  marker. HYBRID/SEPARATE dual-cost casts intentionally still pay both.
+- **Elementium Scroll "Botania pays, scroll retained" now triggers.** Scroll spells report
+  0 ISS mana cost, so the old `issCost × ratio` Botania price was always 0 and the scroll
+  was consumed the vanilla way every time. The scroll now draws a configurable flat cost
+  (`elementiumScrollManaCost`, default 10 000) and is retained when Botania covers it.
+- **Casting-channel mana-cost modifiers now apply.** Livingwood Staff (−10%), Dreamwood
+  Focus (+10%) and Terra Rod (+30%) advertised a mana-cost modifier that was never
+  consumed. The channel's multiplier is now folded into the Botania cost the bridge
+  computes.
 
-### Polish
+### Fixed — school migration (NATURE → BOTANY)
 
-- **Sounds.json now loads.** All four IB sound events
-  (`mana_conversion`, `botanical_cast`, `flower_bloom`, `spark_summon`)
-  used vanilla path-style references (e.g. `minecraft:block/beacon/power_select`)
-  that Minecraft tried to resolve as a file path. Switched to
-  `"type": "event"` references with dotted event names.
-- **Pool Attunement Charm now has a texture.** 1.7.0 shipped the model
-  JSON but no PNG. Placeholder texture copied from `botanical_focus.png`;
-  a bespoke art pass is deferred to 1.7.2.
-- **`mods.toml` Forge update-check no longer fails.** Removed the
-  `updateJSONURL` line; the old URL pointed at a GitHub releases page
-  which returns HTML, not the JSON Forge expects.
-- **Particle atlas added.** `assets/ironsbotany/atlases/particles.json`
-  registers a directory source for the existing 12 particle PNGs.
-  May or may not silence the "Missing particle sprites" warning depending
-  on atlas-build ordering; particle rendering itself was unaffected.
+Botanical spells report the custom **Botany** school, but several subsystems still compared
+against ISS's Nature school, so their mechanics were silently dead. Repointed:
 
-### Not in scope (other-mod issues seen in the log)
+- **Gaia Spell Trials** Phase-2 "botanical spells hit Gaia harder" vulnerability + the
+  `botanicalSpellsUsed` counter.
+- **Corporea** spell-circle reagent mapping (botanical spells now map to the earth rune, not
+  the generic mana rune).
+- **Spell-triggered mana events** trigger typing, and the **Livingwood Staff channel**
+  eligibility check.
+- **Alfheim dual-school crafting** now yields compatible schools for a Botany primary (was
+  empty), and **persists both primary and secondary schools** to NBT (the primary was
+  previously dropped).
+- The **Botanical Focus** now powers the Botany school: `ironsbotany:botanical_focus` was
+  added to `#ironsbotany:focus/botany` and removed from ISS's `#irons_spellbooks:nature_focus`.
 
-- ISS shipping `minecraft:set_written_book_pages` (a 1.21 loot function)
-  in a 1.20.1 loot table — surfaces as a parse error for
-  `irons_spellbooks:chests/citadel/citadel_tomes`.
-- ISS's `template_open_spell_book_model` missing reference.
-- The `global_config.json` "outside namespaced directory" warning fires
-  from ISS scanning, with no IB file involved (confirmed).
+### Fixed — correctness & exploits
 
-## [1.7.0] - 2026-05-14
+- **Livingwood Staff split mana store.** The staff's tooltip/bar/drain read a different NBT
+  key (`IronsBotany_BotaniaMana`) than the Botania `MANA_ITEM` capability
+  (`ironsbotany_mana`), so Spark deposits and HUD aggregation were invisible to the staff.
+  Both now share `ironsbotany_mana`.
+- **Rune Scroll Fusion duplication exploit.** The result copied the input scroll stack
+  without resetting its count, so N scrolls + 1 rune yielded N enhanced scrolls while
+  consuming one of each. Result count is now clamped to 1. The recipe serializer also no
+  longer NPEs when the optional `category` field is omitted.
+- **Piercing Botanical Burst projectiles now pierce.** The `onHit` override discarded the
+  projectile on first contact, killing the piercing path and double-spawning impact
+  particles. It now survives live piercing hits and only finalizes once.
+- **Flower auras can no longer register against `minecraft:air`.** An unknown/renamed block
+  id resolves to AIR (not null); the guard now excludes AIR, preventing an aura that would
+  match near every position around every player.
+- **Corporea reagent cache** is now keyed by spell *and level* (reagents scale with level)
+  and hands out copies, so cached prototypes are no longer mutated across players/casts.
+- **Botania→ISS conversion over-drain.** `tryConvertManaToISS` drained the full transfer
+  rate but granted only the floored ISS conversion; it now drains exactly the Botania that
+  maps to the ISS actually added.
+- **Reservoir/conduit free-mana underflow.** A config-lowered reservoir capacity could make
+  `addMana` return negative and create mana; the accepted amount is now clamped to ≥ 0.
+- **Gaia's Blessing** drained 100 000 mana on *every* `ModifySpellLevelEvent` firing (many
+  per cast) via a large block-entity cube scan; it now drains once per cast-tick.
 
-A full stabilization, architecture, and integration release built end-to-end
-against the [1.7.0 audit](irons-botany-1.7.0.md). Five phases, each shipped
-as a discrete commit.
+### Fixed — stability & hardening
 
-### Phase 1 — Stabilization (P0)
+- `ManaBridgeManager.resolveCost` is wrapped defensively — a third-party Botania/ANS
+  exception can no longer abort or crash a cast.
+- **Ars 'n Spells compat** no longer permanently disables itself after an ANS mode switch:
+  the reflective `getMaxMana` method is re-resolved per concrete bridge class instead of
+  being cached across incompatible bridge implementations.
+- **Daybloom Amulet** uses a *transient* attribute modifier (was permanent), so its
+  day-only buff can never bake permanently into a player's save.
+- **Arcane Mana Altar** resolves its attached spark lazily and drops the reference once the
+  spark entity is gone (previously a removed spark blocked all future attachments).
+- `BotanySpellConfig` reads are guarded against ISS's `SpellConfigManager` being
+  uninitialized (client-side, pre-config-sync).
+- `SpellCastSyncPacket` no longer double-enqueues its handler and now declares an explicit
+  `PLAY_TO_CLIENT` direction. `SparkSwarmEntity` lifetime is a plain server field instead of
+  per-tick synched data (was spamming a metadata packet every tick and flickering on the
+  client).
+- Spell-catalyst global power multiplier now scales only each catalyst's own contribution
+  instead of compounding over the full accumulated damage multiplier.
 
-- **Aggregated Botania mana drain fixed** — `ManaHelper.requestManaFromAllSources`
-  was returning true only when a single stack could satisfy the full request,
-  so spells failed under split-mana setups. Replaced with a two-pass
-  aggregated transaction that sums across all mana items, accessories, and
-  (if enabled) nearby pools, then drains in the same order. Public API
-  (`hasBotaniaMana`, `drainBotaniaMana`) is unchanged.
-- **Casting channels registered** — `CastingChannelRegistry` had three
-  implementations and a lookup site in `AbstractBotanicalSpell`, but no
-  call to `registerItemChannel` anywhere. Added
-  `CastingChannelRegistration` (mirroring `CatalystRegistration`) wired
-  from common setup, binding Livingwood/Dreamwood/TerraRod profiles to
-  the corresponding IB items and Botania's Terra Truncator if present.
-- **Progression flags wired to real gameplay** — `UnifiedAdvancementSystem`
-  was writing `TIER4_UNLOCKED`, `DUAL_SCHOOL_UNLOCKED`, and
-  `OVERCHARGE_UNLOCKED` to player NBT but nothing read them. Added
-  `ProgressionGates` reader-side helpers and wired:
-  - `TIER4_UNLOCKED` → filters LEGENDARY-tier catalysts from
-    `SpellCatalystRegistry.getActiveCatalysts`.
-  - `DUAL_SCHOOL_UNLOCKED` → required by
-    `AlfheimScrollCrafting.markAlfheimScroll`; falls back to single-school
-    when locked.
-  - `OVERCHARGE_UNLOCKED` → +5% Nature spell damage at cast time, and
-    required for binding the new Pool Attunement Charm.
-- **`IBRegistryHealthCheck`** logs catalyst/aura/channel counts after
-  common setup. In dev environments, throws when any registry is empty;
-  in production it warns.
+### Changed
 
-### Phase 2 — Architecture Cleanup
+- **New config group "Mana Network Capacities":** every mana-network item cap (previously
+  hardcoded) and the Arcane Mana Altar pool cap are now configurable, plus the new
+  `elementiumScrollManaCost`.
+- Removed the dead, redundant `ManaBridgeManager.tryDrainFromNearbyAltar` cube scan (the
+  altar is a `ManaPool`, already covered by the normal pool-draw path).
+- Note on design intent: in HYBRID/SEPARATE modes a Botanical cast is cancelled when Botania
+  is insufficient even if ISS mana is available — dual-cost is mandatory by design.
+- Documentation reconciled to the 1.9.0 behavior (CLAUDE.md, README, CurseForge description).
 
-- **Datagen pipeline scaffolded** — `runData` run config in `build.gradle`
-  enabled; new `data/IBDataGenerator` subscribes to `GatherDataEvent`.
-  `runData` requires deobfuscated dependencies that the project ships as
-  obfuscated `compileOnly` jars, so the four GLM JSONs are hand-authored
-  from the same Java provider source for 1.7.0. The provider class is
-  retained for future regeneration once deobf coordinates are available.
-- **Global Loot Modifiers replace `LootTableInjector`** — Custom
-  `AddPoolModifier` codec registered via `IBLootModifiers`; six
-  modifier JSONs under `data/ironsbotany/loot_modifiers/` target the
-  four vanilla chests (village houses ×3, mineshaft, stronghold library,
-  end city). Pack authors can disable any specific injection by
-  overriding the JSON; `ENABLE_VANILLA_LOOT_INJECTION` remains the
-  runtime master toggle.
-- **NBT keys centralized** — `ArmorSetBonusHandler.LAST_SHIELD_TIME_KEY`
-  moved to `DataKeys.MANA_SHIELD_COOLDOWN`. All player-persistent NBT
-  keys now flow through `DataKeys`.
-- **Custom attribute retired** — `IBAttributes.MANA_EFFICIENCY` had zero
-  consumers. Class deleted; corresponding lang key removed from all 23
-  locale files.
-- **Cross-mod IDs moved to config** — Three Botania advancement IDs
-  hardcoded in `UnifiedAdvancementSystem` migrated to
-  `ProgressionConfig` (server config). Pack authors can retarget gates
-  when upstream renames an advancement; missing IDs warn at startup but
-  never throw.
+## [1.8.1] - Iron's Spells 3.16 compatibility & asset hotfix
 
-### Phase 3 — Core Integration Enhancements
+Player-reported release blockers: a purple/black "magic" texture, and a question
+about Iron's Spells 3.16 support. Both are resolved here. **This build now targets
+Iron's Spells 'n Spellbooks 3.16+** and no longer loads on 3.15.2 (see below);
+players still on 3.15.2 should remain on Iron's Botany 1.8.0. Item/registry IDs are
+unchanged — saves are not broken.
 
-- **Botania-native recipe paths** — 17 new recipe JSONs across four
-  Botania recipe types replace 17 vanilla shaped/shapeless crafting JSONs:
-  - **Petal Apothecary** — `spell_petal`, `botanical_focus`,
-    `botanical_ring`.
-  - **Mana Infusion** — `mana_infused_essence`.
-  - **Runic Altar** — `botanical_crystal`, `botanical_grimoire`,
-    `mana_conduit`, `spell_reservoir`, `livingwood_staff`,
-    all four `manasteel_wizard_*` pieces.
-  - **Elven Trade** — `dreamwood_scepter`, `gaia_spirit_wand`,
-    `orb_of_terran_might`.
-  Entry-tier consumables (orb_of_flora/pool/bursting, all spell scrolls,
-  bulk variants, rune_scroll_fusion) keep their vanilla crafting paths.
-- **`NearbyManaPoolCache` + `NearbyIBBlockCache`** — Per-player cube-scan
-  caches with 40-tick TTL and 4-block movement invalidation. `ManaHelper.
-  simulatePools` and the client HUD proximity pulse both swapped from
-  per-call `BlockPos.betweenClosed` walks to cached lookups.
-- **`BotanicalManaPayment` service** — Single static entry point
-  centralises the five `ManaUnificationMode` branches that previously
-  lived inline in `AbstractBotanicalSpell.onCast`. Mana payment now
-  flows through one authoritative path.
+### Fixed
 
-### Phase 4 — Content Expansion
+- **Missing Arcane Mana Altar texture rendering purple/black.** The block model
+  referenced `ironsbotany:block/arcane_mana_altar`, but the texture PNG was never
+  shipped, so the altar (and its item form and break particles) rendered as the
+  missing-texture checkerboard. Added `textures/block/arcane_mana_altar.png`.
+- **Iron's Spells 3.16 compatibility.** ISS 3.16 changed the `Scroll` constructor
+  from no-arg to `Scroll(Item.Properties)`. The reusable Elementium Scroll extends
+  `Scroll`, so the old binary threw `NoSuchMethodError` on 3.16. Updated to the new
+  constructor and rebuilt against 3.16.1 (compiles and builds clean). Because the
+  two `Scroll` constructors are mutually exclusive, this is a hard version boundary:
+  1.8.1 requires **3.16+**; 3.15.2 is no longer supported.
+- **Dreamwood Scepter double-charge.** `DreamwoodConversionHandler` and
+  `ManaBridgeManager` both route cost on `SpellPreCastEvent` at `EventPriority.LOW`.
+  The Dreamwood handler drained Botania mana without consulting the shared
+  `CostRoutedTag`, so in `BOTANIA_PRIMARY`/`HYBRID` a scepter cast could drain
+  Botania mana twice. The handler now checks-and-sets the tag, so Botania is drained
+  exactly once per cast regardless of listener order.
 
-Audit-prescribed defaults: Runic Catalysis **ON**, Pool Attunement **ON**,
-Corporea Reagent Recall **OFF**, Elven Bloom Scrolls **OFF**.
+### Changed
 
-- **Runic Catalysis (tag-driven catalysts)** — New `TemplatedCatalystEffect`
-  handles modifier-only catalysts as a generic data class. `CatalystDataLoader`
-  (`SimpleJsonResourceReloadListener`) loads from
-  `data/ironsbotany/catalysts/*.json` on reload. Schema supports per-school
-  filtering, four tiers, and five modifier multipliers. Existing Java
-  catalyst classes remain for complex behaviours (mob effects, custom
-  data, conditional damage); the JSON system is additive.
-- **Pool Attunement Charm** — New curio `ironsbotany:pool_attunement_charm`.
-  Right-click on a Mana Pool binds it (requires `OVERCHARGE_UNLOCKED`).
-  Worn charms supply Botania mana to Nature-school spells only, gated by
-  `POOL_ATTUNEMENT_RANGE` (default 64 blocks) and
-  `POOL_ATTUNEMENT_BANDWIDTH` (default 50,000 mana/cast). Wired into
-  `BotanicalManaPayment` via new `ManaHelper.{has,drain}BotaniaMana`-with-bound-pool
-  entry points; the Nature-only filter is implicit because no other
-  caller reaches that path.
-- **Corporea Reagent Recall (default OFF)** — `ENABLE_CORPOREA_LOGISTICS`
-  flipped to false. Scope tightened in `SpellCircleReagentSystem`:
-  now requires `AbstractBotanicalSpell.isRitualGrade()` to return true.
-  Only `GaiaWrathSpell` and `ManaRebirthSpell` currently qualify.
-- **Elven Bloom Scrolls (default OFF)** — New `ENABLE_ELVEN_BLOOM_SCROLLS`
-  config plus `DataKeys.ELVEN_BLOOM`. `ElvenBloomScrollHandler` listens
-  to `PlayerEvent.ItemCraftedEvent`: if a rune-enhanced scroll is
-  crafted within 8 blocks of an Alfheim Portal block, the scroll's NBT
-  is flagged. `AbstractBotanicalSpell.onCast` checks main/offhand for
-  the flag and applies +15% damage and -10% cooldown — a sidegrade
-  endgame reward gated entirely behind real Botania late-game.
+- `mods.toml` Iron's Spells dependency range: `[1.20.1-3.15.2,)` → `[1.20.1-3.16,)`.
+- Documentation reconciled to the actual 1.8.x implementation (custom **Botany**
+  spell school, v1.8 equipment ladders, mana aggregation, Mana Mirror, upgrade-orb
+  compat). `CURSEFORGE_DESCRIPTION.md` in particular was stale (listed ISS 3.0.0 /
+  Botania 441 / Curios 5.0.0 and a "Nature school").
 
-### Phase 5 — Polish
+### Added
 
-- New Patchouli entries: Pool Attunement Charm, Runic Catalysis,
-  Elven Bloom Scrolls, Datapack Overview (`advanced_systems`).
-- README and CurseForge description updated to mark each feature as
-  default-on / default-off / experimental.
-- `ENABLE_CORPOREA_LOGISTICS` default flipped (see Phase 4.3).
+- **Asset-integrity validation** (`./gradlew validateAssets`, run automatically by
+  `build`/`check`). Fails the build if any model, blockstate, or particle JSON
+  references a texture/model that doesn't exist, or if a registered spell is missing
+  its icon — the guard that would have caught the missing altar texture.
 
-### Known limitations
+> Note: `1.7.x` release notes live in `irons-botany-1.7.0.md` at the project root;
+> this changelog jumps from 1.8.x back to 1.6.0 for the older in-repo history.
 
-- `./gradlew runData` currently fails because `libs/` ships obfuscated
-  production jars (compileOnly). The hand-authored JSONs match the Java
-  provider source bit-for-bit and are the source of truth until deobf
-  coordinates land.
-- `SpellManaNetworkIntegration` remains mostly stubbed (only water-fill
-  is functional) — audit-acknowledged, deferred to a future release.
-- ISS 3.15.2 upgrade-orb registry schema not independently verified
-  against developer docs.
-- JEI plugin not added — Rune-Scroll Fusion uses Forge's `CustomRecipe`
-  which JEI auto-handles via the default crafting category; Elven Bloom
-  Scrolls modify an existing recipe's output NBT rather than creating a
-  separate recipe type, so no dedicated category is required.
+## [1.8.0] - Player-feedback balance & usability pass
+
+Follows player feedback on `1.7.2`: mana integration that only worked next to a
+Mana Pool, upgrade orbs rejected by Botania casters, a backwards wand progression,
+and over-strong early mage armor with no higher tiers. Existing item/registry IDs
+are preserved — saves are not broken (display names, stats, and recipes change in
+place; new items are added alongside).
+
+### Fixed — Mana source support (highest priority)
+
+- **Unified mana aggregation.** `ManaHelper` now aggregates Botania mana across
+  *all* carried and equipped sources — Mana Tablet, Mana Ring, Greater Band of
+  Mana, Mana Mirror (remote, via its bound pool), and Iron's Botany mana items —
+  instead of the old all-or-nothing per-item `requestManaExact`. A cost that no
+  single item fully covers can now be paid from several. Two-pass (availability
+  sweep, then commit) so a cast never partially drains when it can't be afforded.
+  Nearby Mana Pools remain the final fallback.
+  - **Root cause:** the previous code asked each item for the *entire* cost
+    individually; when no single carried item covered it, the only thing that
+    worked was a Mana Pool — exactly the reported symptom.
+- New config: `enableInventoryManaSources`, `enableManaMirrorSupport`
+  (`enableManaPoolAccess` / `manaPoolSearchRadius` continue to govern the
+  nearby-pool fallback).
+
+### Fixed — Upgrade-orb compatibility
+
+- Botanical Spell Blade and the Botania wands now accept Iron's Spells upgrade
+  orbs, via the `irons_spellbooks:can_be_upgraded` data tag (the ISS-sanctioned
+  integration path). Spellbooks, the Manasteel caster, and mage armor already
+  qualified through their ISS/Forge base classes.
+
+### Changed — Spell Blade mana-generation safeguards
+
+- Mana generation now requires a real, damage-dealing hit and is rate-limited by
+  an internal cooldown, so autoclickers / attack-speed mods can't farm the mana
+  economy. New config: `terrasteelBladeManaCooldown` (a.k.a.
+  spellBladeManaGenerationCooldown); `terrasteelBladeManaPerHit` unchanged.
+
+### Added — Melee mage sword ladder
+
+- New **Elementium Spell Sword** and **Gaia Spell Sword** flank the existing
+  **Terrasteel Spell Blade**, forming a melee caster ladder
+  (Elementium → Terrasteel → Gaia). Like the blade, they boost spell power /
+  max mana / cooldown while held and generate Botania mana on a qualifying hit —
+  now sharing one `ManaGeneratingWeapon` path so the damage gate and
+  anti-autoclicker cooldown apply to all three. Config-driven
+  (`elementiumSword*` / `gaiaSword*`); accept upgrade orbs via the
+  `can_be_upgraded` tag. Crafted via smithing (Elementium from
+  `botania:elementium_sword`; Gaia upgrades the Terrasteel Spell Blade with a
+  Gaia Spirit Ingot).
+
+### Added — Wand progression ladder
+
+- Coherent **Manasteel → Elementium → Terrasteel → Gaia** caster ladder. New
+  **Terrasteel Wand** fills the late-game gap; existing wands are rebalanced and
+  re-themed in place (Manasteel Staff → "Manasteel Wand", Gaia Spirit Wand →
+  "Gaia Wand"; Livingwood Staff remains a pre-tier wood starter). Wands now scale
+  spell power / cooldown / mana efficiency monotonically and are config-driven
+  (`*WandSpellPower`, etc.).
+- **Elementium Wand** — dedicated Elementium rung (a real ISS `StaffItem` caster,
+  not a stat-stick), crafted via an Alfheim Elven Trade that upgrades the Manasteel
+  Wand. Identity: **Elven Favor** — a configurable chance on cast to refund part of
+  the spell's mana cost (`elementiumWand*` config). The **Dreamwood Scepter** now
+  reverts to its own name as a separate Alfheim ISS→Botania conversion utility
+  (it had been temporarily re-lettered as the Elementium rung). 250k Botania-mana
+  buffer; accepts upgrade orbs inherently as a casting item.
+
+### Changed — Mage armor: nerf + new tiers
+
+- **Manasteel Wizard** nerfed: per-piece spell power 0.15 → 0.05, max mana
+  150 → 50. Its strong 50%-absorb Mana Shield set bonus is **moved to the Gaia
+  set**; Manasteel's set bonus is now a small Botania spell-cost discount.
+- New **Elementium / Terrasteel / Gaia Mage** armor sets (12 items), each
+  config-driven with a distinct set bonus:
+  - Elementium — chance to refund part of a spell's mana cost.
+  - Terrasteel — incoming damage reduction while ISS mana is high (battlemage).
+  - Gaia — the endgame Mana Shield (absorbs damage by spending Botania mana).
+- Smithing-ladder recipes (each tier upgrades the previous piece). New config:
+  `*ArmorSpellPower`, `*ArmorMaxMana`, and per-set bonus tunables.
+
+## [1.6.0] - In Development
+
+Endgame content layer. Adds the four major Botany progression items, three new
+curios, and revives the datagen pipeline so future asset additions don't accumulate
+hand-written JSON debt.
+
+### Added — Phase 6.1: Datagen revival
+
+- **`IBDatagen`** + provider stack (`IBItemModelProvider`, `IBBlockStateProvider`,
+  `IBLanguageProvider`, `IBLootTableProvider`, `IBRecipeProvider`) — wired to
+  `GatherDataEvent`. The datagen run config in `build.gradle` is uncommented;
+  `./gradlew runData` regenerates JSON under `src/generated/resources/`.
+- Botania custom-recipe JSONs (`petal_apothecary`, `runic_altar`, `terra_plate`,
+  `elven_trade`) and Patchouli book entries stay hand-written by design.
+
+### Added — Phase 6.2: Manasteel Staff
+
+- **`ManasteelStaffItem`** — extends ISS `StaffItem` with a custom `MANASTEEL_TIER`
+  (damage 2.0, speed -3.0) plus four `AttributeContainer`s: +20 Max Mana,
+  +5% Cast Time Reduction, +10% Botany Spell Power, +0.05 Mana Efficiency.
+- Mana network: 50,000-unit `MANA_ITEM` capability via `IBCapabilityHandler`.
+- Crafting: shaped recipe (Manasteel + Mana Pearl + Sticks).
+
+### Added — Phase 6.3: Spellbooks
+
+- **`TerrasteelSpellbookItem`** — 12-slot Rare-tier `SimpleAttributeSpellBook`.
+  Stats: +200 Max Mana, +15% Botany Spell Power, +10% Nature Spell Power,
+  +0.10 Mana Efficiency. Mana network: 200,000-unit capacity.
+- **`ArcaneCodexItem`** — 14-slot Epic-tier endgame spellbook. Stats: +300 Max
+  Mana, +20% Cooldown Reduction, +15% Botany Spell Power, +10% Spell Power
+  (all schools), +0.15 Mana Efficiency. Mana network: 500,000-unit capacity.
+  Fire-resistant.
+- Crafting: Terrasteel Spellbook is a vanilla shaped recipe (`#botania:terrasteel_ingots`
+  surrounding any spellbook). Arcane Codex is a Terra Plate recipe (500,000 mana
+  + Terrasteel + Terrasteel Spellbook + Mana Pearl + Mana Diamond + Gaia Ingot).
+
+### Added — Phase 6.4: Elementium Scroll
+
+- **`ElementiumScrollItem`** — extends ISS `Scroll`, overrides
+  `removeScrollAfterCast` to skip consumption when `ManaBridgeManager` paid the
+  cost from Botania mana that tick. Falls back to vanilla single-use behavior if
+  no Botania mana is available.
+- **`ManaBridgeManager.resolveCost`** — adds an Elementium-scroll branch that
+  checks for the item in either hand on `CastSource.SCROLL`, charges
+  `issCost × MANA_CONVERSION_RATIO` Botania mana, marks the routed tag, and
+  returns `botaniaOnly` so the scroll's override sees the marker.
+- Crafting: Alfheim elven trade (any ISS scroll + Elementium + Pixie Dust).
+
+### Added — Phase 6.5: Three new curios
+
+- **`ManaReservoirRingItem`** — ring slot. +100 Max Mana attribute. Every 20
+  ticks, while ISS mana is below 50%, drains 20 Botania mana from any source
+  in the wearer's inventory and adds 1 ISS mana. Doubles as a 200,000-unit
+  Botania mana store via `IBCapabilityHandler`.
+- **`DaybloomAmuletItem`** — necklace slot. Daytime-conditional bonuses:
+  +15% Nature Spell Power and +5% Cast Time Reduction while in direct
+  sunlight. Implemented as transient UUID-keyed attribute modifiers added/
+  removed in `curioTick` based on `isDay() && canSeeSky(pos)`.
+- **`GaiasBlessingItem`** — necklace slot, Epic. While worn, Botany-school
+  spells gain +1 effective level via `ModifySpellLevelEvent`. Each cast drains
+  100,000 mana from a `ManaPool` within 16 blocks; if no pool can pay, the
+  bonus fizzles silently.
+- **`CurioEffectsHandler`** — Forge-bus subscriber that wires Gaia's Blessing
+  into the spell-level event.
+- Crafting: Mana Reservoir Ring is Petal Apothecary; Daybloom Amulet is Petal
+  Apothecary; Gaia's Blessing is Terra Plate (200,000 mana + Gaia Spirit +
+  Daybloom Amulet + Pixie Dust + Dragonstone).
+- Curios slot tags updated: `ring.json` adds Mana Reservoir Ring; new
+  `necklace.json` registers Daybloom Amulet and Gaia's Blessing.
+
+### Added — Phase 6.6: Patchouli + release prep
+
+- 5 new Patchouli entries under `equipment/` (manasteel_staff, terrasteel_spellbook,
+  arcane_codex, elementium_scroll, new_curios).
+- Version bump to 1.6.0 in `build.gradle`.
+
+## [1.5.0] - Released
+
+Foundation release implementing Phases 1–3 of the v2.0 enhancement roadmap. Adds the centralized
+mana bridge, custom Botany school, recipe content, and the first mana-network blocks.
+
+### Phase 1: Foundation Hardening
+
+- **Added** `ManaBridgeManager` (`com.ironsbotany.common.bridge`) — single entry point for
+  spell cost routing. Handles all five `ManaUnificationMode` values with a single
+  `resolveCost(player, spell, level, source)` call, returning
+  `ManaResolutionResult(issCharged, botaniaCharged, ok)`.
+- **Added** `CostRoutedTag` — tick-scoped idempotency tag stored on the player's persistent
+  data, preventing double-billing when both `SpellPreCastEvent` and `ChangeManaEvent` fire
+  for the same cast. Reads ANS's mirror tag to defer cleanly.
+- **Added** `SpellEventHandlers` — explicit `EventPriority.LOW` subscribers for ISS spell
+  events. Yields to Ars 'n Spells (which runs at `NORMAL`) and to KubeJS scripts
+  (`HIGH`/`HIGHEST`).
+- **Added** `ManaPriorityChain` + `ManaSource` enum — config-driven cross-bridge resource
+  ordering (default `["botania", "ars", "iss"]`). Configured via the new
+  `MANA_PRIORITY_CHAIN` TOML key.
+- **Added** `ArsNSpellsCompat.shouldDeferRouting()` — IB cleanly defers routing when ANS
+  is in `ARS_PRIMARY` or `HYBRID` mode.
+- **Added** public API package at `com.ironsbotany.api.*`:
+  - `IronsBotanyApi` — stable entry point for downstream addons
+  - `IManaSource` — SPI for cross-bridge mana source contract
+  - `BotanySchoolFlowerRegistry` — registration surface for school-themed flowers
+- **Added** `BotanySpellConfig` — per-spell `SpellConfigParameter`s (`botania_mana_cost`,
+  `dual_cost_enabled`) via `RegisterConfigParametersEvent`. Datapack-overridable per spell
+  at `data/<namespace>/spell_configs/<spell_id>.json`.
+- **Added** `/irons_botany reload` — server command (perm 2) that flushes runtime caches.
+- **Added** mixin JSON skeleton (`ironsbotany.mixins.json`) for future client-side HUD work.
+
+### Phase 2: Content & School
+
+- **Added** Botany SchoolType (`IBSchools.BOTANY`) — replaces the earlier shortcut of
+  piggybacking on Nature. Wires:
+  - Focus tag `#ironsbotany:focus/botany` (Mana Pearl, Pixie Dust, Dragonstone)
+  - Attributes `BOTANY_SPELL_POWER`, `BOTANY_MAGIC_RESIST`
+  - Damage type `ironsbotany:botany` (data-driven JSON at
+    `data/ironsbotany/damage_type/botany.json`)
+- **Changed** all 9 existing Botanical spells now return `IBSchools.BOTANY.get()` from
+  `getSchoolType()`.
+- **Added** Mana Inks (`MINOR_MANA_INK`, `GREATER_MANA_INK`, `PRIME_MANA_INK`) — petal
+  apothecary recipes that craft tiered scroll inks.
+- **Added** 8 School Power Orbs (Fire, Frost, Lightning, Holy, Ender, Blood, Nature,
+  Eldritch), crafted at the Runic Altar with the matching Botania rune.
+- **Added** 3 Alfheim Portal trades — Manasteel→Elementium spellblade,
+  Livingwood→Dreamwood scepter, Greater→Prime ink discount.
+- **Added** Gaia Guardian II loot modifier — Forge GLM (`AddItemLootModifier` +
+  `IBLootModifiers`) that adds Legendary Ink to the hardmode loot table without
+  overwriting Botania's JSON.
+- **Added** Lexica Botania Patchouli entry at
+  `assets/botania/patchouli_books/lexicon/en_us/entries/ironsbotany/index.json` — five-page
+  guide covering Iron's Botany content from inside Botania's own book.
+
+### Phase 3: Mana Network Citizenship
+
+- **Added** `ItemManaStorage` + `ItemManaCapabilityProvider` — per-stack `ManaItem`
+  capability provider, attached via `IBCapabilityHandler.onAttachItemCapabilities`. Iron's
+  Botany weapons and curios now appear in the Botania mana HUD, accept Spark deposits, and
+  are drained by `ManaItemHandler.requestMana` alongside Mana Tablets.
+- **Added** Arcane Mana Altar (`ArcaneManaAltarBlock` + `ArcaneManaAltarBlockEntity`) —
+  block entity implementing `ManaPool`, `ManaReceiver`, and `SparkAttachable`
+  simultaneously. Default capacity 1,000,000 mana. Drainable by nearby players during cast
+  resolution via `ManaBridgeManager.tryDrainFromNearbyAltar`.
+- **Added** `ManaBridgeManager.tryDrainFromNearbyAltar(player, amount, radius)` — bridge
+  helper that scans for an Arcane Mana Altar within range and drains from it before
+  falling through to the player's tablets.
+
+### Changed
+
+- `AbstractBotanicalSpell.onCast` — removed inline mana routing (the bridge handles it
+  before this method runs). Cost handling is now centralized in `ManaBridgeManager`.
+- `AbstractBotanicalSpell.getBotaniaManaCost(level)` — now consults the
+  `botania_mana_cost` SpellConfigParameter via `BotanySpellConfig.resolveBotaniaCost` and
+  falls back to the constructor-supplied ladder.
+
+### Deferred to v1.6 / v2.0
+
+The following enhancement-doc items are scoped for follow-up releases:
+
+- **v1.6**: Manasteel Staff, Terrasteel Spellbook, Elementium Scroll (ISS spellbook
+  subclasses); 3 new curios (Mana Reservoir Ring, Daybloom Amulet, Gaia's Blessing);
+  `ArcaneCodexItem` + Terra Plate recipe; datagen revival.
+- **v2.0**: Six ISS-school generating flowers (Emberlily, Frostbud, Stormbloom,
+  Sanctuary Lily, Voidpetal, Bloodweed); Verdant Caster functional flower;
+  Spreader-fired spell bursts; Corporea Scroll Rack + spell request matcher;
+  performance hygiene with `FakePlayer` pool; KubeJS surface (`irons_botany_js`).
 
 ## [1.4.1] - 2026-04-17
 

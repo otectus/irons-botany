@@ -30,6 +30,16 @@ public class SparkSwarmSpell extends AbstractBotanicalSpell {
     }
 
     @Override
+    protected double perSpellPowerMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.SPARK_SWARM_POWER.get();
+    }
+
+    @Override
+    protected double perSpellCooldownMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.SPARK_SWARM_COOLDOWN.get();
+    }
+
+    @Override
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.RARE)

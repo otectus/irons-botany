@@ -1,0 +1,21 @@
+{
+  "name": "Terrasteel Spell Blade",
+  "icon": "ironsbotany:terrasteel_spell_blade",
+  "category": "ironsbotany:equipment",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The $(l)Terrasteel Spell Blade$() represents the pinnacle of Botanical weaponry.$(br2)By fusing Terrasteel with arcane essence, you create a weapon that excels at both physical and magical combat."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:terrasteel_spell_blade",
+      "text": "Forge the blade using a Smithing Table with a Terra Sword, Arcane Essence, and Rune of Wrath."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Attributes",
+      "text": "$(l)Attack Damage:$() 10$(br)$(l)Attack Speed:$() 1.6$(br)$(l)Durability:$() 3000$(br2)$(l)Bonuses:$()$(br)• +25% All Spell Power$(br)• +200 Max Mana$(br)• -20% Mana Cost$(br2)$(l)Passive:$() Attacks generate 500 Botania Mana (requires Mana Tablet in inventory)"
+    }
+  ]
+}

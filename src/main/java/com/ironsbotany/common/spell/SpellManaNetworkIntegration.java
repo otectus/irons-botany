@@ -80,7 +80,9 @@ public class SpellManaNetworkIntegration {
         if (spell.getSchoolType() == SchoolRegistry.LIGHTNING.get()) {
             return SpellTriggeredManaEvent.SpellTriggerType.LIGHTNING;
         }
-        if (spell.getSchoolType() == SchoolRegistry.NATURE.get()) {
+        if (spell.getSchoolType() == com.ironsbotany.common.registry.IBSchools.BOTANY.get()
+                || spell.getSchoolType() == SchoolRegistry.NATURE.get()) {
+            // Botanical spells report the custom Botany school; treat it as a Nature trigger.
             return SpellTriggeredManaEvent.SpellTriggerType.NATURE;
         }
         if (spell.getSchoolType() == SchoolRegistry.FIRE.get()) {

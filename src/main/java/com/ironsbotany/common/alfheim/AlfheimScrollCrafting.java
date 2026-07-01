@@ -1,13 +1,11 @@
 package com.ironsbotany.common.alfheim;
 
 import com.ironsbotany.IronsBotany;
-import com.ironsbotany.common.progression.ProgressionGates;
 import com.ironsbotany.common.util.DataKeys;
 import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.SchoolType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.ModList;
 
@@ -21,31 +19,33 @@ import java.util.List;
 public class AlfheimScrollCrafting {
     
     /**
-     * Mark a scroll as Alfheim-crafted with dual-school. The {@code player}
-     * must have unlocked dual-school casting (see {@link ProgressionGates});
-     * otherwise the scroll is marked Alfheim-crafted but without the
-     * dual-school NBT and no secondary school is recorded.
+     * Mark a scroll as Alfheim-crafted with dual-school
      */
-    public static boolean markAlfheimScroll(Player player, ItemStack scroll,
-                                            SchoolType primarySchool,
-                                            SchoolType secondarySchool) {
+    public static void markAlfheimScroll(ItemStack scroll, SchoolType primarySchool, 
+                                         SchoolType secondarySchool) {
         if (!ModList.get().isLoaded("botania")) {
-            return false;
+            return;
         }
-
+        
         CompoundTag tag = scroll.getOrCreateTag();
         tag.putBoolean(DataKeys.ALFHEIM_CRAFTED, true);
-
-        if (!ProgressionGates.isDualSchoolUnlocked(player)) {
-            IronsBotany.LOGGER.debug(
-                "Dual-school not unlocked for player {} — Alfheim scroll left single-school",
-                player == null ? "<null>" : player.getName().getString());
-            return false;
-        }
-
         tag.putBoolean(DataKeys.DUAL_SCHOOL, true);
+        // Persist BOTH schools; the primary was previously dropped, so a "dual-school"
+        // scroll only ever recorded one of its two schools.
+        tag.putString(DataKeys.PRIMARY_SCHOOL, primarySchool.getId().toString());
         tag.putString(DataKeys.SECONDARY_SCHOOL, secondarySchool.getId().toString());
-        return true;
+    }
+
+    /**
+     * Get primary school for a dual-school scroll (null if unmarked/unparseable).
+     */
+    public static SchoolType getPrimarySchool(ItemStack scroll) {
+        CompoundTag tag = scroll.getTag();
+        if (tag == null || !tag.contains(DataKeys.PRIMARY_SCHOOL)) {
+            return null;
+        }
+        ResourceLocation rl = ResourceLocation.tryParse(tag.getString(DataKeys.PRIMARY_SCHOOL));
+        return rl == null ? null : SchoolRegistry.getSchool(rl);
     }
     
     /**
@@ -86,7 +86,14 @@ public class AlfheimScrollCrafting {
      */
     public static List<SchoolType> getCompatibleSchools(SchoolType primarySchool) {
         List<SchoolType> compatible = new ArrayList<>();
-        
+
+        // Botany (the mod's own school) is compatible with Holy and Nature. Without this
+        // branch, dual-school crafting produced NO compatible schools for botanical spells.
+        if (primarySchool == com.ironsbotany.common.registry.IBSchools.BOTANY.get()) {
+            compatible.add(SchoolRegistry.HOLY.get());
+            compatible.add(SchoolRegistry.NATURE.get());
+        }
+
         // Nature school is compatible with Holy
         if (primarySchool == SchoolRegistry.NATURE.get()) {
             compatible.add(SchoolRegistry.HOLY.get());

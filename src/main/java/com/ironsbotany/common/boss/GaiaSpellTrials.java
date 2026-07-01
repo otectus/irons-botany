@@ -148,8 +148,11 @@ public class GaiaSpellTrials {
         if (school == SchoolRegistry.ICE.get()) {
             event.setAmount(event.getAmount() * 0.3f); // 70% resistance to ice
             trialData.resistedSchools.add("ice");
-        } else if (school == SchoolRegistry.NATURE.get()) {
-            event.setAmount(event.getAmount() * 1.25f); // Vulnerable to Nature
+        } else if (school == com.ironsbotany.common.registry.IBSchools.BOTANY.get()
+                || school == SchoolRegistry.NATURE.get()) {
+            // Botanical spells report the custom Botany school (not ISS Nature); include
+            // both so the "botanical spells hit Gaia harder" mechanic actually fires.
+            event.setAmount(event.getAmount() * 1.25f); // Vulnerable to Botany/Nature
             trialData.botanicalSpellsUsed++;
         } else if (school == SchoolRegistry.FIRE.get()) {
             event.setAmount(event.getAmount() * 1.25f); // Vulnerable to Fire

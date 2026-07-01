@@ -2,11 +2,7 @@ package com.ironsbotany.common.entity;
 
 import com.ironsbotany.common.registry.IBEntities;
 import com.ironsbotany.common.registry.IBParticles;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -25,11 +21,12 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 public class SparkSwarmEntity extends PathfinderMob {
-    private static final EntityDataAccessor<Integer> LIFETIME =
-        SynchedEntityData.defineId(SparkSwarmEntity.class, EntityDataSerializers.INT);
-
+    // Lifetime is server-authoritative bookkeeping only (particles use tickCount, not this),
+    // so it's a plain field — not synched entity data. Syncing it wrote a metadata packet
+    // every tick per swarm, and the client-side expiry check caused a removal flicker.
     private UUID ownerUUID;
     private int maxLifetime = 200; // 10 seconds
+    private int currentLifetime = 0;
 
     public SparkSwarmEntity(EntityType<? extends SparkSwarmEntity> type, Level level) {
         super(type, level);
@@ -40,12 +37,6 @@ public class SparkSwarmEntity extends PathfinderMob {
         this.ownerUUID = owner.getUUID();
         this.maxLifetime = lifetime;
         this.setPos(owner.getX(), owner.getY() + 1.5, owner.getZ());
-    }
-
-    @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(LIFETIME, 0);
     }
 
     @Override
@@ -79,8 +70,10 @@ public class SparkSwarmEntity extends PathfinderMob {
     public void tick() {
         super.tick();
 
-        int currentLifetime = this.entityData.get(LIFETIME);
-        this.entityData.set(LIFETIME, currentLifetime + 1);
+        // Advance lifetime on the server only; the client learns of removal via entity sync.
+        if (!this.level().isClientSide) {
+            this.currentLifetime++;
+        }
 
         // Follow-owner logic (server side only)
         if (!this.level().isClientSide && ownerUUID != null) {
@@ -120,9 +113,9 @@ public class SparkSwarmEntity extends PathfinderMob {
             }
         }
 
-        // Remove after lifetime expires
-        if (currentLifetime > maxLifetime) {
-            if (!this.level().isClientSide && this.level() instanceof ServerLevel serverLevel) {
+        // Remove after lifetime expires (server-authoritative; client removal follows via sync)
+        if (!this.level().isClientSide && this.currentLifetime > maxLifetime) {
+            if (this.level() instanceof ServerLevel serverLevel) {
                 serverLevel.sendParticles(
                     IBParticles.MANA_TRANSFER.get(),
                     this.getX(), this.getY() + 0.5, this.getZ(),
@@ -155,7 +148,7 @@ public class SparkSwarmEntity extends PathfinderMob {
             tag.putUUID("Owner", this.ownerUUID);
         }
         tag.putInt("MaxLifetime", this.maxLifetime);
-        tag.putInt("CurrentLifetime", this.entityData.get(LIFETIME));
+        tag.putInt("CurrentLifetime", this.currentLifetime);
     }
 
     @Override
@@ -165,7 +158,7 @@ public class SparkSwarmEntity extends PathfinderMob {
             this.ownerUUID = tag.getUUID("Owner");
         }
         this.maxLifetime = tag.getInt("MaxLifetime");
-        this.entityData.set(LIFETIME, tag.getInt("CurrentLifetime"));
+        this.currentLifetime = tag.getInt("CurrentLifetime");
     }
 
     @Override

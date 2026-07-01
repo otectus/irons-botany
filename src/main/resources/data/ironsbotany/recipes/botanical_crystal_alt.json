@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "botania:mana_pearl"
+    },
+    {
+      "item": "botania:mana_pearl"
+    },
+    {
+      "item": "irons_spellbooks:arcane_essence"
+    },
+    {
+      "item": "minecraft:diamond"
+    }
+  ],
+  "result": {
+    "item": "ironsbotany:botanical_crystal",
+    "count": 1
+  }
+}

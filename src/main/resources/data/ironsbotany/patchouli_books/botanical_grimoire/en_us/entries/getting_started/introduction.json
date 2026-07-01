@@ -1,0 +1,26 @@
+{
+  "name": "Introduction to Botanical Magic",
+  "icon": "ironsbotany:botanical_focus",
+  "category": "ironsbotany:getting_started",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Long ago, ancient botanists discovered that the natural mana flowing through mystical flowers resonated with the arcane energies wielded by spellcasters.$(br2)By binding runes to living magic, they created a hybrid discipline: $(l)Botanical Spellcasting$().$(br2)These verdant mages could command nature itself, turning gardens into arsenals and forests into sanctuaries."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Mana Conversion",
+      "text": "The key to Botanical Magic lies in converting Botania's natural mana into the arcane mana used for spellcasting.$(br2)The conversion ratio is $(l)1000 Botania mana = 1 ISS mana$().$(br2)This may seem expensive, but Botania's abundant mana generation makes it sustainable for dedicated practitioners."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:botanical_focus",
+      "text": "Your first step is to craft a $(l)Botanical Focus$(). This curio item enables passive mana conversion from your Botania items to your spell mana pool."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Using the Focus",
+      "text": "1. Equip the Botanical Focus in a Curio slot$(br)2. Right-click to toggle $(l)Siphon Mode$()$(br)3. Ensure you have Botania mana in your inventory$(br)4. Your spell mana will automatically regenerate!$(br2)The Focus drains 1000 Botania mana per second to restore 1 spell mana per second."
+    }
+  ]
+}

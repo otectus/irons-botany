@@ -8,28 +8,22 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.function.Supplier;
-
 /**
- * Deferred registers for Iron's Botany Global Loot Modifier codecs.
- *
- * Replaces the runtime {@code LootTableLoadEvent} hack with data-driven JSON
- * modifiers, so pack authors can disable or replace injected loot through a
- * datapack instead of cracking open Java.
+ * Forge global loot modifier codec registry. The actual modifier
+ * instances live in {@code data/ironsbotany/loot_modifiers/} and the
+ * master pointer file at
+ * {@code data/forge/loot_modifiers/global_loot_modifiers.json} lists
+ * which modifier JSONs are active.
  */
 public final class IBLootModifiers {
-    private IBLootModifiers() {}
 
     public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> MODIFIERS =
-        DeferredRegister.create(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, IronsBotany.MODID);
+            DeferredRegister.create(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, IronsBotany.MODID);
 
-    public static final RegistryObject<Codec<AddPoolModifier>> ADD_POOL =
-        register("add_pool", AddPoolModifier.CODEC);
+    public static final RegistryObject<Codec<? extends IGlobalLootModifier>> ADD_ITEM =
+            MODIFIERS.register("add_item", () -> AddItemLootModifier.CODEC);
 
-    private static <T extends IGlobalLootModifier> RegistryObject<Codec<T>> register(
-            String name, Supplier<Codec<T>> codec) {
-        return MODIFIERS.register(name, codec);
-    }
+    private IBLootModifiers() {}
 
     public static void register(IEventBus eventBus) {
         MODIFIERS.register(eventBus);

@@ -2,11 +2,18 @@
 
 **A Minecraft Forge 1.20.1 compatibility mod bridging Botania and Iron's Spells 'n Spellbooks.**
 
-Iron's Botany creates deep mechanical synergy between Botania's natural mana systems and ISS's arcane spellcasting. It adds 9 Nature-school spells with dual mana costs, cross-mod equipment, a configurable mana unification system, and six stages of progressive integration that reward mastering both mods together.
+Iron's Botany creates deep mechanical synergy between Botania's natural mana systems and ISS's arcane spellcasting. As of v1.6 it ships its own custom **Botany** spell school, the centralized `ManaBridgeManager` cost router, mana-network-aware blocks and items, endgame spellbooks crafted at the Terra Plate, three new curios, and graceful soft-integration with Ars 'n Spells when present.
 
 ## Features
 
-### Mana Unification System
+### Mana Bridge Architecture (v1.5)
+
+All spell cost routing flows through `ManaBridgeManager.resolveCost(player, spell, level, source)`, called at `EventPriority.LOW` on `SpellPreCastEvent`. The bridge:
+
+- Handles all five `ManaUnificationMode` values from one entry point
+- Uses a tick-scoped `CostRoutedTag` for idempotency across `SpellPreCastEvent` and `ChangeManaEvent`
+- Defers cleanly to Ars 'n Spells when both bridges are active (no double-billing)
+- Honors a config-driven `ManaPriorityChain` (`["botania", "ars", "iss"]` default)
 
 Five configurable modes control how Botania and ISS mana interact:
 
@@ -18,85 +25,156 @@ Five configurable modes control how Botania and ISS mana interact:
 | **SEPARATE** | No conversion — spells require both mana types (dual-cost) |
 | **DISABLED** | No mana integration at all |
 
-Key items:
-- **Botanical Focus** — Curio that enables passive Botania-to-ISS mana conversion. Right-click in hand to toggle Siphon Mode; sneak + right-click in hand to equip to a Curios slot (or drag in the inventory UI).
-- **Spell Reservoir** — Block that stores and distributes ISS mana to nearby players. Right-click with mana items to deposit. Comparator output.
-- **Mana Conduit** — Block that converts Botania mana pool energy into ISS mana for nearby players. Feeds adjacent Reservoirs. Comparator output.
+### Botany Spell School (v1.5)
 
-### Botanical Spell School
-
-9 Nature-school spells with dual-cost mechanics (Botania + ISS mana):
+Iron's Botany registers its own `SchoolType` against `SchoolRegistry.SCHOOL_REGISTRY_KEY` — no longer piggybacking on Nature. Custom focus tag (`#ironsbotany:focus/botany`), attribute pair (`BOTANY_SPELL_POWER` / `BOTANY_MAGIC_RESIST`), and damage type. The 9 Botany spells:
 
 | Spell | Max Level | Rarity | Description |
 |-------|-----------|--------|-------------|
-| Mana Bloom | 5 | Common | Summons Botania mystical flowers on nearby ground. Flower count and range scale with level. |
-| Botanical Burst | 8 | Common | Fires a botanical projectile that deals magic damage. Catalysts can add piercing or extra projectiles. |
-| Flower Shield | 10 | Uncommon | Creates a petal barrier that absorbs damage and grants Resistance. Shield HP scales with level. |
-| Living Root Grasp | 6 | Common | Roots nearby enemies in place, applying Slowness and Weakness. |
-| Spark Swarm | 7 | Rare | Summons mana sparks that orbit and attack nearby enemies. Spark count scales with level. |
-| Runic Infusion | 10 | Rare | Grants Strength, Speed, and Regeneration. Carrying Botania runes in your inventory enhances the effect. |
-| Petal Storm | 5 | Uncommon | Unleashes a spiral storm of petals that damages and knocks back nearby enemies. |
-| Gaia's Wrath | 10 | Legendary | Channels the fury of Gaia to deal massive AoE damage, applying Wither, Weakness, and Slowness. |
-| Mana Rebirth | 5 | Epic | Heals the caster, removes negative effects, and grants Regeneration and Absorption. Can prevent death at higher levels. |
+| Mana Bloom | 5 | Common | Summons Botania mystical flowers on nearby ground. |
+| Botanical Burst | 8 | Common | Fires a botanical projectile that deals magic damage. |
+| Flower Shield | 10 | Uncommon | Creates a petal barrier that absorbs damage. |
+| Living Root Grasp | 6 | Common | Roots nearby enemies with Slowness and Weakness. |
+| Spark Swarm | 7 | Rare | Summons mana sparks that orbit and attack enemies. |
+| Runic Infusion | 10 | Rare | Strength + Speed + Regeneration; runes amplify the effect. |
+| Petal Storm | 5 | Uncommon | Spiral storm of petals damaging nearby enemies. |
+| Gaia's Wrath | 10 | Legendary | Massive AoE; Wither + Weakness + Slowness. |
+| Mana Rebirth | 5 | Epic | Heals, removes negatives; can prevent death at high levels. |
+
+Each spell exposes per-spell `botania_mana_cost` and `dual_cost_enabled` SpellConfigParameters — datapack-overridable at `data/<namespace>/spell_configs/<spell_id>.json`.
+
+### Supported Mana Sources (v1.8)
+
+When an Iron's Botany spell or mechanic needs Botania mana, it draws — and **aggregates across** — every source you carry or have equipped, in this order:
+
+1. **Carried & equipped mana items** — Mana Tablet, Mana Ring, Greater Band of Mana, **Mana Mirror** (remote, via its bound pool), and any Iron's Botany mana item. Mana is summed across all of them, so a cost no single item covers is still paid. *(Same sources the Botania mana HUD shows.)*
+2. **Nearby Mana Pools** — fallback when carried mana is insufficient (configurable radius).
+
+This makes spellcasting viable while exploring or bossing, away from base infrastructure. Toggles: `enableInventoryManaSources`, `enableManaMirrorSupport`, `enableManaPoolAccess` (nearby-pool fallback), `manaPoolSearchRadius`.
+
+> **Known limitation:** cross-item aggregation is best-effort over Botania's `ManaItemHandler`; third-party `ManaItem`s are supported insofar as they honor `requestMana`. Mana Mirror support is whatever Botania's `ManaItem` forwarding provides.
+
+### Mana Network Citizenship (v1.5 + v1.6)
+
+**Arcane Mana Altar** — block entity implementing `ManaPool`, `ManaReceiver`, and `SparkAttachable` simultaneously. 1,000,000 mana capacity. Drainable by nearby players during cast resolution via `ManaBridgeManager.tryDrainFromNearbyAltar`.
+
+**Mana Conduit** — drains adjacent Botania pools and feeds nearby players' ISS mana directly.
+
+**Spell Reservoir** — block that stores and distributes ISS mana to nearby players.
+
+Iron's Botany items also attach a per-stack `MANA_ITEM` capability via `IBCapabilityHandler` — they appear in the Botania mana HUD, accept Spark deposits, and are drained by `ManaItemHandler.requestMana` alongside Mana Tablets:
+
+| Item | Mana Capacity |
+|------|---------------|
+| Arcane Codex | 500,000 |
+| Gaia Spirit Wand | 1,000,000 |
+| Livingwood Staff | 500,000 (configurable) |
+| Dreamwood Scepter | 250,000 |
+| Terrasteel Spellbook | 200,000 |
+| Mana Reservoir Ring | 200,000 |
+| Manasteel Staff | 50,000 |
+| Botanical Focus | 50,000 |
+| Botanical Ring | 25,000 |
 
 ### Equipment
 
 **Weapons:**
-- **Terrasteel Spell Blade** — +25% spell power, +200 max mana, -20% cooldown. Attacks generate Botania mana. Repairable with Terrasteel Ingots.
-- **Livingwood Staff** — +10% Botanical spell power, stores 500k Botania mana
-- **Dreamwood Scepter** — +20% Botanical spell power, converts ISS mana cost to Botania
-- **Gaia Spirit Wand** — +30% Botanical spell power, -25% cooldowns
 
-**Manasteel Wizard Armor (4-piece set):**
-- +15% spell power and +150 max mana per piece
-- Repairable with Manasteel Ingots
-- Set Bonus: Mana Shield absorbs 50% damage using Botania mana
+**Melee mage sword ladder** *(v1.8)* — reward melee aggression; real combat hits generate Botania mana (rate-limited; not autoclicker-farmable). The alternative to the pure-caster wand ladder.
 
-**Upgrade Orbs** (used in Arcane Anvil):
-- Orb of Flora (+10% Nature spell power)
-- Orb of the Pool (+100 max ISS mana)
-- Orb of Bursting (+5% all spell power)
-- Orb of Terran Might (+5% all spell power)
+| Tier | Sword | Spell Power | Max Mana | Cooldown | Mana/Hit |
+|------|-------|------------|----------|----------|----------|
+| Elementium | **Elementium Spell Sword** *(new)* | +18% | +150 | -12% | 3500 |
+| Terrasteel | **Terrasteel Spell Blade** | +25% | +200 | -20% | 5000 |
+| Gaia | **Gaia Spell Sword** *(new)* | +38% | +250 | -28% | 7000 |
+
+**Wand progression ladder** *(v1.8)* — pure casters; hold one and cast from your spellbook for big caster bonuses. (Registry IDs unchanged; saves are safe.)
+
+| Tier | Wand | Spell Power | Cooldown | Mana Eff. | Material |
+|------|------|------------|----------|-----------|----------|
+| Pre  | Livingwood Staff | +10% (Nature) | — | — | Livingwood |
+| 1    | Manasteel Wand *(self-casting `StaffItem`)* | +10% Botany | -5% | +0.05 | Manasteel |
+| 2    | **Elementium Wand** *(self-casting `StaffItem`)* | +18% | -10% | +0.10 | Elementium; **Elven Favor** — chance to refund part of spell mana |
+| 3    | **Terrasteel Wand** | +28% | -15% | +0.12 | Terrasteel |
+| 4    | Gaia Wand | +40% | -25% | +0.15 | Gaia |
+
+All wand stats are config-driven. The Spell Blade keeps its melee-aggression identity (mana on hit); wands are the ranged/pure-caster path. The **Dreamwood Scepter** is a separate Alfheim utility (converts ISS mana cost → Botania), no longer the Elementium rung.
+
+**Spellbooks (v1.6):**
+- **Terrasteel Spellbook** — 12 slots, Rare. +200 Max Mana, +15% Botany Spell Power, +10% Nature Spell Power.
+- **Arcane Codex** — 14 slots, Epic. Crafted at the Terra Plate (500,000 mana). +300 Max Mana, +20% CDR, +15% Botany Spell Power.
+
+**Scrolls (v1.6):**
+- **Elementium Scroll** — reusable scroll, pulls cast cost from your Botania mana network. Falls back to single-use if mana is exhausted.
+
+**Mage Armor progression** *(v1.8)* — entry → endgame ladder, each tier config-driven with a distinct set bonus. Per-piece values shown; a full set is 4×.
+
+| Tier | Set | Spell Power / pc | Max Mana / pc | Set Bonus |
+|------|-----|------------------|---------------|-----------|
+| Entry | **Manasteel Wizard** | +5% *(was +15%)* | +50 *(was +150)* | Small Botania spell-cost discount |
+| Mid   | **Elementium Mage** *(new)* | +8% | +75 | Chance to refund part of spell mana (+0.03 mana eff./pc) |
+| Late  | **Terrasteel Mage** *(new)* | +12% | +100 | Reduced incoming damage while mana is high (-3% CDR/pc) |
+| Endgame | **Gaia Mage** *(new)* | +15% | +125 | Mana Shield — absorbs 50% damage with Botania mana (-4% CDR/pc) |
+
+Manasteel was nerfed so it's a true entry set; the strong 50%-absorb Mana Shield moved up to the Gaia set. New tiers craft via a smithing ladder (each upgrades the previous piece).
+
+**Curios:**
+- **Botanical Focus** — passive Botania-to-ISS mana conversion when held active.
+- **Botanical Ring** — +25 max mana, +5% Nature spell power.
+- **Mana Reservoir Ring** *(v1.6)* — +100 max mana; auto-converts Botania → ISS when ISS mana is low.
+- **Daybloom Amulet** *(v1.6)* — +15% Nature Spell Power and +5% Cast Speed while in direct sunlight.
+- **Gaia's Blessing** *(v1.6)* — Botany spells gain +1 effective level. Drains 100k mana from a nearby Mana Pool per cast.
+
+**Upgrade Orbs** (used at the Arcane Anvil; crafted at the Runic Altar in v1.5):
+- 4 original orbs: Flora, Pool, Bursting, Terran Might
+- 8 ISS-school orbs: Fire / Frost / Lightning / Holy / Ender / Blood / Nature / Eldritch power
+- **Accepts upgrade orbs** *(v1.8)*: Botanical Spell Blade, all wands (Livingwood/Manasteel/Elementium/Terrasteel/Gaia), spellbooks, and mage armor — via the `irons_spellbooks:can_be_upgraded` tag. Both Iron's Botany and Iron's Spells orbs work.
+
+### Petal Apothecary, Runic Altar, Terra Plate, Alfheim Portal
+
+Iron's Botany ships custom recipes for every major Botania crafting station:
+
+- **Petal Apothecary**: 3 tiers of Mana Ink (Minor / Greater / Prime), Mana Reservoir Ring, Daybloom Amulet
+- **Runic Altar**: 8 ISS-school spell-power orbs (Fire / Frost / Lightning / Holy / Ender / Blood / Nature / Eldritch)
+- **Terra Plate**: Arcane Codex (500k mana), Gaia's Blessing (200k mana)
+- **Alfheim Portal**: Manasteel→Elementium spellblade, Livingwood→Dreamwood scepter, Greater→Prime ink discount, Elementium Scroll promotion
+
+### Gaia Guardian II Loot
+
+Iron's Botany ships a Forge global loot modifier that adds Legendary Ink to the Gaia Guardian II hardmode loot table without overwriting Botania's JSON.
 
 ### Deep Synergy (6 Stages)
 
 All stages are individually toggleable. Use `bareBonesMode` to disable everything except mana conversion, or `enableDeepSynergy` as a master switch.
 
-1. **Spell Catalysts** *(default ON)* — Botania runes and lenses in your inventory modify spell behavior. 9 hardcoded Java catalysts (elemental runes, Terrasteel, Gaia Spirit) plus tag-driven `data/ironsbotany/catalysts/` JSON catalysts (1.7.0).
-2. **Casting Channels** *(default ON)* — Livingwood Staff, Dreamwood Focus, and Terra Rod each provide unique casting profiles (speed, regen, burst damage). *Registered in 1.7.0 — previously the registry was empty at runtime.*
-3. **Flower Auras** *(default ON)* — Nearby Botania flowers passively buff spellcasting. Bellethorne, Jaded Amaranthus, Heisei Dream, Rannuncarpus.
-4. **Spell-Triggered Mana Events** *(default OFF, experimental)* — Casting spells sends ripples through the Botania mana network. Only water-fill is fully functional; other effects stubbed.
-5. **Corporea Reagent Recall** *(default OFF in 1.7.0)* — Ritual-grade spells (Gaia's Wrath, Mana Rebirth) auto-request reagents from Corporea networks. Scope tightened in 1.7.0.
-6. **Alfheim Integration** *(default ON)* — Spells gain power in the Alfheim dimension; scrolls gain dual-school properties when crafted with `DUAL_SCHOOL_UNLOCKED`; spellbooks gain attunement levels.
+1. **Spell Catalysts** — Botania runes and lenses in your inventory modify spell behavior. 9 catalysts: elemental runes, lens upgrades, Terrasteel crit, Gaia Spirit damage.
+2. **Casting Channels** — Livingwood Staff, Dreamwood Focus, and Terra Rod each provide unique casting profiles.
+3. **Flower Auras** — Nearby Botania flowers passively buff spellcasting. Bellethorne, Jaded Amaranthus, Heisei Dream, Rannuncarpus.
+4. **Spell-Triggered Mana Events** *(Experimental, disabled by default)* — Casts ripple through the Botania mana network.
+5. **Corporea Logistics** — High-tier spells auto-request reagents from Corporea networks.
+6. **Alfheim Integration** — Spells gain power near Alfheim Portals; scrolls gain dual-school properties.
 
-### 1.7.0+ Additions
+### Patchouli Documentation
 
-- **Pool Attunement Charm** *(default ON, requires Gaia Guardian unlock)* — Curios charm that binds a single Botania mana pool as a supplementary Botania mana source for Nature-school spells. Range and bandwidth configurable.
-- **Runic Catalysis** *(default ON)* — Tag-driven catalyst definitions loaded from `data/ironsbotany/catalysts/`. Datapack authors can add new catalysts without Java.
-- **Elven Bloom Scrolls** *(default OFF, experimental)* — Rune-enhanced scrolls crafted near an Alfheim Portal gain +15% damage / -10% cooldown.
-- **Unified Progression** — Three cross-mod unlocks now have real gameplay effects:
-  - Botania Terrasteel → LEGENDARY-tier catalysts unlock
-  - Alfheim Portal → dual-school scroll crafting unlock
-  - Gaia Guardian → Spell Overcharge (+5% Nature damage) + Pool Attunement binding
+Iron's Botany ships a 24+ entry Patchouli book (*Botanical Grimoire*) covering every system. v2.0+ entries are organized under categories: Getting Started, Spells, Equipment, Advanced Systems, Deep Synergy.
 
-**1.7.1 / 1.7.2 patches** — Recipe correctness pass: the Botania-native Petal Apothecary, Runic Altar, Mana Infusion and Elven Trade paths shipped in 1.7.0 now actually load (missing `reagent` fields restored, invalid ISS item references corrected). Spell scrolls craft via the new `IBSpellScrollRecipe` (vanilla crafting + `irons_spellbooks:common_ink` + `ironsbotany:spell_petal` → bound ISS scroll) instead of the never-existing `irons_spellbooks:scroll_forge` recipe type. The Patchouli "Chronicle of the Green Mage" book now loads (content migrated from `data/` to `assets/` per the 1.20 upgrade guide) and is no longer duplicated by Patchouli's auto-spawn (`dont_generate_book: true`). Botanical Focus Siphon Mode is reachable again — Curios only auto-equips on sneak + right-click.
+A 5-page Iron's Botany entry is also injected into the **Lexica Botania** itself — visible from inside Botania's own guidebook.
 
 ## Localization
 
-Fully translated into 22 languages: Afrikaans, Arabic, Bengali, German, British English, Argentine Spanish, Spanish, Mexican Spanish, French, Hindi, Italian, Japanese, Korean, Dutch, Brazilian Portuguese, Russian, Turkish, Ukrainian, Vietnamese, Simplified Chinese, Traditional Chinese (HK), Traditional Chinese (TW).
+Fully translated into 22+ languages.
 
 ## Dependencies
 
 **Required:**
 - Minecraft Forge 1.20.1 (47.4.16+)
 - Botania 1.20.1-450+
-- Iron's Spells 'n Spellbooks 1.20.1-3.15.2+
+- Iron's Spells 'n Spellbooks 1.20.1-**3.16+** (tested on 3.16.1; on 3.15.2 use Iron's Botany 1.8.0)
 - Curios API 5.14.1+
 
 **Optional:**
 - Patchouli (in-game guidebook: *Chronicle of the Green Mage*)
-- JEI (recipe viewing)
-- Ars 'n' Spells 1.8.0+ (soft compat — see [COMPAT-ARS-N-SPELLS.md](COMPAT-ARS-N-SPELLS.md))
+- Ars 'n Spells (auto-detected via reflection; cost routing yields cleanly when present)
 
 ## Installation
 
@@ -105,21 +183,25 @@ Fully translated into 22 languages: Afrikaans, Arabic, Bengali, German, British 
 3. Place the Iron's Botany JAR in your `mods/` folder
 4. Launch Minecraft
 
+## Server Commands
+
+- `/irons_botany reload` *(perm 2)* — flushes runtime caches; pick up TOML / datapack changes without restart
+
 ## Configuration
 
-All settings are in the common config (`ironsbotany-common.toml`). 80+ options across 13 categories:
+All settings are in the common config (`ironsbotany-common.toml`). 90+ options across 14 categories:
 
 - **Master Toggles** — Bare-bones mode, deep synergy master switch
-- **Mana System** — Unification mode, conversion ratio (100–10000), bidirectional conversion, dual-cost, reservoir capacity
-- **Spells** — Power multiplier, cooldown multiplier, Botanical school toggle
+- **Mana System** — Unification mode, conversion ratio, bidirectional conversion, dual-cost, reservoir capacity, **priority chain**
+- **Spells** — Power multiplier, cooldown multiplier
 - **Equipment** — Per-item stat bonuses
 - **Balance** — Cross-loot, upgrade orb effectiveness
 - **Casting Channels** — Toggle + power multiplier
-- **Spell Catalysts** — Toggle, consumption chance, max stacking, power multiplier
-- **Flower Auras** — Toggle, range/strength multipliers, stacking limit, particles
+- **Spell Catalysts** — Toggle, consumption chance, stacking, power
+- **Flower Auras** — Toggle, range/strength, stacking, particles
 - **Mana Events** — Toggle (disabled by default), duration, intensity, radius
-- **Corporea Logistics** — Toggle, auto-request, search radius
-- **Alfheim Integration** — Dimension boost, dual-school scrolls, attunement
+- **Corporea Logistics** — Toggle, auto-request, radius
+- **Alfheim Integration** — Boost, dual-school scrolls, attunement
 
 ## Development
 
@@ -133,33 +215,55 @@ cd ironsbotany
 
 The built JAR will be in `build/libs/`.
 
+### Datagen
+
+```bash
+./gradlew runData
+```
+
+Outputs to `src/generated/resources/`. Hand-written JSONs under `src/main/resources/`
+take precedence; Botania custom-recipe JSONs (petal_apothecary, runic_altar, terra_plate,
+elven_trade) and Patchouli book entries are intentionally hand-written.
+
 ### Project Structure
+
 ```
 src/main/java/com/ironsbotany/
-├── IronsBotany.java          # Mod entry point
-├── client/                    # Rendering, particles, HUD, NearbyIBBlockCache
-├── data/                      # Datagen entrypoint + GLM provider (1.7.0)
+├── IronsBotany.java                # Mod entry point
+├── api/                            # Public API (stable across minor versions)
+│   ├── IronsBotanyApi              #   — bridge entry point
+│   ├── IManaSource                 #   — cross-bridge SPI
+│   └── BotanySchoolFlowerRegistry  #   — flower registration surface
+├── datagen/                        # Recipe / model / lang / loot providers
 └── common/
-    ├── alfheim/               # Dimension integration
-    ├── automation/            # Spell-driven Botania automation
-    ├── block/                 # Spell Reservoir, Mana Conduit
-    ├── boss/                  # Gaia Guardian spell trials
-    ├── casting/               # Casting channel system + registration (1.7.0)
-    ├── compat/                # Ars 'n' Spells reflective shim (1.4.1)
-    ├── config/                # 80+ config options + ProgressionConfig
-    ├── corporea/              # Corporea logistics (ritual-grade only, 1.7.0)
-    ├── entity/                # Projectiles and summons
-    ├── event/                 # Armor set bonus, Elven Bloom handler (1.7.0)
-    ├── flower/                # Flower aura system
-    ├── item/                  # Weapons, armor, curios, orbs, Pool Attunement Charm (1.7.0)
-    ├── loot/                  # Global Loot Modifier codecs (1.7.0)
-    ├── network/               # Client-server sync
-    ├── progression/           # UnifiedAdvancementSystem + ProgressionGates
-    ├── recipe/                # Rune Scroll Fusion + IBSpellScrollRecipe (1.7.1)
-    ├── registry/              # Deferred registers
-    ├── spell/                 # 9 spells, catalyst system, BotanicalManaPayment (1.7.0)
-    └── util/                  # ManaHelper, BotaniaIntegration, DataKeys, IBRegistryHealthCheck, NearbyManaPoolCache
+    ├── alfheim/                    # Dimension proximity boost
+    ├── automation/                 # Spell-driven Botania automation
+    ├── block/ + block/entity/      # Mana Conduit, Spell Reservoir, Arcane Mana Altar
+    ├── boss/                       # Gaia Guardian spell trials
+    ├── bridge/                     # ManaBridgeManager, CostRoutedTag, ManaPriorityChain
+    ├── casting/                    # Casting channel system
+    ├── command/                    # /irons_botany reload
+    ├── compat/                     # ArsNSpellsCompat reflective probe
+    ├── config/                     # 90+ config options
+    ├── corporea/                   # Corporea logistics
+    ├── entity/                     # Projectiles and summons
+    ├── event/                      # SpellEventHandlers, IBCapabilityHandler, CurioEffectsHandler
+    ├── flower/                     # Flower aura system
+    ├── item/ + item/cap/           # Weapons, armor, curios, orbs, mana capability provider
+    ├── loot/                       # AddItemLootModifier (Gaia Guardian drops)
+    ├── network/                    # Client-server sync
+    ├── progression/                # Advancement tracking
+    ├── recipe/                     # Rune Scroll Fusion
+    ├── registry/                   # Deferred registers (incl. IBSchools, IBDamageTypes)
+    ├── spell/ + spell/config/      # 9 Botany spells + per-spell SpellConfigParameters
+    └── util/                       # ManaHelper, BotaniaIntegration, DataKeys
 ```
+
+## Roadmap
+
+- **v1.5** *(released)* — Bridge architecture, Botany SchoolType, Arcane Mana Altar, recipe content
+- **v1.6** *(in development)* — Manasteel Staff, Terrasteel Spellbook, Arcane Codex, Elementium Scroll, 3 new curios, datagen revival
+- **v2.0** *(planned)* — see [`PHASE_7_PLAN.md`](PHASE_7_PLAN.md): six ISS-school generating flowers, the Verdant Caster (functional flower casts ISS spells), Corporea Scroll Rack, KubeJS surface
 
 ## Credits
 

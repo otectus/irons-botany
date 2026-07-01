@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " M ",
+    "MDM",
+    " M "
+  ],
+  "key": {
+    "M": {
+      "item": "botania:mana_diamond"
+    },
+    "D": {
+      "item": "botania:dragonstone"
+    }
+  },
+  "result": {
+    "item": "ironsbotany:botanical_crystal",
+    "count": 1
+  }
+}

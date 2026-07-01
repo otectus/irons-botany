@@ -71,8 +71,11 @@ public class RuneScrollFusionRecipe extends CustomRecipe {
             return ItemStack.EMPTY;
         }
 
-        // Create enhanced scroll
+        // Create enhanced scroll. copy() preserves the input stack's count, so reset to 1
+        // — otherwise placing a stack of N scrolls + 1 rune would yield N enhanced scrolls
+        // while consuming only 1 scroll + 1 rune (a duplication exploit).
         ItemStack result = scroll.copy();
+        result.setCount(1);
         CompoundTag tag = result.getOrCreateTag();
 
         // Store rune registry name
@@ -101,8 +104,11 @@ public class RuneScrollFusionRecipe extends CustomRecipe {
         
         @Override
         public RuneScrollFusionRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
+            // "category" is conventionally optional; json.get(...).getAsString() would NPE
+            // when it is omitted. Default to MISC via GsonHelper.
             CraftingBookCategory category = CraftingBookCategory.CODEC.byName(
-                json.get("category").getAsString(), CraftingBookCategory.MISC);
+                net.minecraft.util.GsonHelper.getAsString(json, "category", "misc"),
+                CraftingBookCategory.MISC);
             return new RuneScrollFusionRecipe(recipeId, category);
         }
 

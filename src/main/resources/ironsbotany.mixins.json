@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.ironsbotany.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "ironsbotany.refmap.json",
+  "minVersion": "0.8",
+  "mixins": [],
+  "client": [],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

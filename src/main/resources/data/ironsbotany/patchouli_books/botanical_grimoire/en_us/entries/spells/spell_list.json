@@ -1,0 +1,57 @@
+{
+  "name": "Botanical Spell Compendium",
+  "icon": "irons_spellbooks:scroll",
+  "category": "ironsbotany:spells",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Dual-Cost Mechanics",
+      "text": "All Botanical spells require $(l)both$() Botania mana $(l)and$() spell mana to cast.$(br2)This unique requirement makes them powerful but resource-intensive. Plan your mana generation accordingly!"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Mana Bloom",
+      "text": "$(l)Level:$() 1-5$(br)$(l)Type:$() Utility$(br)$(l)Cooldown:$() 30s$(br2)Spawns temporary mystical flowers in a radius around you. Higher levels spawn more flowers over a larger area.$(br2)$(o)Perfect for quick mana generation in a pinch!$()"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Botanical Burst",
+      "text": "$(l)Level:$() 1-8$(br)$(l)Type:$() Attack$(br)$(l)Cooldown:$() 10s$(br2)Fires a projectile of concentrated mana that deals damage on impact. Leaves a trail of petals in its wake.$(br2)$(o)Your basic offensive spell.$()"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Flower Shield",
+      "text": "$(l)Level:$() 1-10$(br)$(l)Type:$() Defense$(br)$(l)Cooldown:$() 20s$(br2)Summons a barrier of petals that grants Absorption and Resistance. Duration and strength increase with level.$(br2)$(o)Essential for survival!$()"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Living Root Grasp",
+      "text": "$(l)Level:$() 1-6$(br)$(l)Type:$() Control$(br)$(l)Cooldown:$() 15s$(br2)Roots enemies in place with living vines, applying Slowness IV and Weakness. Affects all enemies in a radius.$(br2)$(o)Excellent crowd control.$()"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Spark Swarm",
+      "text": "$(l)Level:$() 1-7$(br)$(l)Type:$() Summon$(br)$(l)Cooldown:$() 40s$(br2)Summons combat Sparks that attack nearby enemies. Higher levels summon more Sparks with longer lifetimes.$(br2)$(o)Your personal army!$()"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Runic Infusion",
+      "text": "$(l)Level:$() 1-10$(br)$(l)Type:$() Buff$(br)$(l)Cooldown:$() 60s$(br2)Channels runic power to grant Strength, Speed, and Regeneration. Duration and potency scale with level.$(br2)$(o)Become unstoppable!$()"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Petal Storm",
+      "text": "$(l)Level:$() 1-5$(br)$(l)Type:$() AoE$(br)$(l)Cooldown:$() 25s$(br2)Unleashes a storm of razor-sharp petals that damage and knock back all enemies in a large radius.$(br2)$(o)Clear entire rooms!$()"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Gaia's Wrath",
+      "text": "$(l)Level:$() 1-10$(br)$(l)Type:$() Ultimate Attack$(br)$(l)Cooldown:$() 180s$(br2)Channels the fury of Gaia herself, dealing massive damage to all enemies in a huge radius. Applies Wither, Weakness, and Slowness.$(br2)$(o)The ultimate spell of destruction!$()"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Mana Rebirth",
+      "text": "$(l)Level:$() 1-5$(br)$(l)Type:$() Healing$(br)$(l)Cooldown:$() 300s$(br2)Channels the regenerative power of mana to fully heal you, cleanse negative effects, and grant Regeneration and Absorption.$(br2)$(o)Your second chance at life!$()"
+    }
+  ]
+}

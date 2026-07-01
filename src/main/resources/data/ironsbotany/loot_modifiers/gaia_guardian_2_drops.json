@@ -1,0 +1,11 @@
+{
+  "type": "ironsbotany:add_item",
+  "conditions": [
+    {
+      "condition": "minecraft:loot_table_id",
+      "loot_table_id": "botania:gaia_guardian_2"
+    }
+  ],
+  "item": "irons_spellbooks:legendary_ink",
+  "count": 1
+}

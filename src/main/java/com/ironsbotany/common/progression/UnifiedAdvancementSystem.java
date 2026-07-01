@@ -1,7 +1,6 @@
 package com.ironsbotany.common.progression;
 
 import com.ironsbotany.IronsBotany;
-import com.ironsbotany.common.config.ProgressionConfig;
 import com.ironsbotany.common.util.DataKeys;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
@@ -14,40 +13,56 @@ import net.minecraftforge.fml.common.Mod;
 
 /**
  * Unified Advancement Chain - Weaves Botania and ISS progression together.
- *
- * Progression gates (upstream IDs resolved from {@link ProgressionConfig}):
- * - Terrasteel pickup → LEGENDARY-tier catalyst unlock
- * - Alfheim portal   → dual-school scroll casting unlock
- * - Gaia Guardian    → Spell Overcharge (+5% Nature damage)
- *
- * Reader-side gates live in {@link ProgressionGates}.
+ * 
+ * Progression gates:
+ * - Unlock Terrasteel → Unlock Tier 4 Spell Modifier
+ * - Unlock Alfheim → Unlock dual-school casting
+ * - Defeat Gaia → Unlock spell overcharge mechanic
+ * 
+ * Makes both mods co-dependent evolutions of the same magical discipline.
  */
 @Mod.EventBusSubscriber(modid = IronsBotany.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class UnifiedAdvancementSystem {
-
-    /** Resolve a config'd advancement id. {@code null} if the config is empty or unparseable. */
-    private static ResourceLocation resolve(String configValue) {
-        if (configValue == null || configValue.isBlank()) return null;
-        return ResourceLocation.tryParse(configValue);
-    }
-
+    
+    // Botania advancement keys
+    private static final ResourceLocation BOTANIA_TERRASTEEL = 
+        ResourceLocation.tryParse("botania:main/terrasteel_pickup");
+    private static final ResourceLocation BOTANIA_ALFHEIM = 
+        ResourceLocation.tryParse("botania:main/alfheim_portal_open");
+    private static final ResourceLocation BOTANIA_GAIA = 
+        ResourceLocation.tryParse("botania:challenge/gaia_guardian_kill");
+    
+    // ISS advancement keys (examples)
+    private static final ResourceLocation ISS_FIRST_SPELL = 
+        ResourceLocation.tryParse("irons_spellbooks:first_spell_cast");
+    private static final ResourceLocation ISS_LEGENDARY_SPELL = 
+        ResourceLocation.tryParse("irons_spellbooks:legendary_spell");
+    
+    /**
+     * Track advancement completion and unlock cross-mod features
+     */
     @SubscribeEvent
     public static void onAdvancementEarned(AdvancementEvent.AdvancementEarnEvent event) {
-        if (!ModList.get().isLoaded("botania")) return;
-
+        if (!ModList.get().isLoaded("botania")) {
+            return;
+        }
+        
         ServerPlayer player = (ServerPlayer) event.getEntity();
         Advancement advancement = event.getAdvancement();
         ResourceLocation advId = advancement.getId();
-
-        ResourceLocation terrasteel = resolve(ProgressionConfig.BOTANIA_TERRASTEEL_ADVANCEMENT.get());
-        ResourceLocation alfheim = resolve(ProgressionConfig.BOTANIA_ALFHEIM_ADVANCEMENT.get());
-        ResourceLocation gaia = resolve(ProgressionConfig.BOTANIA_GAIA_ADVANCEMENT.get());
-
-        if (terrasteel != null && advId.equals(terrasteel)) {
+        
+        // Terrasteel unlock → Tier 4 Spell Modifiers
+        if (advId.equals(BOTANIA_TERRASTEEL)) {
             unlockTier4SpellModifiers(player);
-        } else if (alfheim != null && advId.equals(alfheim)) {
+        }
+        
+        // Alfheim unlock → Dual-school casting
+        if (advId.equals(BOTANIA_ALFHEIM)) {
             unlockDualSchoolCasting(player);
-        } else if (gaia != null && advId.equals(gaia)) {
+        }
+        
+        // Gaia defeat → Spell overcharge
+        if (advId.equals(BOTANIA_GAIA)) {
             unlockSpellOvercharge(player);
         }
     }

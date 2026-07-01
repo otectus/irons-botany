@@ -1,0 +1,15 @@
+{
+  "name": "Gaia's Wrath",
+  "icon": "ironsbotany:gaia_spirit_wand",
+  "category": "ironsbotany:spells",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Gaia's Wrath$() — the ultimate Botanical spell. Channels the devastating power of the Gaia Guardian in a massive AoE attack.$(br2)$(l)Max Level:$() 10$(br)$(l)Type:$() Legendary AoE$(br)$(l)Cooldown:$() 180 seconds$(br)$(l)Botania Mana Cost:$() 150,000 + 50,000/level$(br2)Applies Wither and Weakness to all enemies in range. Reaches full power only in the Alfheim dimension. This spell requires endgame resources to craft."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:scroll_gaia_wrath"
+    }
+  ]
+}

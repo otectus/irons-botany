@@ -1,7 +1,6 @@
 {
   "replace": false,
   "values": [
-    "ironsbotany:botanical_focus",
-    "ironsbotany:pool_attunement_charm"
+    "ironsbotany:botanical_focus"
   ]
 }

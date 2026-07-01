@@ -1,0 +1,12 @@
+{
+  "type": "botania:elven_trade",
+  "ingredients": [
+    { "item": "ironsbotany:livingwood_staff" },
+    { "tag": "botania:dreamwood_logs" },
+    { "tag": "botania:dreamwood_logs" },
+    { "item": "botania:mana_pearl" }
+  ],
+  "output": [
+    { "item": "ironsbotany:dreamwood_scepter" }
+  ]
+}

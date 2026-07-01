@@ -1,6 +1,7 @@
 package com.ironsbotany.common.event;
 
 import com.ironsbotany.IronsBotany;
+import com.ironsbotany.common.bridge.CostRoutedTag;
 import com.ironsbotany.common.compat.ArsNSpellsCompat;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.item.DreamwoodScepterItem;
@@ -19,9 +20,9 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = IronsBotany.MODID)
 public class DreamwoodConversionHandler {
 
-    // Run at LOW so HIGHEST-priority cancellers (cooldowns, LP shortfalls, etc.
-    // from ISS add-ons like Ars 'n' Spells) get first refusal before we
-    // drain Botania mana.
+    // Subscribe at LOW (which runs AFTER HIGH/NORMAL): higher-priority cancellers
+    // — cooldowns, LP shortfalls, Ars 'n' Spells routing, etc. — get to refuse the
+    // cast first, so we only commit the Botania drain once the cast looks viable.
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onSpellPreCast(SpellPreCastEvent event) {
         if (event.isCanceled()) return;
@@ -41,6 +42,16 @@ public class DreamwoodConversionHandler {
         AbstractSpell spell = SpellRegistry.getSpell(event.getSpellId());
         if (spell == null) return;
 
+        // Idempotency guard: ManaBridgeManager also subscribes to SpellPreCastEvent at
+        // LOW and charges Botania in BOTANIA_PRIMARY/HYBRID. Same-priority listener order
+        // is undefined, so both handlers check-and-set the shared CostRoutedTag using the
+        // bridge's exact key (spellId hash + clamped ISS cost). Whichever runs first wins;
+        // the other sees the mark and skips, so Botania is drained exactly once per cast.
+        long tick = player.level().getGameTime();
+        int spellHash = spell.getSpellId().hashCode();
+        int issCost = Math.max(0, spell.getManaCost(event.getSpellLevel()));
+        if (CostRoutedTag.isMarked(player, tick, spellHash, issCost)) return;
+
         int spellManaCost = spell.getManaCost(event.getSpellLevel());
         int manaToConvert = (int) (spellManaCost * conversionPercent);
 
@@ -55,6 +66,10 @@ public class DreamwoodConversionHandler {
 
         // Drain Botania mana
         if (!ManaHelper.drainBotaniaMana(player, botaniaEquivalent)) return;
+
+        // Mark the shared idempotency tag so ManaBridgeManager.resolveCost sees this cast
+        // as already routed and returns NOOP (prevents a second Botania drain this tick).
+        CostRoutedTag.mark(player, tick, spellHash, issCost);
 
         // Pre-fund ISS mana so the spell can consume it instead.
         // Under Ars 'n' Spells ARS_PRIMARY mode, ANS's mixin redirects this

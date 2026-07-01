@@ -22,9 +22,6 @@ public final class DataKeys {
     public static final String LAST_SPELL_TIME = "IronsBotany_LastSpellTime";
     public static final String UNIQUE_SPELLS = "IronsBotany_UniqueSpells";
 
-    // Armor set bonus internal cooldown
-    public static final String MANA_SHIELD_COOLDOWN = "IronsBotany_ManaShieldCooldown";
-
     // Gaia trials
     public static final String ACTIVE_AURAS = "IronsBotany_ActiveAuras";
 
@@ -49,11 +46,9 @@ public final class DataKeys {
 
     // Alfheim scroll crafting
     public static final String DUAL_SCHOOL = "IronsBotany_DualSchool";
+    public static final String PRIMARY_SCHOOL = "IronsBotany_PrimarySchool";
     public static final String SECONDARY_SCHOOL = "IronsBotany_SecondarySchool";
     public static final String ALFHEIM_CRAFTED = "IronsBotany_AlfheimCrafted";
-
-    // Elven Bloom Scrolls (1.7.0 Phase 4.4)
-    public static final String ELVEN_BLOOM = "IronsBotany_ElvenBloom";
 
     // Spellbook attunement
     public static final String ALFHEIM_ATTUNEMENT = "IronsBotany_AlfheimAttunement";

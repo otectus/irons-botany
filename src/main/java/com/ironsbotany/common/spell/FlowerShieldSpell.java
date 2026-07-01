@@ -32,6 +32,16 @@ public class FlowerShieldSpell extends AbstractBotanicalSpell {
     }
 
     @Override
+    protected double perSpellPowerMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.FLOWER_SHIELD_POWER.get();
+    }
+
+    @Override
+    protected double perSpellCooldownMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.FLOWER_SHIELD_COOLDOWN.get();
+    }
+
+    @Override
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.UNCOMMON)

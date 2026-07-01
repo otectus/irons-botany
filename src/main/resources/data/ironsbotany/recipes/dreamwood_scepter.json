@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  E",
+    " D ",
+    "D  "
+  ],
+  "key": {
+    "E": {
+      "item": "botania:elementium_ingot"
+    },
+    "D": {
+      "item": "botania:dreamwood_twig"
+    }
+  },
+  "result": {
+    "item": "ironsbotany:dreamwood_scepter",
+    "count": 1
+  }
+}
