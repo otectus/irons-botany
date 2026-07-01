@@ -28,6 +28,7 @@ public class CommonConfig {
     // Mana System
     public static final ForgeConfigSpec.EnumValue<ManaUnificationMode> MANA_UNIFICATION_MODE;
     public static final ForgeConfigSpec.IntValue MANA_CONVERSION_RATIO;
+    public static final ForgeConfigSpec.IntValue ELEMENTIUM_SCROLL_MANA_COST;
     public static final ForgeConfigSpec.BooleanValue ENABLE_DUAL_COST_SPELLS;
     public static final ForgeConfigSpec.IntValue SPELL_RESERVOIR_CAPACITY;
     public static final ForgeConfigSpec.IntValue MANA_TRANSFER_RATE;
@@ -117,6 +118,19 @@ public class CommonConfig {
     public static final ForgeConfigSpec.DoubleValue TERRASTEEL_SET_DAMAGE_REDUCTION;
     public static final ForgeConfigSpec.DoubleValue TERRASTEEL_SET_MANA_THRESHOLD;
     public static final ForgeConfigSpec.DoubleValue GAIA_SET_ABSORB_PERCENT;
+
+    // Mana Network Item Capacities (Botania MANA_ITEM cap per stack; and the Arcane Mana Altar)
+    public static final ForgeConfigSpec.IntValue DREAMWOOD_SCEPTER_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue ELEMENTIUM_WAND_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue TERRASTEEL_WAND_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue GAIA_WAND_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue MANASTEEL_STAFF_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue TERRASTEEL_SPELLBOOK_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue ARCANE_CODEX_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue MANA_RESERVOIR_RING_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue BOTANICAL_FOCUS_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue BOTANICAL_RING_MANA_CAPACITY;
+    public static final ForgeConfigSpec.IntValue ARCANE_ALTAR_MAX_MANA;
 
     // Balance
     public static final ForgeConfigSpec.BooleanValue ENABLE_CROSS_LOOT;
@@ -226,7 +240,15 @@ public class CommonConfig {
                 .comment("How much Botania mana equals 1 ISS mana (default: 1000)",
                          "Only used in HYBRID and ISS_PRIMARY modes")
                 .defineInRange("conversionRatio", 1000, 100, 10000);
-        
+
+        ELEMENTIUM_SCROLL_MANA_COST = BUILDER
+                .comment("Botania mana an Elementium Scroll draws to cast without consuming itself.",
+                         "Scroll spells usually report 0 ISS mana cost, so this flat floor is what",
+                         "the scroll actually pays; if Botania can't cover it the scroll is consumed",
+                         "the vanilla single-use way. Raised to conversionRatio*issCost for the rare",
+                         "scroll whose spell does carry a mana cost.")
+                .defineInRange("elementiumScrollManaCost", 10000, 0, 1000000);
+
         BIDIRECTIONAL_CONVERSION = BUILDER
                 .comment("Allow converting ISS mana back to Botania mana",
                          "Only used in HYBRID mode")
@@ -293,6 +315,8 @@ public class CommonConfig {
         MANA_PRIORITY_CHAIN = BUILDER
                 .comment("Cross-bridge mana resource ordering. Sources are tried in",
                          "list order; absent mods are skipped. Tokens: botania, ars, iss.",
+                         "(\"lp\" and \"aura\" are also accepted as forward-compat placeholders",
+                         "but are currently inactive and always skipped.)",
                          "Default: [\"botania\", \"ars\", \"iss\"] — Botania pays first, then",
                          "Ars 'n Spells if loaded, then ISS as the safety-net fallback.")
                 .defineList("manaPriorityChain",
@@ -532,6 +556,44 @@ public class CommonConfig {
                 .comment("Full Gaia Mage set (endgame Mana Shield): fraction of incoming damage absorbed by spending Botania mana",
                          "This is the strong 50% absorb formerly on Manasteel, now gated behind the Gaia tier.")
                 .defineInRange("gaiaSetAbsorbPercent", 0.50, 0.0, 0.90);
+        BUILDER.pop();
+
+        BUILDER.push("Mana Network Capacities");
+        BUILDER.comment("Max Botania mana each mana-network item stores (Spark-fillable, HUD-aggregated),",
+                        "plus the Arcane Mana Altar's pool cap. Previously hardcoded.");
+        DREAMWOOD_SCEPTER_MANA_CAPACITY = BUILDER
+                .comment("Dreamwood Scepter mana capacity")
+                .defineInRange("dreamwoodScepterManaCapacity", 250_000, 0, 100_000_000);
+        ELEMENTIUM_WAND_MANA_CAPACITY = BUILDER
+                .comment("Elementium Wand mana capacity")
+                .defineInRange("elementiumWandManaCapacity", 250_000, 0, 100_000_000);
+        TERRASTEEL_WAND_MANA_CAPACITY = BUILDER
+                .comment("Terrasteel Wand mana capacity")
+                .defineInRange("terrasteelWandManaCapacity", 500_000, 0, 100_000_000);
+        GAIA_WAND_MANA_CAPACITY = BUILDER
+                .comment("Gaia Spirit Wand mana capacity")
+                .defineInRange("gaiaWandManaCapacity", 1_000_000, 0, 100_000_000);
+        MANASTEEL_STAFF_MANA_CAPACITY = BUILDER
+                .comment("Manasteel Staff mana capacity")
+                .defineInRange("manasteelStaffManaCapacity", 50_000, 0, 100_000_000);
+        TERRASTEEL_SPELLBOOK_MANA_CAPACITY = BUILDER
+                .comment("Terrasteel Spellbook mana capacity")
+                .defineInRange("terrasteelSpellbookManaCapacity", 200_000, 0, 100_000_000);
+        ARCANE_CODEX_MANA_CAPACITY = BUILDER
+                .comment("Arcane Codex mana capacity")
+                .defineInRange("arcaneCodexManaCapacity", 500_000, 0, 100_000_000);
+        MANA_RESERVOIR_RING_MANA_CAPACITY = BUILDER
+                .comment("Mana Reservoir Ring mana capacity")
+                .defineInRange("manaReservoirRingManaCapacity", 200_000, 0, 100_000_000);
+        BOTANICAL_FOCUS_MANA_CAPACITY = BUILDER
+                .comment("Botanical Focus mana capacity")
+                .defineInRange("botanicalFocusManaCapacity", 50_000, 0, 100_000_000);
+        BOTANICAL_RING_MANA_CAPACITY = BUILDER
+                .comment("Botanical Ring mana capacity")
+                .defineInRange("botanicalRingManaCapacity", 25_000, 0, 100_000_000);
+        ARCANE_ALTAR_MAX_MANA = BUILDER
+                .comment("Arcane Mana Altar pool capacity")
+                .defineInRange("arcaneAltarMaxMana", 1_000_000, 0, 100_000_000);
         BUILDER.pop();
 
         BUILDER.pop(); // Equipment

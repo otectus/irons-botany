@@ -46,6 +46,7 @@ public final class DataKeys {
 
     // Alfheim scroll crafting
     public static final String DUAL_SCHOOL = "IronsBotany_DualSchool";
+    public static final String PRIMARY_SCHOOL = "IronsBotany_PrimarySchool";
     public static final String SECONDARY_SCHOOL = "IronsBotany_SecondarySchool";
     public static final String ALFHEIM_CRAFTED = "IronsBotany_AlfheimCrafted";
 

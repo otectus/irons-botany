@@ -5,7 +5,6 @@ import com.ironsbotany.common.casting.CastingChannel;
 import com.ironsbotany.common.casting.ChannelVisuals;
 import com.ironsbotany.common.casting.SpellCastContext;
 import com.ironsbotany.common.spell.AbstractBotanicalSpell;
-import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import net.minecraft.ChatFormatting;
 import com.ironsbotany.common.registry.IBParticles;
@@ -45,9 +44,10 @@ public class LivingwoodStaffChannel implements CastingChannel {
     
     @Override
     public boolean canCast(AbstractSpell spell, Player player) {
-        // Can cast all Botanical spells efficiently
+        // Can cast all Botanical spells efficiently (Botanical spells report the
+        // custom Botany school, not ISS's Nature school).
         return spell instanceof AbstractBotanicalSpell ||
-               spell.getSchoolType() == SchoolRegistry.NATURE.get();
+               spell.getSchoolType() == com.ironsbotany.common.registry.IBSchools.BOTANY.get();
     }
     
     @Override

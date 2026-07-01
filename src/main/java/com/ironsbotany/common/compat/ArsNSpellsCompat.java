@@ -31,6 +31,7 @@ public final class ArsNSpellsCompat {
     private static Method getCurrentModeMethod;
     private static Method getBridgeMethod;
     private static Method bridgeGetMaxManaMethod;
+    private static Class<?> bridgeGetMaxManaMethodClass;
     private static Field conversionRateField;
     private static Method configValueGetMethod;
 
@@ -111,8 +112,15 @@ public final class ArsNSpellsCompat {
             }
             Object bridge = getBridgeMethod.invoke(null);
             if (bridge == null) return Float.NaN;
-            if (bridgeGetMaxManaMethod == null) {
-                bridgeGetMaxManaMethod = bridge.getClass().getMethod("getMaxMana", Player.class);
+            // Cache the getMaxMana Method per concrete bridge class. BridgeManager.getBridge()
+            // returns different impls (IronsBridge vs ArsNativeBridge) depending on the active
+            // mode, so a Method cached from one impl would throw IllegalArgumentException when
+            // invoked on another after a runtime mode switch — which markFailed() would then
+            // latch, disabling ALL ANS integration for the session.
+            Class<?> bridgeClass = bridge.getClass();
+            if (bridgeGetMaxManaMethod == null || bridgeGetMaxManaMethodClass != bridgeClass) {
+                bridgeGetMaxManaMethod = bridgeClass.getMethod("getMaxMana", Player.class);
+                bridgeGetMaxManaMethodClass = bridgeClass;
             }
             Object result = bridgeGetMaxManaMethod.invoke(bridge, player);
             return result instanceof Float f ? f : Float.NaN;

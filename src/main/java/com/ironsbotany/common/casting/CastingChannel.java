@@ -57,4 +57,16 @@ public interface CastingChannel {
      * Get the cooldown multiplier
      */
     float getCooldownMultiplier();
+
+    /**
+     * Get the mana-cost multiplier this channel applies (e.g. 0.9 for -10%).
+     * Derived from {@link #modifyCast} so the two never drift; the probe context
+     * only receives {@code multiply*}/{@code add*} calls, so null player/spell are safe.
+     * Consumed by {@code ManaBridgeManager} when computing the Botania cost.
+     */
+    default float getManaCostMultiplier() {
+        SpellCastContext probe = new SpellCastContext(null, null, 0, net.minecraft.world.item.ItemStack.EMPTY);
+        modifyCast(probe);
+        return probe.getManaCost();
+    }
 }

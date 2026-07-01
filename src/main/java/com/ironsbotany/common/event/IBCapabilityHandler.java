@@ -42,16 +42,16 @@ public final class IBCapabilityHandler {
 
     private static int capacityFor(Item item) {
         if (item == IBItems.LIVINGWOOD_STAFF.get()) return CommonConfig.LIVINGWOOD_STAFF_MANA_CAPACITY.get();
-        if (item == IBItems.DREAMWOOD_SCEPTER.get()) return 250_000;
-        if (item == IBItems.ELEMENTIUM_WAND.get()) return 250_000;
-        if (item == IBItems.TERRASTEEL_WAND.get()) return 500_000;
-        if (item == IBItems.GAIA_SPIRIT_WAND.get()) return 1_000_000;
-        if (item == IBItems.MANASTEEL_STAFF.get()) return 50_000;
-        if (item == IBItems.TERRASTEEL_SPELLBOOK.get()) return 200_000;
-        if (item == IBItems.ARCANE_CODEX.get()) return 500_000;
-        if (item == IBItems.MANA_RESERVOIR_RING.get()) return 200_000;
-        if (item == IBItems.BOTANICAL_FOCUS.get()) return 50_000;
-        if (item == IBItems.BOTANICAL_RING.get()) return 25_000;
+        if (item == IBItems.DREAMWOOD_SCEPTER.get()) return CommonConfig.DREAMWOOD_SCEPTER_MANA_CAPACITY.get();
+        if (item == IBItems.ELEMENTIUM_WAND.get()) return CommonConfig.ELEMENTIUM_WAND_MANA_CAPACITY.get();
+        if (item == IBItems.TERRASTEEL_WAND.get()) return CommonConfig.TERRASTEEL_WAND_MANA_CAPACITY.get();
+        if (item == IBItems.GAIA_SPIRIT_WAND.get()) return CommonConfig.GAIA_WAND_MANA_CAPACITY.get();
+        if (item == IBItems.MANASTEEL_STAFF.get()) return CommonConfig.MANASTEEL_STAFF_MANA_CAPACITY.get();
+        if (item == IBItems.TERRASTEEL_SPELLBOOK.get()) return CommonConfig.TERRASTEEL_SPELLBOOK_MANA_CAPACITY.get();
+        if (item == IBItems.ARCANE_CODEX.get()) return CommonConfig.ARCANE_CODEX_MANA_CAPACITY.get();
+        if (item == IBItems.MANA_RESERVOIR_RING.get()) return CommonConfig.MANA_RESERVOIR_RING_MANA_CAPACITY.get();
+        if (item == IBItems.BOTANICAL_FOCUS.get()) return CommonConfig.BOTANICAL_FOCUS_MANA_CAPACITY.get();
+        if (item == IBItems.BOTANICAL_RING.get()) return CommonConfig.BOTANICAL_RING_MANA_CAPACITY.get();
         return 0;
     }
 }

@@ -35,4 +35,14 @@ public final class ItemManaCapabilityProvider implements ICapabilityProvider {
         }
         return LazyOptional.empty();
     }
+
+    /**
+     * Invalidate the backing {@link LazyOptional} so any consumer that cached it
+     * releases its resolver (which is bound to a specific {@link ItemStack}). Item
+     * providers are recreated on stack copy, so callers holding a stale reference
+     * can be signalled to re-resolve.
+     */
+    public void invalidate() {
+        instance.invalidate();
+    }
 }

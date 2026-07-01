@@ -4,15 +4,11 @@ import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.compat.ArsNSpellsCompat;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.config.ManaUnificationMode;
-import com.ironsbotany.common.block.entity.ArcaneManaAltarBlockEntity;
 import com.ironsbotany.common.spell.AbstractBotanicalSpell;
 import com.ironsbotany.common.util.ManaHelper;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import io.redspace.ironsspellbooks.api.spells.CastSource;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * Single entry point for routing spell cost between ISS mana and Botania
@@ -59,7 +55,19 @@ public final class ManaBridgeManager {
     public static ManaResolutionResult resolveCost(Player player, AbstractSpell spell, int level, CastSource source) {
         if (player == null || spell == null) return ManaResolutionResult.NOOP;
         if (player.level().isClientSide()) return ManaResolutionResult.NOOP;
+        try {
+            return resolveCostInternal(player, spell, level, source);
+        } catch (Throwable t) {
+            // This runs inside a Forge SpellPreCastEvent handler and bridges into
+            // Botania's / ANS's mana network; a third-party exception here must not
+            // abort or crash the cast. Fail open (let ISS handle cost normally).
+            IronsBotany.LOGGER.debug("ManaBridgeManager.resolveCost failed for {} L{}: {}",
+                    spell.getSpellId(), level, t.toString());
+            return ManaResolutionResult.NOOP;
+        }
+    }
 
+    private static ManaResolutionResult resolveCostInternal(Player player, AbstractSpell spell, int level, CastSource source) {
         long tick = player.level().getGameTime();
         int spellHash = spell.getSpellId().hashCode();
         int issCost = safeIssCost(spell, level);
@@ -73,7 +81,14 @@ public final class ManaBridgeManager {
         // mark the routed tag so the scroll's overridden removeScrollAfterCast
         // sees the marker and skips consumption.
         if (source == CastSource.SCROLL && holdingElementiumScroll(player)) {
-            int botaniaCost = Math.max(0, issCost) * CommonConfig.MANA_CONVERSION_RATIO.get();
+            // Scroll spells usually report a 0 ISS mana cost (the scroll item is the
+            // "cost"), so deriving the Botania price purely from issCost would make this
+            // path never fire. Use a configurable flat floor, raised to issCost*ratio for
+            // the rare scroll whose spell does have a mana cost, then apply the held
+            // channel's mana-cost multiplier.
+            int botaniaCost = Math.max(CommonConfig.ELEMENTIUM_SCROLL_MANA_COST.get(),
+                    Math.max(0, issCost) * CommonConfig.MANA_CONVERSION_RATIO.get());
+            botaniaCost = applyChannelManaCost(player, spell, botaniaCost);
             if (botaniaCost > 0
                     && com.ironsbotany.common.util.ManaHelper.hasBotaniaMana(player, botaniaCost)
                     && com.ironsbotany.common.util.ManaHelper.drainBotaniaMana(player, botaniaCost)) {
@@ -81,6 +96,8 @@ public final class ManaBridgeManager {
                 // Dedicated marker so the scroll's removeScrollAfterCast knows Botania paid
                 // for *this* cast specifically (not just any routed cast this tick).
                 CostRoutedTag.markScrollPaid(player, tick);
+                // Botania paid in place of ISS — refund ISS's own debit (if any) in onChangeMana.
+                CostRoutedTag.markBotaniaPaid(player, tick);
                 return ManaResolutionResult.botaniaOnly(botaniaCost);
             }
             // Insufficient Botania → fall through to normal mode handling
@@ -120,9 +137,9 @@ public final class ManaBridgeManager {
 
     /**
      * Botania-primary: convert ISS cost into Botania units and charge the
-     * mana network. ISS's own debit will still happen (we don't cancel it
-     * here), so this mode effectively makes the player pay <em>both</em> in
-     * exchange for being able to refill ISS mana from Botania trivially.
+     * mana network <em>instead of</em> ISS mana. We flag the cast as
+     * Botania-paid so {@code SpellEventHandlers.onChangeMana} refunds ISS's
+     * own debit, making this a true "Botania pays" mode (no double-charge).
      *
      * <p>For Botanical spells, we charge the Botanical-specific cost; for
      * other ISS spells we use {@code issCost * conversionRatio}.
@@ -136,6 +153,8 @@ public final class ManaBridgeManager {
         if (!ManaHelper.drainBotaniaMana(player, botaniaCost)) {
             return ManaResolutionResult.INSUFFICIENT;
         }
+        // Botania paid in place of ISS — refund ISS's debit in onChangeMana this tick.
+        CostRoutedTag.markBotaniaPaid(player, player.level().getGameTime());
         return ManaResolutionResult.botaniaOnly(botaniaCost);
     }
 
@@ -158,7 +177,8 @@ public final class ManaBridgeManager {
         if (!CommonConfig.ENABLE_DUAL_COST_SPELLS.get()) return ManaResolutionResult.NOOP;
         if (!(spell instanceof AbstractBotanicalSpell botanical)) return ManaResolutionResult.NOOP;
         if (!com.ironsbotany.common.spell.config.BotanySpellConfig.isDualCostEnabled(spell)) return ManaResolutionResult.NOOP;
-        int botaniaCost = com.ironsbotany.common.util.MageArmorSets.applyBotaniaDiscount(player, botanical.getBotaniaManaCost(level));
+        int botaniaCost = com.ironsbotany.common.util.MageArmorSets.applyBotaniaDiscount(player,
+                applyChannelManaCost(player, spell, botanical.getBotaniaManaCost(level)));
         if (botaniaCost <= 0) return ManaResolutionResult.NOOP;
         if (!ManaHelper.hasBotaniaMana(player, botaniaCost)) {
             return ManaResolutionResult.INSUFFICIENT;
@@ -175,7 +195,8 @@ public final class ManaBridgeManager {
      */
     private static ManaResolutionResult chargeSeparate(Player player, AbstractSpell spell, int level, int issCost) {
         if (!(spell instanceof AbstractBotanicalSpell botanical)) return ManaResolutionResult.NOOP;
-        int botaniaCost = com.ironsbotany.common.util.MageArmorSets.applyBotaniaDiscount(player, botanical.getBotaniaManaCost(level));
+        int botaniaCost = com.ironsbotany.common.util.MageArmorSets.applyBotaniaDiscount(player,
+                applyChannelManaCost(player, spell, botanical.getBotaniaManaCost(level)));
         if (botaniaCost <= 0) return ManaResolutionResult.NOOP;
         if (!ManaHelper.hasBotaniaMana(player, botaniaCost)) {
             return ManaResolutionResult.INSUFFICIENT;
@@ -194,34 +215,35 @@ public final class ManaBridgeManager {
             int ratio = CommonConfig.MANA_CONVERSION_RATIO.get();
             base = Math.max(0, issCost * ratio);
         }
+        // Held casting channel adjusts the cost (Livingwood -10%, Dreamwood +10%, Terra Rod +30%).
+        base = applyChannelManaCost(player, spell, base);
         // Full Manasteel Wizard set applies a small Botania cost discount.
         return com.ironsbotany.common.util.MageArmorSets.applyBotaniaDiscount(player, base);
     }
 
     /**
-     * Search for a {@link ArcaneManaAltarBlockEntity} within {@code radius}
-     * blocks of the player and try to drain {@code amount} mana from it.
-     * Used by Botanical cost paths so altars take precedence over the
-     * player's tablets when available.
-     *
-     * @return true if the full amount was drained from a single altar
+     * Apply the mana-cost multiplier of the casting channel bound to the item in the
+     * player's hand (main hand first, then off hand), if channels are enabled and the
+     * channel can cast this spell. Without this, the channels' advertised mana-cost
+     * modifiers (e.g. Livingwood Staff -10%) were dead — {@code onCast} only consumed the
+     * damage/cooldown/speed multipliers, never the cost one.
      */
-    public static boolean tryDrainFromNearbyAltar(Player player, int amount, int radius) {
-        if (player == null || amount <= 0) return false;
-        Level level = player.level();
-        if (level.isClientSide()) return false;
-        BlockPos origin = player.blockPosition();
-
-        for (BlockPos pos : BlockPos.betweenClosed(
-                origin.offset(-radius, -radius, -radius),
-                origin.offset(radius, radius, radius))) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof ArcaneManaAltarBlockEntity altar && altar.tryDrainForCast(amount)) {
-                return true;
-            }
+    private static int applyChannelManaCost(Player player, AbstractSpell spell, int base) {
+        if (base <= 0) return base;
+        if (!com.ironsbotany.common.config.ConfigHelper.areChannelsEnabled()) return base;
+        com.ironsbotany.common.casting.CastingChannel channel =
+                com.ironsbotany.common.casting.CastingChannelRegistry.getChannelForItem(player.getMainHandItem());
+        if (channel == null) {
+            channel = com.ironsbotany.common.casting.CastingChannelRegistry.getChannelForItem(player.getOffhandItem());
         }
-        return false;
+        if (channel == null || !channel.canCast(spell, player)) return base;
+        return Math.max(0, Math.round(base * channel.getManaCostMultiplier()));
     }
+
+    // Note: the Arcane Mana Altar draws during cast resolution via the normal Botania
+    // pool path — it implements ManaPool, so ManaHelper.findAndDrainPool already scans
+    // for and drains it (gated by enableManaPoolAccess / manaPoolSearchRadius). A
+    // separate altar-only cube scan was redundant dead code and has been removed.
 
     /**
      * @return true if either of the player's hands holds an

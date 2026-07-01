@@ -55,8 +55,11 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
      * when set; otherwise uses the constructor-supplied ladder.
      */
     public int getBotaniaManaCost(int spellLevel) {
-        int fallback = baseBotaniaManaCost + (botaniaManaCostPerLevel * (spellLevel - 1));
-        return com.ironsbotany.common.spell.config.BotanySpellConfig.resolveBotaniaCost(this, fallback);
+        // Spell levels are 1-based; clamp defensively so a stray level 0 can't make the
+        // ladder subtract a full per-level step and yield a negative ("free") cost.
+        int effectiveLevel = Math.max(1, spellLevel);
+        int fallback = baseBotaniaManaCost + (botaniaManaCostPerLevel * (effectiveLevel - 1));
+        return Math.max(0, com.ironsbotany.common.spell.config.BotanySpellConfig.resolveBotaniaCost(this, fallback));
     }
 
     /**

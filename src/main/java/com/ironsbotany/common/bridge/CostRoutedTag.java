@@ -38,6 +38,14 @@ public final class CostRoutedTag {
      */
     public static final String KEY_SCROLL_PAID_TICK = "ironsbotany_scroll_paid_tick";
 
+    /**
+     * Tick on which Botania fully paid a cast's cost <em>in place of</em> ISS mana
+     * (BOTANIA_PRIMARY / scroll paths). {@code SpellEventHandlers.onChangeMana} reads
+     * this to refund the ISS debit ISS would otherwise still apply, so the player is
+     * charged once. NOT set for HYBRID/SEPARATE dual-cost, where paying both is intended.
+     */
+    public static final String KEY_BOTANIA_PAID_TICK = "ironsbotany_botania_paid_tick";
+
     private CostRoutedTag() {}
 
     public static void mark(Player player, long tick, int spellHash, int issCost) {
@@ -66,6 +74,17 @@ public final class CostRoutedTag {
         return data.contains(KEY_SCROLL_PAID_TICK) && data.getLong(KEY_SCROLL_PAID_TICK) == tick;
     }
 
+    /** Stamp that Botania paid a cast's cost in place of ISS mana on {@code tick}. */
+    public static void markBotaniaPaid(Player player, long tick) {
+        player.getPersistentData().putLong(KEY_BOTANIA_PAID_TICK, tick);
+    }
+
+    /** True if Botania paid in place of ISS mana on {@code tick} (→ refund the ISS debit). */
+    public static boolean isBotaniaPaid(Player player, long tick) {
+        CompoundTag data = player.getPersistentData();
+        return data.contains(KEY_BOTANIA_PAID_TICK) && data.getLong(KEY_BOTANIA_PAID_TICK) == tick;
+    }
+
     /** True if any sister bridge has already routed cost this tick. */
     public static boolean isExternallyRouted(Player player, long tick) {
         CompoundTag data = player.getPersistentData();
@@ -77,5 +96,11 @@ public final class CostRoutedTag {
         data.remove(KEY_TICK);
         data.remove(KEY_SPELL_HASH);
         data.remove(KEY_COST);
+        // Also wipe the per-cast payment markers so they don't accumulate on the
+        // player's persistent NBT. (The ANS mirror tag is owned by Ars 'n Spells;
+        // it is a single tick-scoped long that ANS overwrites each cast, so we
+        // deliberately leave it alone rather than stomp a possibly-fresh value.)
+        data.remove(KEY_SCROLL_PAID_TICK);
+        data.remove(KEY_BOTANIA_PAID_TICK);
     }
 }

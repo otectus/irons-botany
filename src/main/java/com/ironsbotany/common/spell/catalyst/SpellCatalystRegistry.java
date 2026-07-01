@@ -102,12 +102,18 @@ public class SpellCatalystRegistry {
                 float originalDamage = context.getDamageMultiplier();
                 
                 catalyst.modifySpell(spell, context);
-                
-                // Apply global power multiplier
-                if (powerMultiplier != 1.0) {
+
+                // Apply the global power multiplier to THIS catalyst's contribution only.
+                // The catalyst multiplied damage by factor f = newDamage/originalDamage;
+                // amplify that factor's bonus by powerMultiplier and re-scale, so the boost
+                // doesn't compound over the full accumulated multiplier (prior catalysts/auras).
+                if (powerMultiplier != 1.0 && originalDamage > 0.0f) {
                     float newDamage = context.getDamageMultiplier();
-                    float damageChange = newDamage - originalDamage;
-                    context.multiplyDamage(1.0f + (float)((damageChange) * (powerMultiplier - 1.0)));
+                    float factor = newDamage / originalDamage;
+                    if (factor > 0.0f) {
+                        float amplified = 1.0f + (factor - 1.0f) * (float) powerMultiplier;
+                        context.multiplyDamage(amplified / factor);
+                    }
                 }
                 
                 if (!allowMultiple) {
