@@ -3,7 +3,7 @@
 ## Quick Reference
 - **Mod ID**: `ironsbotany`
 - **Package**: `com.ironsbotany`
-- **Version**: 1.6.0 (in development)
+- **Version**: 1.8.1 (targets Iron's Spells 3.16+)
 - **MC**: 1.20.1 | **Forge**: 47.4.16 | **Java**: 17
 - **Mappings**: Official
 
@@ -44,7 +44,7 @@
 
 ## Key Dependencies
 - **Botania** 1.20.1-450+ (required, local JAR)
-- **Iron's Spells 'n Spellbooks** 3.15.2+ (required, local JAR)
+- **Iron's Spells 'n Spellbooks** 3.16+ (required, local JAR; 3.16 changed the `Scroll` constructor, so 3.15.2 is no longer supported)
 - **Curios** 5.14.1+ (required, local JAR)
 - **Patchouli** 84+ (optional, local JAR)
 - **Player Animation Lib** (optional, local JAR)

@@ -31,6 +31,16 @@ public class ManaRebirthSpell extends AbstractBotanicalSpell {
     }
 
     @Override
+    protected double perSpellPowerMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.MANA_REBIRTH_POWER.get();
+    }
+
+    @Override
+    protected double perSpellCooldownMultiplier() {
+        return com.ironsbotany.common.config.CommonConfig.MANA_REBIRTH_COOLDOWN.get();
+    }
+
+    @Override
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.EPIC)

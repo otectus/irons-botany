@@ -23,6 +23,13 @@ public class IBItems {
     public static final RegistryObject<Item> TERRASTEEL_SPELL_BLADE = ITEMS.register("terrasteel_spell_blade",
             () -> new TerrasteelSpellBladeItem(new Item.Properties().stacksTo(1).durability(3000)));
 
+    // Mage swords — melee caster ladder around the Terrasteel Spell Blade (Elementium -> Terrasteel -> Gaia)
+    public static final RegistryObject<Item> ELEMENTIUM_MAGE_SWORD = ITEMS.register("elementium_mage_sword",
+            () -> new MageSwordItem(MageSwordItem.Tier.ELEMENTIUM, new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> GAIA_MAGE_SWORD = ITEMS.register("gaia_mage_sword",
+            () -> new MageSwordItem(MageSwordItem.Tier.GAIA, new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> LIVINGWOOD_STAFF = ITEMS.register("livingwood_staff",
             () -> new LivingwoodStaffItem(new Item.Properties().stacksTo(1).durability(1000)));
 
@@ -54,6 +61,14 @@ public class IBItems {
     public static final RegistryObject<Item> DREAMWOOD_SCEPTER = ITEMS.register("dreamwood_scepter",
             () -> new DreamwoodScepterItem(new Item.Properties().stacksTo(1).durability(2000)));
 
+    // Elementium Wand — Elementium rung of the wand ladder; real ISS StaffItem caster
+    public static final RegistryObject<Item> ELEMENTIUM_WAND = ITEMS.register("elementium_wand",
+            () -> new ElementiumWandItem(new Item.Properties().stacksTo(1).durability(1500)));
+
+    // Terrasteel Wand — late-Botania caster rung between Elementium and Gaia
+    public static final RegistryObject<Item> TERRASTEEL_WAND = ITEMS.register("terrasteel_wand",
+            () -> new TerrasteelWandItem(new Item.Properties().stacksTo(1).durability(2500)));
+
     public static final RegistryObject<Item> GAIA_SPIRIT_WAND = ITEMS.register("gaia_spirit_wand",
             () -> new GaiaSpiritWandItem(new Item.Properties().stacksTo(1).durability(5000)));
 
@@ -71,8 +86,28 @@ public class IBItems {
                     net.minecraft.world.item.ArmorItem.Type.LEGGINGS, new Item.Properties()));
 
     public static final RegistryObject<Item> MANASTEEL_WIZARD_BOOTS = ITEMS.register("manasteel_wizard_boots",
-            () -> new ManasteelWizardArmorItem(IBArmorMaterials.MANASTEEL_WIZARD, 
+            () -> new ManasteelWizardArmorItem(IBArmorMaterials.MANASTEEL_WIZARD,
                     net.minecraft.world.item.ArmorItem.Type.BOOTS, new Item.Properties()));
+
+    // Armor - Mage tiers above Manasteel (Elementium -> Terrasteel -> Gaia)
+    public static final RegistryObject<Item> ELEMENTIUM_MAGE_HELMET = registerMageArmor("elementium_mage_helmet", MageArmorItem.Tier.ELEMENTIUM, net.minecraft.world.item.ArmorItem.Type.HELMET);
+    public static final RegistryObject<Item> ELEMENTIUM_MAGE_CHESTPLATE = registerMageArmor("elementium_mage_chestplate", MageArmorItem.Tier.ELEMENTIUM, net.minecraft.world.item.ArmorItem.Type.CHESTPLATE);
+    public static final RegistryObject<Item> ELEMENTIUM_MAGE_LEGGINGS = registerMageArmor("elementium_mage_leggings", MageArmorItem.Tier.ELEMENTIUM, net.minecraft.world.item.ArmorItem.Type.LEGGINGS);
+    public static final RegistryObject<Item> ELEMENTIUM_MAGE_BOOTS = registerMageArmor("elementium_mage_boots", MageArmorItem.Tier.ELEMENTIUM, net.minecraft.world.item.ArmorItem.Type.BOOTS);
+
+    public static final RegistryObject<Item> TERRASTEEL_MAGE_HELMET = registerMageArmor("terrasteel_mage_helmet", MageArmorItem.Tier.TERRASTEEL, net.minecraft.world.item.ArmorItem.Type.HELMET);
+    public static final RegistryObject<Item> TERRASTEEL_MAGE_CHESTPLATE = registerMageArmor("terrasteel_mage_chestplate", MageArmorItem.Tier.TERRASTEEL, net.minecraft.world.item.ArmorItem.Type.CHESTPLATE);
+    public static final RegistryObject<Item> TERRASTEEL_MAGE_LEGGINGS = registerMageArmor("terrasteel_mage_leggings", MageArmorItem.Tier.TERRASTEEL, net.minecraft.world.item.ArmorItem.Type.LEGGINGS);
+    public static final RegistryObject<Item> TERRASTEEL_MAGE_BOOTS = registerMageArmor("terrasteel_mage_boots", MageArmorItem.Tier.TERRASTEEL, net.minecraft.world.item.ArmorItem.Type.BOOTS);
+
+    public static final RegistryObject<Item> GAIA_MAGE_HELMET = registerMageArmor("gaia_mage_helmet", MageArmorItem.Tier.GAIA, net.minecraft.world.item.ArmorItem.Type.HELMET);
+    public static final RegistryObject<Item> GAIA_MAGE_CHESTPLATE = registerMageArmor("gaia_mage_chestplate", MageArmorItem.Tier.GAIA, net.minecraft.world.item.ArmorItem.Type.CHESTPLATE);
+    public static final RegistryObject<Item> GAIA_MAGE_LEGGINGS = registerMageArmor("gaia_mage_leggings", MageArmorItem.Tier.GAIA, net.minecraft.world.item.ArmorItem.Type.LEGGINGS);
+    public static final RegistryObject<Item> GAIA_MAGE_BOOTS = registerMageArmor("gaia_mage_boots", MageArmorItem.Tier.GAIA, net.minecraft.world.item.ArmorItem.Type.BOOTS);
+
+    private static RegistryObject<Item> registerMageArmor(String name, MageArmorItem.Tier tier, net.minecraft.world.item.ArmorItem.Type type) {
+        return ITEMS.register(name, () -> new MageArmorItem(tier, type, new Item.Properties()));
+    }
 
     // Upgrade Orbs
     public static final RegistryObject<Item> ORB_OF_FLORA = ITEMS.register("orb_of_flora",

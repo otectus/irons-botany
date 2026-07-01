@@ -21,12 +21,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public class TerrasteelSpellBladeItem extends SwordItem {
+public class TerrasteelSpellBladeItem extends SwordItem implements ManaGeneratingWeapon {
     private static final UUID SPELL_POWER_UUID = UUID.fromString("a8b3c4d5-e6f7-8901-2345-6789abcdef01");
     private static final UUID MAX_MANA_UUID = UUID.fromString("b9c4d5e6-f7a8-9012-3456-789abcdef012");
-    
+
     public TerrasteelSpellBladeItem(Properties properties) {
         super(TerrasteelTier.INSTANCE, 3, -2.4F, properties);
+    }
+
+    @Override
+    public int getManaPerHit() {
+        return CommonConfig.TERRASTEEL_BLADE_MANA_PER_HIT.get();
     }
 
     private static final UUID COOLDOWN_UUID = UUID.fromString("c0d5e6f7-a8b9-0123-4567-89abcdef0123");

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": {
+    "item": "botania:rune_autumn"
+  },
+  "base": {
+    "item": "ironsbotany:manasteel_wizard_helmet"
+  },
+  "addition": {
+    "item": "botania:elementium_ingot"
+  },
+  "result": {
+    "item": "ironsbotany:elementium_mage_helmet"
+  }
+}

@@ -5,7 +5,7 @@ plugins {
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
 
-version = '1.6.0'
+version = '1.8.1'
 group = 'com.ironsbotany'
 
 base {
@@ -88,7 +88,10 @@ dependencies {
     
     // Use local JARs from libs folder - compileOnly to avoid deobf issues
     compileOnly files('libs/Botania-1.20.1-450-FORGE.jar')
-    compileOnly files('libs/irons_spellbooks-1.20.1-3.15.2.jar')
+    // Iron's Botany 1.8.1 targets Iron's Spells 3.16+. ISS 3.16 changed the Scroll
+    // constructor (no-arg -> Scroll(Item.Properties)), a hard ABI break that makes the
+    // Elementium Scroll incompatible with 3.15.2, so 3.15.2 is no longer supported.
+    compileOnly files("libs/${project.findProperty('iss_jar') ?: 'irons_spellbooks-1.20.1-3.16.1.jar'}")
     compileOnly files('libs/curios-forge-5.14.1+1.20.1.jar')
 
     compileOnly files('libs/Patchouli-1.20.1-84.1-FORGE.jar')
@@ -119,3 +122,95 @@ tasks.named('processResources', ProcessResources).configure {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+// ---------------------------------------------------------------------------
+// Asset-integrity validation
+//
+// Fails the build if any model / blockstate / particle JSON references a
+// texture or model that does not exist, or if any registered spell is missing
+// its icon. This is the guard that would have caught the missing
+// arcane_mana_altar.png (the v1.8.0 purple/black bug). Wired into `check`, so
+// `build` runs it automatically.
+// ---------------------------------------------------------------------------
+tasks.register('validateAssets') {
+    group = 'verification'
+    description = 'Verify every referenced texture/model/spell-icon resolves to a real file.'
+
+    def assets = file('src/main/resources/assets/ironsbotany')
+    def javaSrc = file('src/main/java')
+
+    doLast {
+        def json = new groovy.json.JsonSlurper()
+        def errors = []
+
+        // Resolve an "ironsbotany:<path>" texture ref to its PNG file.
+        def texFile = { String ref ->
+            if (ref == null) return null
+            def path = ref.contains(':') ? ref.substring(ref.indexOf(':') + 1) : ref
+            new File(assets, "textures/${path}.png")
+        }
+        // Resolve an "ironsbotany:<path>" model ref to its JSON file (skip vanilla/other namespaces).
+        def modelFile = { String ref ->
+            if (ref == null) return null
+            if (ref.contains(':') && !ref.startsWith('ironsbotany:')) return null
+            def path = ref.contains(':') ? ref.substring(ref.indexOf(':') + 1) : ref
+            new File(assets, "models/${path}.json")
+        }
+        def checkPng = { File png, String origin ->
+            if (png == null) return
+            if (!png.exists()) errors << "${origin}: missing texture -> ${png}"
+            else if (png.length() == 0L) errors << "${origin}: zero-byte texture -> ${png}"
+        }
+
+        // 1 + 2. Item and block models: every texture ref + ironsbotany parent must resolve.
+        ['models/item', 'models/block'].each { dir ->
+            def d = new File(assets, dir)
+            if (!d.isDirectory()) return
+            d.listFiles({ f -> f.name.endsWith('.json') } as FileFilter).each { f ->
+                def m = json.parse(f)
+                m.textures?.each { k, v -> if (v instanceof String && !v.startsWith('#')) checkPng(texFile(v), "${dir}/${f.name} [${k}]") }
+                if (m.parent instanceof String) {
+                    def pf = modelFile(m.parent)
+                    if (pf != null && !pf.exists()) errors << "${dir}/${f.name}: missing parent model -> ${pf}"
+                }
+            }
+        }
+
+        // 3. Particle definitions: every sprite in the textures[] list must resolve.
+        def pd = new File(assets, 'particles')
+        if (pd.isDirectory()) {
+            pd.listFiles({ f -> f.name.endsWith('.json') } as FileFilter).each { f ->
+                json.parse(f).textures?.each { s -> checkPng(texFile(s), "particles/${f.name}") }
+            }
+        }
+
+        // 4. Blockstates: every referenced block model must exist.
+        def bs = new File(assets, 'blockstates')
+        if (bs.isDirectory()) {
+            bs.listFiles({ f -> f.name.endsWith('.json') } as FileFilter).each { f ->
+                def data = json.parse(f)
+                def refs = [] as Set
+                data.variants?.each { k, v -> (v instanceof List ? v : [v]).each { if (it?.model) refs << it.model } }
+                data.multipart?.each { part -> def a = part.apply; (a instanceof List ? a : [a]).each { if (it?.model) refs << it.model } }
+                refs.each { r -> def mf = modelFile(r); if (mf != null && !mf.exists()) errors << "blockstates/${f.name}: missing model -> ${mf}" }
+            }
+        }
+
+        // 5. Spell icons: every id registered in IBSpells must have a GUI icon PNG.
+        def ibSpells = new File(javaSrc, 'com/ironsbotany/common/registry/IBSpells.java')
+        if (ibSpells.exists()) {
+            def matcher = ibSpells.text =~ /SPELLS\.register\("([a-z0-9_]+)"/
+            while (matcher.find()) {
+                def id = matcher.group(1)
+                checkPng(new File(assets, "textures/gui/spell_icons/${id}.png"), "IBSpells spell '${id}'")
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            throw new GradleException("Asset validation failed (${errors.size()} problem(s)):\n  " + errors.join('\n  '))
+        }
+        logger.lifecycle("validateAssets: all texture/model/spell-icon references resolve.")
+    }
+}
+
+tasks.named('check') { dependsOn 'validateAssets' }

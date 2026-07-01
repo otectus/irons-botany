@@ -92,11 +92,12 @@ public class ManaHelper {
 
     /**
      * Checks if a player has enough Botania mana across all sources
-     * (inventory, Curios slots, accessories — same sources the mana HUD shows)
+     * (inventory, Curios slots, accessories — same sources the mana HUD shows),
+     * then nearby pools as a fallback.
      */
     public static boolean hasBotaniaMana(Player player, int amount) {
-        // Use ManaItemHandler to check all mana items + accessories (matches HUD)
-        // requestManaExactForTool with simulate=false just checks availability
+        if (amount <= 0) return true;
+        // Aggregate across all carried/equipped mana items + accessories (matches HUD).
         if (requestManaFromAllSources(player, amount, false)) {
             return true;
         }
@@ -109,10 +110,12 @@ public class ManaHelper {
 
     /**
      * Drains Botania mana from a player's items and accessories
-     * (uses the same aggregation as the mana HUD for consistency)
+     * (uses the same aggregation as the mana HUD for consistency),
+     * then nearby pools as a fallback.
      */
     public static boolean drainBotaniaMana(Player player, int amount) {
-        // Use ManaItemHandler to drain from all sources (matches HUD)
+        if (amount <= 0) return true;
+        // Aggregate-drain across all carried/equipped mana sources (matches HUD).
         if (requestManaFromAllSources(player, amount, true)) {
             return true;
         }
@@ -124,24 +127,78 @@ public class ManaHelper {
     }
 
     /**
-     * Request mana from all Botania mana sources (items + accessories).
-     * Uses ManaItemHandler which aggregates inventory, Curios, and other mana providers.
+     * Request mana from all Botania mana sources the player carries or has equipped.
+     *
+     * <p>Unlike a per-item {@code requestManaExact} (which is all-or-nothing against a
+     * <em>single</em> item), this <strong>aggregates</strong> across every mana item and
+     * accessory — Mana Tablet, Mana Ring, Greater Band of Mana, Mana Mirror (remote, via
+     * its bound pool), and our own {@link com.ironsbotany.common.item.cap.ItemManaStorage}
+     * items — so a cost that no single item fully covers can still be paid from several.
+     *
+     * <p>Two passes when extracting: a non-destructive availability sweep first, so we never
+     * partially drain when the player can't actually afford the full {@code amount} (which would
+     * let the cast proceed for free or leave items short-changed). Only when the full amount is
+     * confirmed available do we commit the drain.
+     *
+     * @param doExtract {@code true} to actually remove mana; {@code false} to only test availability
+     * @return {@code true} iff the full {@code amount} is available (and, when {@code doExtract},
+     *         was drained)
      */
     private static boolean requestManaFromAllSources(Player player, int amount, boolean doExtract) {
-        // Check mana items (main inventory)
+        if (amount <= 0) return true;
+        if (!CommonConfig.ENABLE_INVENTORY_MANA_SOURCES.get()) return false;
+
+        java.util.List<ItemStack> sources = collectManaSources(player);
+        if (sources.isEmpty()) return false;
+
+        // Pass 1: availability sweep (never removes mana).
+        long available = 0L;
+        for (ItemStack stack : sources) {
+            // requestMana returns the partial amount that could be supplied (capped at request).
+            available += ManaItemHandler.instance().requestMana(stack, player, amount, false);
+            if (available >= amount) break;
+        }
+        if (available < amount) return false;
+        if (!doExtract) return true;
+
+        // Pass 2: commit the drain across sources until the cost is fully paid.
+        int remaining = amount;
+        for (ItemStack stack : sources) {
+            if (remaining <= 0) break;
+            int drained = ManaItemHandler.instance().requestMana(stack, player, remaining, true);
+            remaining -= drained;
+        }
+        // Defensive: with the availability sweep above this should always be fully paid.
+        return remaining <= 0;
+    }
+
+    /**
+     * Gather the player's mana items and accessories into a single ordered list.
+     * Inventory items first, then accessories (Curios/Baubles). Honors the Mana Mirror
+     * config toggle.
+     *
+     * <p>Note: "getManaAccesories" is the Botania API's spelling (missing an 's'), not a typo.
+     */
+    private static java.util.List<ItemStack> collectManaSources(Player player) {
+        java.util.List<ItemStack> sources = new java.util.ArrayList<>();
+        boolean allowMirror = CommonConfig.ENABLE_MANA_MIRROR_SUPPORT.get();
         for (ItemStack stack : ManaItemHandler.instance().getManaItems(player)) {
-            if (ManaItemHandler.instance().requestManaExact(stack, player, amount, doExtract)) {
-                return true;
+            if (!stack.isEmpty() && (allowMirror || !isManaMirror(stack))) {
+                sources.add(stack);
             }
         }
-        // Check mana accessories (Curios, Baubles, etc.)
-        // Note: "getManaAccesories" is the Botania API's spelling (missing an 's'), not a mod typo
         for (ItemStack stack : ManaItemHandler.instance().getManaAccesories(player)) {
-            if (ManaItemHandler.instance().requestManaExact(stack, player, amount, doExtract)) {
-                return true;
+            if (!stack.isEmpty() && (allowMirror || !isManaMirror(stack))) {
+                sources.add(stack);
             }
         }
-        return false;
+        return sources;
+    }
+
+    private static boolean isManaMirror(ItemStack stack) {
+        net.minecraft.resources.ResourceLocation id =
+                net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
+        return id != null && "botania".equals(id.getNamespace()) && "mana_mirror".equals(id.getPath());
     }
 
     /**

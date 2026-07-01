@@ -59,6 +59,38 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
         return com.ironsbotany.common.spell.config.BotanySpellConfig.resolveBotaniaCost(this, fallback);
     }
 
+    /**
+     * Per-spell power multiplier (config knob); 1.0 by default. Concrete spells
+     * override to return their {@code *_POWER} config so server operators can tune
+     * each spell individually. Composed with the global botanical power multiplier.
+     */
+    protected double perSpellPowerMultiplier() {
+        return 1.0;
+    }
+
+    /**
+     * Per-spell cooldown multiplier (config knob); 1.0 by default. Concrete spells
+     * override to return their {@code *_COOLDOWN} config. Composed with the global
+     * spell cooldown multiplier.
+     */
+    protected double perSpellCooldownMultiplier() {
+        return 1.0;
+    }
+
+    @Override
+    public float getSpellPower(int spellLevel, net.minecraft.world.entity.Entity sourceEntity) {
+        double mult = com.ironsbotany.common.config.CommonConfig.BOTANICAL_SPELL_POWER_MULTIPLIER.get()
+                * perSpellPowerMultiplier();
+        return (float) (super.getSpellPower(spellLevel, sourceEntity) * mult);
+    }
+
+    @Override
+    public int getSpellCooldown() {
+        double mult = com.ironsbotany.common.config.CommonConfig.SPELL_COOLDOWN_MULTIPLIER.get()
+                * perSpellCooldownMultiplier();
+        return Math.max(0, (int) Math.round(super.getSpellCooldown() * mult));
+    }
+
     @Override
     public void onCast(Level level, int spellLevel, LivingEntity entity, CastSource castSource, MagicData playerMagicData) {
         if (level.isClientSide) {
@@ -114,7 +146,7 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
             AlfheimSpellBoost.applyAlfheimBoost(context, this, player);
 
             // Apply spellbook attunement bonuses
-            if (ConfigHelper.isAlfheimEnabled()) {
+            if (ConfigHelper.isAlfheimEnabled() && CommonConfig.ENABLE_SPELLBOOK_ATTUNEMENT.get()) {
                 ItemStack mainHand = player.getMainHandItem();
                 ItemStack offHand = player.getOffhandItem();
                 ItemStack spellbook = SpellbookAttunement.isAttuned(mainHand) ? mainHand :

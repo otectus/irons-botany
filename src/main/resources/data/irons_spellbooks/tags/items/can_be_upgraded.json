@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "ironsbotany:terrasteel_spell_blade",
+    "ironsbotany:elementium_mage_sword",
+    "ironsbotany:gaia_mage_sword",
+    "ironsbotany:livingwood_staff",
+    "ironsbotany:manasteel_staff",
+    "ironsbotany:elementium_wand",
+    "ironsbotany:dreamwood_scepter",
+    { "id": "ironsbotany:terrasteel_wand", "required": false },
+    "ironsbotany:gaia_spirit_wand"
+  ]
+}

@@ -42,3 +42,6 @@ src/generated/
 *.log
 *.swp
 *.bak
+
+# Claude Code harness (worktrees, transcripts, local config)
+.claude/

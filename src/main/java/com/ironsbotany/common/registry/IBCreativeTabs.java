@@ -26,17 +26,33 @@ public class IBCreativeTabs {
                         output.accept(IBItems.GAIAS_BLESSING.get());
                         
                         // Weapons
+                        output.accept(IBItems.ELEMENTIUM_MAGE_SWORD.get());
                         output.accept(IBItems.TERRASTEEL_SPELL_BLADE.get());
+                        output.accept(IBItems.GAIA_MAGE_SWORD.get());
                         output.accept(IBItems.LIVINGWOOD_STAFF.get());
                         output.accept(IBItems.MANASTEEL_STAFF.get());
+                        output.accept(IBItems.ELEMENTIUM_WAND.get());
                         output.accept(IBItems.DREAMWOOD_SCEPTER.get());
+                        output.accept(IBItems.TERRASTEEL_WAND.get());
                         output.accept(IBItems.GAIA_SPIRIT_WAND.get());
-                        
+
                         // Armor
                         output.accept(IBItems.MANASTEEL_WIZARD_HELMET.get());
                         output.accept(IBItems.MANASTEEL_WIZARD_CHESTPLATE.get());
                         output.accept(IBItems.MANASTEEL_WIZARD_LEGGINGS.get());
                         output.accept(IBItems.MANASTEEL_WIZARD_BOOTS.get());
+                        output.accept(IBItems.ELEMENTIUM_MAGE_HELMET.get());
+                        output.accept(IBItems.ELEMENTIUM_MAGE_CHESTPLATE.get());
+                        output.accept(IBItems.ELEMENTIUM_MAGE_LEGGINGS.get());
+                        output.accept(IBItems.ELEMENTIUM_MAGE_BOOTS.get());
+                        output.accept(IBItems.TERRASTEEL_MAGE_HELMET.get());
+                        output.accept(IBItems.TERRASTEEL_MAGE_CHESTPLATE.get());
+                        output.accept(IBItems.TERRASTEEL_MAGE_LEGGINGS.get());
+                        output.accept(IBItems.TERRASTEEL_MAGE_BOOTS.get());
+                        output.accept(IBItems.GAIA_MAGE_HELMET.get());
+                        output.accept(IBItems.GAIA_MAGE_CHESTPLATE.get());
+                        output.accept(IBItems.GAIA_MAGE_LEGGINGS.get());
+                        output.accept(IBItems.GAIA_MAGE_BOOTS.get());
 
                         // Spellbooks (Phase 6.3)
                         output.accept(IBItems.TERRASTEEL_SPELLBOOK.get());
