@@ -330,6 +330,52 @@ Therefore, in 1.9.0:
   ignores it;
 - any add-on that reads the config rather than calling `getSchoolType()` sees Nature.
 
+#### 2.8.1 Two follow-on facts that shaped the fix (and one trap avoided)
+
+**(a) A spell-config datapack override would have been a severe regression.** The obvious way to
+force upgraded worlds onto the canonical school is to ship
+`data/ironsbotany/irons_spellbooks_spell_config/<spell>.json`. `SpellConfigManager.onDatapackSync`
+disassembles to:
+
+```java
+if (INSTANCE.dirty) {
+    INSTANCE.dirty = false;
+    if (INSTANCE.datapackOverride != null) {
+        ok = INSTANCE.buildConfigManager(INSTANCE.datapackOverride, true);   // datapack ONLY
+        INSTANCE.datapackOverride = null;
+    } else {
+        ok = INSTANCE.buildConfigManager(toJson(getConfigFiles(configDir)), true);  // folder ONLY
+    }
+}
+```
+
+The two sources are **mutually exclusive, not merged**. Shipping even one spell-config JSON would
+make `datapackOverride` non-null on every world load and therefore cause ISS to **ignore the
+operator's entire `config/irons_spellbooks/spells/` directory for every spell in the modpack**,
+Iron's Spells' own spells included. This approach was rejected. No spell-config datapack is shipped.
+
+**(b) ISS never repairs an existing spell config file.** `generateSpellConfigFile` short-circuits:
+
+```
+76: invokevirtual File.exists:()Z
+79: ifeq 96
+83: ifne 96          ← if (exists && !overwrite)
+92: Pair.of(false, file)
+95: areturn
+```
+
+So a world upgraded from 1.9.0 keeps `"school": "irons_spellbooks:nature"` in
+`config/irons_spellbooks/spells/ironsbotany/*.json` indefinitely. Correcting `DefaultConfig` alone
+fixes new installs only.
+
+**Resulting design.** `AbstractBotanicalSpell` keeps an explicit `getSchoolType()` override so the
+runtime school is deterministic and independent of config-load timing (which also matters
+client-side, before config sync, where `getSpellConfigValue` would otherwise fall back to the
+global default school). `DefaultConfig` is corrected so new installs generate the right file. The
+migration service repairs the stale value in place — scoped strictly to the `ironsbotany`
+namespace subdirectory, only when the value is exactly the legacy `irons_spellbooks:nature`, and
+logging every file it touches.
+
 ### 2.9 P1 — Botany attributes are registered but never attached
 
 **VERIFIED.** `IBAttributes` registers `botany_spell_power`, `botany_magic_resist` and

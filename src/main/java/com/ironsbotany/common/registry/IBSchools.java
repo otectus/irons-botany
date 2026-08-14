@@ -3,7 +3,6 @@ package com.ironsbotany.common.registry;
 import com.ironsbotany.IronsBotany;
 import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.SchoolType;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
@@ -42,11 +41,22 @@ public final class IBSchools {
     public static final TagKey<Item> BOTANY_FOCUS_TAG = ItemTags.create(
             new ResourceLocation(IronsBotany.MODID, "focus/botany"));
 
-    public static final RegistryObject<SchoolType> BOTANY = SCHOOLS.register("botany",
+    /**
+     * The Botany school.
+     *
+     * <p>The display name <strong>must</strong> carry an explicit colour. ISS's
+     * {@code SchoolType} constructor caches {@code displayName.getStyle()} and
+     * {@code getTargetingColor()} then dereferences {@code style.getColor().getValue()}
+     * without a null check, so an unstyled component makes every targeting-colour lookup
+     * throw {@link NullPointerException} — which is what crashed 1.9.0 whenever ISS itself
+     * or a description/restriction add-on inspected a Botany spell. See
+     * {@link BotanySchool} for the full contract and the test that pins it.
+     */
+    public static final RegistryObject<SchoolType> BOTANY = SCHOOLS.register(BotanySchool.PATH,
             () -> new SchoolType(
-                    new ResourceLocation(IronsBotany.MODID, "botany"),
+                    BotanySchool.ID,
                     BOTANY_FOCUS_TAG,
-                    Component.translatable("school.ironsbotany.botany"),
+                    BotanySchool.displayName(),
                     IBAttributes.BOTANY_SPELL_POWER::get,
                     IBAttributes.BOTANY_MAGIC_RESIST::get,
                     () -> SoundEvents.AMETHYST_BLOCK_CHIME,

@@ -3,7 +3,6 @@ package com.ironsbotany.common.spell;
 import com.ironsbotany.IronsBotany;
 import io.redspace.ironsspellbooks.api.config.DefaultConfig;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
-import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -44,7 +43,7 @@ public class BotanicalBurstSpell extends AbstractBotanicalSpell {
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.COMMON)
-                .setSchoolResource(SchoolRegistry.NATURE_RESOURCE)
+                .setSchoolResource(com.ironsbotany.common.registry.BotanySchool.ID)
                 .setMaxLevel(8)
                 .setCooldownSeconds(10)
                 .build();

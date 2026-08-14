@@ -4,7 +4,6 @@ import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.config.CommonConfig;
 import io.redspace.ironsspellbooks.api.config.DefaultConfig;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
-import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -44,7 +43,7 @@ public class LivingRootGraspSpell extends AbstractBotanicalSpell {
     public DefaultConfig getDefaultConfig() {
         return new DefaultConfig()
                 .setMinRarity(SpellRarity.COMMON)
-                .setSchoolResource(SchoolRegistry.NATURE_RESOURCE)
+                .setSchoolResource(com.ironsbotany.common.registry.BotanySchool.ID)
                 .setMaxLevel(6)
                 .setCooldownSeconds(15)
                 .build();

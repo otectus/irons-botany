@@ -66,6 +66,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    mavenCentral()
     flatDir {
         dirs 'libs'
     }
@@ -96,6 +97,23 @@ dependencies {
 
     compileOnly files('libs/Patchouli-1.20.1-84.1-FORGE.jar')
     compileOnly files('libs/player-animation-lib-forge-1.0.2-rc1+1.20.jar')
+
+    // Unit/contract tests. See src/test/java/.../package-info.java for what this
+    // layer can and cannot cover: the dependency JARs in libs/ are *production*
+    // artifacts compiled against SRG names (m_7383_ etc.), so they cannot be
+    // linked in a Mojang-mapped dev runtime. Tests therefore exercise our own
+    // logic and the Minecraft classes it hands to those dependencies, never the
+    // dependency classes themselves.
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat = 'full'
+    }
 }
 
 tasks.named('processResources', ProcessResources).configure {
