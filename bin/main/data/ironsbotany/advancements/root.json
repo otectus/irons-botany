@@ -1,0 +1,30 @@
+{
+  "display": {
+    "icon": {
+      "item": "ironsbotany:botanical_focus"
+    },
+    "title": {
+      "translate": "advancements.ironsbotany.root.title"
+    },
+    "description": {
+      "translate": "advancements.ironsbotany.root.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false,
+    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png"
+  },
+  "criteria": {
+    "has_botanical_focus": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": ["ironsbotany:botanical_focus"]
+          }
+        ]
+      }
+    }
+  }
+}

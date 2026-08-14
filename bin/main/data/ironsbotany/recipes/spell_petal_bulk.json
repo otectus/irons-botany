@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "tag": "botania:petals"
+    },
+    {
+      "tag": "botania:petals"
+    },
+    {
+      "tag": "botania:petals"
+    },
+    {
+      "tag": "botania:petals"
+    },
+    {
+      "item": "irons_spellbooks:arcane_essence"
+    }
+  ],
+  "result": {
+    "item": "ironsbotany:spell_petal",
+    "count": 8
+  }
+}

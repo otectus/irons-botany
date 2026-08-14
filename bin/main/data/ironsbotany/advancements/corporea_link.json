@@ -1,0 +1,17 @@
+{
+  "display": {
+    "icon": {"item": "ironsbotany:mana_infused_essence"},
+    "title": {"translate": "advancements.ironsbotany.corporea_link.title"},
+    "description": {"translate": "advancements.ironsbotany.corporea_link.description"},
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "ironsbotany:first_spell",
+  "criteria": {
+    "corporea_request": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

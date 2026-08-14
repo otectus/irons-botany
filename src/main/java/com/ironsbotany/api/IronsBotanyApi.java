@@ -22,16 +22,32 @@ public final class IronsBotanyApi {
     private IronsBotanyApi() {}
 
     /**
-     * Route the cost of a single spell cast through Iron's Botany's bridge.
-     * Idempotent within a server tick — safe to call from multiple hook
-     * points without double-billing.
+     * Ask whether a cast can be paid for, and reserve an exact payment plan if it can.
      *
-     * @return the routing decision; {@code result.ok() == false} means the
-     *         player could not afford the spell and the cast must be
-     *         cancelled.
+     * <p>This performs <strong>no mutation</strong>. The reservation is a plan; mana moves only
+     * when Iron's Botany commits it during ISS's {@code SpellOnCastEvent}. A caller that decides
+     * not to proceed simply lets the reservation lapse — there is nothing to undo.
+     *
+     * @return {@code true} if the cast may proceed. {@code false} means the player cannot pay in a
+     *         mode that requires Botania payment, and the caller must cancel the cast.
      */
+    public static boolean preflightCost(Player player, AbstractSpell spell, int level, CastSource source) {
+        return ManaBridgeManager.preflight(player, spell, level, source).allow();
+    }
+
+    /**
+     * @deprecated since 1.10.0. Cost routing is no longer a single "resolve and charge" call: it is
+     *         a two-phase transaction (reserve during {@code SpellPreCastEvent}, debit during
+     *         {@code SpellOnCastEvent}) so that a cast which fails after preflight cannot leave a
+     *         partial debit behind. This shim runs only the reserving half and reports no charged
+     *         amounts, because at preflight time nothing has been charged. Use
+     *         {@link #preflightCost} instead.
+     */
+    @Deprecated(since = "1.10.0", forRemoval = true)
     public static ManaResolutionResult resolveCost(Player player, AbstractSpell spell, int level, CastSource source) {
-        return ManaBridgeManager.resolveCost(player, spell, level, source);
+        return preflightCost(player, spell, level, source)
+                ? ManaResolutionResult.NOOP
+                : ManaResolutionResult.INSUFFICIENT;
     }
 
     /**

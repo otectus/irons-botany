@@ -1,0 +1,21 @@
+{
+  "name": "Terrasteel Spellbook",
+  "icon": "ironsbotany:terrasteel_spellbook",
+  "category": "ironsbotany:equipment",
+  "advancement": "ironsbotany:first_spell",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Twelve spell slots. The mid-tier Botany progression spellbook, crafted by surrounding any standard ISS spellbook with Terrasteel ingots."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:terrasteel_spellbook"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Stats",
+      "text": "$(li)+200 Max Mana$(li)+15% Botany Spell Power$(li)+10% Nature Spell Power$(li)+0.10 Mana Efficiency$(br)Mana network capacity: 200,000."
+    }
+  ]
+}

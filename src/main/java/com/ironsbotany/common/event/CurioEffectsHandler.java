@@ -1,36 +1,39 @@
 package com.ironsbotany.common.event;
 
 import com.ironsbotany.IronsBotany;
+import com.ironsbotany.common.bridge.mana.BotaniaManaGateway;
 import com.ironsbotany.common.item.GaiasBlessingItem;
 import com.ironsbotany.common.registry.IBItems;
 import com.ironsbotany.common.registry.IBSchools;
 import io.redspace.ironsspellbooks.api.events.ModifySpellLevelEvent;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import top.theillusivec4.curios.api.CuriosApi;
-import vazkii.botania.api.mana.ManaPool;
 
 /**
- * Forge-bus subscriber that powers curio side-effects which can't be
- * expressed as static attribute modifiers — currently just Gaia's
- * Blessing.
+ * Curio side-effects that cannot be expressed as static attribute modifiers — currently only
+ * Gaia's Blessing.
  *
- * <p>Subscribes at default priority. Iron's Botany doesn't otherwise
- * touch {@code ModifySpellLevelEvent}, so priority isn't a concern.
+ * <h3>Why this no longer charges anything</h3>
+ * {@code ModifySpellLevelEvent} is a <em>query</em>. ISS fires it from
+ * {@code AbstractSpell.getLevelFor}, which runs whenever anything needs a spell's effective level:
+ * casting, yes, but also spell-book UI, tooltips and add-on inspection. Through 1.9.0 this handler
+ * drained a mana pool on the first firing per (tick, spell), so a player could be charged for
+ * opening their spell book, and the "did I already pay" bookkeeping lived in persistent NBT keyed
+ * on a tick — the same collision-prone pattern the cast bridge used.
+ *
+ * <p>Now the bonus level is granted whenever the surcharge is <em>affordable</em>, checked without
+ * mutating anything, and the surcharge itself is folded into the cast transaction so it is debited
+ * exactly once, only for a cast that actually commits. See
+ * {@code ManaBridgeManager#gaiaBlessingSurcharge}.
+ *
+ * <p>Behaviour change worth noting in the release notes: the surcharge is now drawn from the
+ * player's ordinary mana sources in the documented priority order (carried, then worn, then nearby
+ * pools) rather than from a pool only. It also no longer performs its own cuboid block scan.
  */
 @Mod.EventBusSubscriber(modid = IronsBotany.MODID)
 public final class CurioEffectsHandler {
-
-    // Per-cast-tick payment marker. ModifySpellLevelEvent can fire many times per cast
-    // (and in non-cast level queries), so we must grant +1 on every firing for a
-    // consistent effective level, but drain the pool only ONCE per (tick, spell).
-    private static final String KEY_PAID_TICK = "ironsbotany_gaia_blessing_paid_tick";
-    private static final String KEY_PAID_SPELL = "ironsbotany_gaia_blessing_paid_spell";
 
     private CurioEffectsHandler() {}
 
@@ -39,53 +42,31 @@ public final class CurioEffectsHandler {
         if (!(event.getEntity() instanceof Player player)) return;
         if (player.level().isClientSide()) return;
         if (event.getSpell().getSchoolType() != IBSchools.BOTANY.get()) return;
+        if (!isWearingBlessing(player)) return;
 
-        // Find a Gaia's Blessing in the caster's curio slots.
-        boolean wearingBlessing = CuriosApi.getCuriosHelper()
-                .findFirstCurio(player, IBItems.GAIAS_BLESSING.get())
-                .isPresent();
-        if (!wearingBlessing) return;
-
-        long tick = player.level().getGameTime();
-        int spellHash = event.getSpell().getSpellId().hashCode();
-        net.minecraft.nbt.CompoundTag data = player.getPersistentData();
-
-        // Already paid for this (tick, spell): grant the level again without re-draining.
-        if (data.contains(KEY_PAID_TICK)
-                && data.getLong(KEY_PAID_TICK) == tick
-                && data.getInt(KEY_PAID_SPELL) == spellHash) {
-            event.addLevels(1);
+        // Non-destructive affordability check: grant the level only if the surcharge could be
+        // paid, so the level a player is shown is the level they will actually cast at.
+        int surcharge = GaiasBlessingItem.MANA_PER_CAST;
+        if (surcharge > 0
+                && !BotaniaManaGateway.plan(surcharge, BotaniaManaGateway.collectSources(player)).isSatisfied()) {
             return;
         }
 
-        // First firing this cast-tick: pay the cost from a nearby mana pool.
-        // If no pool can cover it, fizzle silently (no level, no marker).
-        if (!drainNearbyPool(player, GaiasBlessingItem.MANA_PER_CAST, GaiasBlessingItem.POOL_SCAN_RADIUS)) {
-            return;
-        }
-        data.putLong(KEY_PAID_TICK, tick);
-        data.putInt(KEY_PAID_SPELL, spellHash);
         event.addLevels(1);
     }
 
-    /**
-     * Search the surrounding area for a {@link ManaPool} block entity
-     * with at least {@code amount} mana and drain it.
-     *
-     * @return true if the full amount was drained
-     */
-    private static boolean drainNearbyPool(LivingEntity entity, int amount, int radius) {
-        Level level = entity.level();
-        BlockPos origin = entity.blockPosition();
-        for (BlockPos pos : BlockPos.betweenClosed(
-                origin.offset(-radius, -radius / 2, -radius),
-                origin.offset(radius, radius / 2, radius))) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof ManaPool pool && pool.getCurrentMana() >= amount) {
-                pool.receiveMana(-amount);
-                return true;
-            }
+    /** True if the player has Gaia's Blessing in a curio slot. */
+    public static boolean isWearingBlessing(Player player) {
+        try {
+            return CuriosApi.getCuriosHelper()
+                    .findFirstCurio(player, IBItems.GAIAS_BLESSING.get())
+                    .isPresent();
+        } catch (RuntimeException e) {
+            // Curios is a hard dependency, but a version skew in its helper API must not break
+            // casting. Treat "cannot determine" as "not worn" — the player loses a bonus rather
+            // than being charged for one they did not get.
+            IronsBotany.LOGGER.debug("Curios lookup for Gaia's Blessing failed: {}", e.toString());
+            return false;
         }
-        return false;
     }
 }

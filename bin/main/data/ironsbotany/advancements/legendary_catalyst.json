@@ -1,0 +1,17 @@
+{
+  "display": {
+    "icon": {"item": "ironsbotany:botanical_crystal"},
+    "title": {"translate": "advancements.ironsbotany.legendary_catalyst.title"},
+    "description": {"translate": "advancements.ironsbotany.legendary_catalyst.description"},
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "parent": "ironsbotany:first_catalyst",
+  "criteria": {
+    "legendary_used": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

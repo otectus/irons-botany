@@ -1,0 +1,17 @@
+{
+  "display": {
+    "icon": {"item": "ironsbotany:spell_petal"},
+    "title": {"translate": "advancements.ironsbotany.first_aura.title"},
+    "description": {"translate": "advancements.ironsbotany.first_aura.description"},
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "ironsbotany:root",
+  "criteria": {
+    "near_aura": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

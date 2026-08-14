@@ -1,0 +1,15 @@
+{
+  "name": "Flower Shield",
+  "icon": "ironsbotany:spell_petal",
+  "category": "ironsbotany:spells",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Flower Shield$() surrounds you in a protective petal barrier that absorbs incoming damage.$(br2)$(l)Max Level:$() 10$(br)$(l)Type:$() Defense$(br)$(l)Botania Mana Cost:$() 30,000 + 15,000/level$(br2)The shield has its own HP pool (base 20 + 5/level). When the shield breaks, it shatters with a glass-break effect. Enhanced by the Rune of Earth catalyst (+30% shield strength)."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:scroll_flower_shield"
+    }
+  ]
+}

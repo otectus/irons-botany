@@ -1,0 +1,17 @@
+{
+  "display": {
+    "icon": {"item": "ironsbotany:gaia_spirit_wand"},
+    "title": {"translate": "advancements.ironsbotany.spell_mastery.title"},
+    "description": {"translate": "advancements.ironsbotany.spell_mastery.description"},
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "ironsbotany:first_spell",
+  "criteria": {
+    "cast_high_level": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

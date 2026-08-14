@@ -1,0 +1,15 @@
+{
+  "name": "Petal Storm",
+  "icon": "ironsbotany:spell_petal",
+  "category": "ironsbotany:spells",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Petal Storm$() unleashes a storm of razor-sharp petals that slice through all enemies in an area.$(br2)$(l)Max Level:$() 5$(br)$(l)Type:$() AoE Attack$(br)$(l)Botania Mana Cost:$() 25,000 + 12,000/level$(br2)Hits multiple targets in a radius around you with knockback. The petal projectiles can be enhanced by Bore Lens (pierce) and Velocity Lens (speed + range) catalysts."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:scroll_petal_storm"
+    }
+  ]
+}

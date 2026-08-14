@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "ironsbotany:item/terrasteel_spell_blade"
+  }
+}

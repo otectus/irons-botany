@@ -1,0 +1,9 @@
+{
+  "amount": 0.05,
+  "attribute": "irons_spellbooks:spell_power",
+  "containerItem": {
+    "count": 1,
+    "id": "ironsbotany:orb_of_bursting"
+  },
+  "operation": "MULTIPLY_BASE"
+}

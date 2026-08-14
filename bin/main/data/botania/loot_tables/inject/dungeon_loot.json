@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "name": "ironsbotany_additions",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "ironsbotany:mana_infused_essence",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "ironsbotany:spell_petal",
+          "weight": 15,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 2,
+                "max": 5
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "ironsbotany:botanical_ring",
+          "weight": 5
+        }
+      ]
+    }
+  ]
+}

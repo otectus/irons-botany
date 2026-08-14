@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "ironsbotany:item/gaia_spirit_wand"
+  }
+}

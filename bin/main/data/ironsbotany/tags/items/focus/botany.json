@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "ironsbotany:botanical_focus",
+      "required": false
+    },
+    {
+      "id": "botania:mana_pearl",
+      "required": false
+    },
+    {
+      "id": "botania:pixie_dust",
+      "required": false
+    },
+    {
+      "id": "botania:dragonstone",
+      "required": false
+    }
+  ]
+}

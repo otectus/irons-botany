@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "MPM",
+    "PAP",
+    "MPM"
+  ],
+  "key": {
+    "M": {
+      "item": "botania:mana_powder"
+    },
+    "P": {
+      "item": "botania:mana_pearl"
+    },
+    "A": {
+      "item": "irons_spellbooks:arcane_essence"
+    }
+  },
+  "result": {
+    "item": "ironsbotany:mana_infused_essence",
+    "count": 8
+  }
+}

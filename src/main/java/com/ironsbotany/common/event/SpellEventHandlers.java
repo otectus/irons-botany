@@ -1,34 +1,38 @@
 package com.ironsbotany.common.event;
 
 import com.ironsbotany.IronsBotany;
-import com.ironsbotany.common.bridge.CostRoutedTag;
 import com.ironsbotany.common.bridge.ManaBridgeManager;
-import com.ironsbotany.common.bridge.ManaResolutionResult;
+import com.ironsbotany.common.bridge.cast.CastTransactions;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.config.ManaUnificationMode;
-import io.redspace.ironsspellbooks.api.events.ChangeManaEvent;
+import io.redspace.ironsspellbooks.api.events.SpellOnCastEvent;
 import io.redspace.ironsspellbooks.api.events.SpellPreCastEvent;
+import io.redspace.ironsspellbooks.api.magic.MagicData;
 import io.redspace.ironsspellbooks.api.registry.SpellRegistry;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
-import io.redspace.ironsspellbooks.api.spells.CastSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * Forge-bus subscribers that wire {@link ManaBridgeManager} into ISS's
- * cast pipeline. These are explicitly annotated with
- * {@link EventPriority#LOW} so that:
- * <ul>
- *   <li>Ars 'n Spells (running at default {@code NORMAL}) gets first
- *       crack at routing — which lets ANS write its routed tag before we
- *       check it.</li>
- *   <li>Player-supplied KubeJS scripts at {@code HIGH}/{@code HIGHEST}
- *       can still pre-empt Iron's Botany cleanly.</li>
- * </ul>
+ * Wires the cast transaction into ISS's pipeline.
+ *
+ * <p>Both subscribers run at {@link EventPriority#LOW} so Ars 'n Spells (at {@code NORMAL}) routes
+ * first and player KubeJS scripts at {@code HIGH}/{@code HIGHEST} can still pre-empt this mod.
+ *
+ * <h3>ChangeManaEvent is deliberately not handled</h3>
+ * Through 1.9.0 this class subscribed {@code ChangeManaEvent} and cancelled any mana decrease that
+ * occurred in a tick stamped "Botania paid". {@code ChangeManaEvent} exposes only
+ * {@code (magicData, oldMana, newMana)} — no spell, level, or cast source — so it could not tell
+ * the cast Botania had paid for from any other debit in the same tick, including a second cast or
+ * an unrelated mod's drain. ISS's own {@code SpellOnCastEvent.setManaCost(int)} redirects cost for
+ * exactly one cast, so that entire interception was removed rather than narrowed.
  */
 @Mod.EventBusSubscriber(modid = IronsBotany.MODID)
 public final class SpellEventHandlers {
@@ -36,70 +40,97 @@ public final class SpellEventHandlers {
     private SpellEventHandlers() {}
 
     /**
-     * Gate the cast on Botania mana availability. Called before ISS
-     * debits ISS mana, so cancellation here costs the player nothing.
+     * Preflight and reserve. Cancelling here costs the player nothing: ISS has not yet debited
+     * mana, initiated the cast, or consumed a scroll.
      */
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onSpellPreCast(SpellPreCastEvent event) {
         if (CommonConfig.MANA_UNIFICATION_MODE.get() == ManaUnificationMode.DISABLED) return;
 
         Player player = event.getEntity();
+        if (player == null || player.level().isClientSide()) return;
+
         AbstractSpell spell = SpellRegistry.getSpell(event.getSpellId());
         if (spell == null) return;
 
-        int level = event.getSpellLevel();
-        CastSource source = event.getCastSource();
+        ManaBridgeManager.Preflight result =
+                ManaBridgeManager.preflight(player, spell, event.getSpellLevel(), event.getCastSource());
 
-        ManaResolutionResult result = ManaBridgeManager.resolveCost(player, spell, level, source);
-        if (!result.ok()) {
-            player.displayClientMessage(
-                    Component.translatable("ironsbotany.spell.insufficient_botania_mana"),
-                    true);
+        if (!result.allow()) {
+            player.displayClientMessage(Component.translatable(result.denyKey()), true);
             event.setCanceled(true);
         }
     }
 
     /**
-     * Fires when ISS is about to mutate the player's mana value. When the
-     * bridge already paid this cast's cost from Botania <em>in place of</em>
-     * ISS mana (BOTANIA_PRIMARY or an Elementium-scroll cast, flagged via
-     * {@link CostRoutedTag#markBotaniaPaid}), refund the ISS debit here so the
-     * player is charged exactly once. Regen (an <em>increase</em>) and
-     * HYBRID/SEPARATE dual-cost casts (which intentionally pay both, and never
-     * set the Botania-paid marker) are left untouched.
+     * Commit the reserved plan, and zero the ISS cost when Botania paid in its place.
+     *
+     * <p>This fires immediately before ISS evaluates
+     * {@code magicData.setMana(max(0, mana - event.getManaCost()))}, so setting the cost to zero is
+     * the whole of the redirection — no refund, no interception, no persistent flag.
      */
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onChangeMana(ChangeManaEvent event) {
+    public static void onSpellCast(SpellOnCastEvent event) {
         if (CommonConfig.MANA_UNIFICATION_MODE.get() == ManaUnificationMode.DISABLED) return;
+
         Player player = event.getEntity();
         if (player == null || player.level().isClientSide()) return;
 
-        // Only intercept debits (a decrease); regen and top-ups must pass through.
-        if (event.getNewMana() >= event.getOldMana()) return;
+        ItemStack castingStack = ItemStack.EMPTY;
+        MagicData magicData = MagicData.getPlayerMagicData(player);
+        if (magicData != null && magicData.getPlayerCastingItem() != null) {
+            castingStack = magicData.getPlayerCastingItem();
+        }
 
-        long tick = player.level().getGameTime();
-        if (CostRoutedTag.isBotaniaPaid(player, tick)) {
-            // Botania already covered this cast — cancel ISS's own debit.
-            event.setNewMana(event.getOldMana());
+        boolean botaniaPaidInsteadOfIss = ManaBridgeManager.commit(
+                player, event.getSpellId(), event.getSpellLevel(), event.getCastSource(), castingStack);
+
+        if (botaniaPaidInsteadOfIss) {
+            event.setManaCost(0);
         }
     }
 
+    // ------------------------------------------------------------------
+    // Lifecycle — no transaction may outlive the cast it belongs to
+    // ------------------------------------------------------------------
+
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        CastTransactions.abort(event.getEntity(), "player logged out");
+    }
+
+    @SubscribeEvent
+    public static void onPlayerDeath(LivingDeathEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            CastTransactions.abort(player, "player died");
+        }
+    }
+
+    @SubscribeEvent
+    public static void onChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        CastTransactions.abort(event.getEntity(), "player changed dimension");
+    }
+
     /**
-     * Wipe stale cost-routed tags on a generous interval so the
-     * persistent data tag set on the player doesn't accumulate
-     * indefinitely. Cleared every 100 ticks (5 seconds); within that
-     * window the same-tick equality check inside {@link CostRoutedTag}
-     * still does the real work.
+     * Sweep transactions abandoned without a terminal event.
+     *
+     * <p>Runs once a second on the server tick rather than per player, and only expires entries
+     * older than a minute. A reservation holds no mana, so expiring one can never cost a player
+     * anything; this exists to stop the map growing, not to protect state.
      */
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
-        if (event.player.level().isClientSide()) return;
-        if (event.player.tickCount % 100 != 0) return;
-        long now = event.player.level().getGameTime();
-        long stamped = event.player.getPersistentData().getLong(CostRoutedTag.KEY_TICK);
-        if (stamped > 0 && stamped + 100 < now) {
-            CostRoutedTag.clear(event.player);
-        }
+        if (event.getServer().getTickCount() % 20 != 0) return;
+        CastTransactions.expireStale(event.getServer().overworld().getGameTime());
+    }
+
+    /**
+     * Drop every open transaction when the server stops, so nothing survives into the next world
+     * loaded in the same JVM — the single-player "quit to title, load another save" path.
+     */
+    @SubscribeEvent
+    public static void onServerStopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+        CastTransactions.clearAll();
     }
 }

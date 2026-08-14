@@ -1,0 +1,15 @@
+{
+  "name": "Living Root Grasp",
+  "icon": "ironsbotany:spell_petal",
+  "category": "ironsbotany:spells",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Living Root Grasp$() roots and binds enemies with living vines, immobilizing them.$(br2)$(l)Max Level:$() 6$(br)$(l)Type:$() Control$(br)$(l)Botania Mana Cost:$() 15,000 + 7,500/level$(br2)Applies Slowness to the target. With the $(o)livingRootImmobilize$() config option (default: true), this becomes full immobilization. Duration increases with spell level."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:scroll_living_root_grasp"
+    }
+  ]
+}

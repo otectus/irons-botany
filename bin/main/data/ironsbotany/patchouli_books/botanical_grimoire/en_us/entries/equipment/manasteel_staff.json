@@ -1,0 +1,21 @@
+{
+  "name": "Manasteel Staff",
+  "icon": "ironsbotany:manasteel_staff",
+  "category": "ironsbotany:equipment",
+  "advancement": "ironsbotany:first_spell",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The $(thing)Manasteel Staff$() extends Iron's Spellbooks $(thing)StaffItem$() — it casts spells like a vanilla staff but doubles as a Botania mana storage with a 50,000-unit buffer. Sparks can deposit into it, and {ManaItemHandler.requestMana} drains it during spell casts."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:manasteel_staff"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Stats",
+      "text": "$(li)+20 Max Mana$(li)+5% Cast Time Reduction$(li)+10% Botany Spell Power$(li)+0.05 Mana Efficiency$(br)Repaired with Manasteel Ingots."
+    }
+  ]
+}

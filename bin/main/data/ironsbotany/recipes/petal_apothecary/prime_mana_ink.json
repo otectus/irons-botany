@@ -1,0 +1,20 @@
+{
+  "type": "botania:petal_apothecary",
+  "ingredients": [
+    { "tag": "botania:petals/blue" },
+    { "tag": "botania:petals/purple" },
+    { "tag": "botania:petals/purple" },
+    { "tag": "botania:petals/magenta" },
+    { "tag": "botania:petals/black" },
+    { "tag": "botania:petals/black" },
+    { "item": "ironsbotany:greater_mana_ink" },
+    { "item": "botania:mana_diamond" }
+  ],
+  "output": {
+    "item": "ironsbotany:prime_mana_ink",
+    "count": 2
+  },
+  "reagent": {
+    "tag": "botania:seed_apothecary_reagent"
+  }
+}

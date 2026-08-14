@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ironsbotany:item/manasteel_wizard_leggings"
+  }
+}

@@ -3,6 +3,9 @@ package com.ironsbotany.common.spell;
 import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.alfheim.AlfheimSpellBoost;
 import com.ironsbotany.common.alfheim.SpellbookAttunement;
+import com.ironsbotany.common.bridge.cast.CastTransaction;
+import com.ironsbotany.common.bridge.cast.CastTransactions;
+import com.ironsbotany.common.bridge.cast.CastTransactionState;
 import com.ironsbotany.common.config.CommonConfig;
 import com.ironsbotany.common.config.ConfigHelper;
 import com.ironsbotany.common.corporea.SpellCircleReagentSystem;
@@ -112,13 +115,9 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
             // Get active catalysts from player inventory
             catalysts = SpellCatalystRegistry.getActiveCatalysts(player);
 
-            // Apply catalyst effects
+            // Apply catalyst effects. Consumption happens at the END of this method, after the
+            // spell has actually been applied — see the note below.
             SpellCatalystRegistry.applyCatalysts(this, context, catalysts);
-
-            // Consume or damage catalysts based on config
-            if (!catalysts.isEmpty()) {
-                consumeCatalysts(player, catalysts);
-            }
 
             // Apply flower auras
             auras = FlowerAuraRegistry.getActiveAuras(player, 16);
@@ -161,19 +160,24 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
                 }
             }
 
-            // Check Corporea logistics for ritual spells
+            // Corporea reagents. This validates the whole placement plan and only then extracts
+            // and places, so a plan that fails partway restores everything it took.
+            //
+            // Reaching this point means Botania mana has already been debited by the cast
+            // transaction (ManaBridgeManager commits during SpellOnCastEvent, which ISS fires
+            // immediately before this method). A reagent shortfall here must therefore roll the
+            // payment back rather than simply returning, which is what 1.9.0 did — it charged
+            // mana, consumed catalysts, and only then discovered the reagents were missing.
             if (!SpellCircleReagentSystem.prepareSpellCircle(player, this, spellLevel)) {
+                CastTransaction tx = CastTransactions.get(player);
+                if (tx != null && tx.state() == CastTransactionState.COMMITTED) {
+                    tx.rollback("reagent shortfall after payment");
+                }
                 player.displayClientMessage(
                     Component.translatable("ironsbotany.spell.missing_reagents"),
                     true);
                 return;
             }
-
-            // Mana cost is routed centrally via ManaBridgeManager from
-            // SpellPreCastEvent. By the time we reach onCast() the player
-            // has already paid (or the cast was cancelled). The bridge's
-            // CostRoutedTag makes this idempotent if a downstream caller
-            // re-enters the path.
 
             // Show catalyst activation effects
             if (!catalysts.isEmpty()) {
@@ -199,6 +203,13 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
 
         // Player-specific post-cast logic
         if (entity instanceof Player player) {
+            // Consume catalysts only now that the spell has actually been applied. 1.9.0 consumed
+            // them before the reagent check, so a cast that failed for want of reagents still
+            // destroyed the player's catalysts.
+            if (!catalysts.isEmpty()) {
+                consumeCatalysts(player, catalysts);
+            }
+
             // Store last spell cast for cross-system tracking (e.g., Gaia trials)
             player.getPersistentData().putString(DataKeys.LAST_SPELL_ID, this.getSpellId());
             player.getPersistentData().putLong(DataKeys.LAST_SPELL_TIME, level.getGameTime());

@@ -1,0 +1,10 @@
+{
+  "type": "botania:elven_trade",
+  "ingredients": [
+    { "item": "ironsbotany:greater_mana_ink" },
+    { "item": "botania:dragonstone" }
+  ],
+  "output": [
+    { "item": "ironsbotany:prime_mana_ink", "count": 2 }
+  ]
+}
