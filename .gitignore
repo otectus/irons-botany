@@ -45,3 +45,6 @@ src/generated/
 
 # Claude Code harness (worktrees, transcripts, local config)
 .claude/
+
+# Eclipse/VSCode Java build output
+bin/
