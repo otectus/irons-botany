@@ -1,9 +1,9 @@
 {
   "amount": 0.10,
-  "attribute": "ironsbotany:botany_spell_power",
+  "attribute": "irons_spellbooks:holy_spell_power",
   "containerItem": {
     "count": 1,
-    "id": "ironsbotany:orb_of_flora"
+    "id": "ironsbotany:orb_of_holy_power"
   },
   "operation": "MULTIPLY_BASE"
 }

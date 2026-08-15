@@ -1,0 +1,9 @@
+{
+  "amount": 0.10,
+  "attribute": "irons_spellbooks:ender_spell_power",
+  "containerItem": {
+    "count": 1,
+    "id": "ironsbotany:orb_of_ender_power"
+  },
+  "operation": "MULTIPLY_BASE"
+}

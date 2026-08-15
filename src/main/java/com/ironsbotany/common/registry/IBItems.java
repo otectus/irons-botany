@@ -2,6 +2,7 @@ package com.ironsbotany.common.registry;
 
 import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.item.*;
+import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -111,16 +112,16 @@ public class IBItems {
 
     // Upgrade Orbs
     public static final RegistryObject<Item> ORB_OF_FLORA = ITEMS.register("orb_of_flora",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.FLORA_ORB_TYPE, "flora"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.typeKey("flora"), "flora", ChatFormatting.GREEN));
 
     public static final RegistryObject<Item> ORB_OF_THE_POOL = ITEMS.register("orb_of_the_pool",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.POOL_ORB_TYPE, "pool"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.typeKey("pool"), "pool", ChatFormatting.BLUE));
 
     public static final RegistryObject<Item> ORB_OF_BURSTING = ITEMS.register("orb_of_bursting",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.BURSTING_ORB_TYPE, "bursting"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.typeKey("bursting"), "bursting", ChatFormatting.LIGHT_PURPLE));
 
     public static final RegistryObject<Item> ORB_OF_TERRAN_MIGHT = ITEMS.register("orb_of_terran_might",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.TERRAN_ORB_TYPE, "terran"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.typeKey("terran"), "terran", ChatFormatting.GOLD));
 
     // Crafting Components
     public static final RegistryObject<Item> MANA_INFUSED_ESSENCE = ITEMS.register("mana_infused_essence",
@@ -148,28 +149,28 @@ public class IBItems {
 
     // School-tied upgrade orbs (Phase 2C) — runic altar outputs, one per ISS school's spell-power attribute
     public static final RegistryObject<Item> ORB_OF_FIRE_POWER = ITEMS.register("orb_of_fire_power",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.FLORA_ORB_TYPE, "fire"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.typeKey("fire"), "fire", ChatFormatting.RED));
 
     public static final RegistryObject<Item> ORB_OF_FROST_POWER = ITEMS.register("orb_of_frost_power",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.POOL_ORB_TYPE, "frost"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.typeKey("frost"), "frost", ChatFormatting.AQUA));
 
     public static final RegistryObject<Item> ORB_OF_LIGHTNING_POWER = ITEMS.register("orb_of_lightning_power",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.BURSTING_ORB_TYPE, "lightning"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.typeKey("lightning"), "lightning", ChatFormatting.YELLOW));
 
     public static final RegistryObject<Item> ORB_OF_HOLY_POWER = ITEMS.register("orb_of_holy_power",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.FLORA_ORB_TYPE, "holy"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.typeKey("holy"), "holy", ChatFormatting.WHITE));
 
     public static final RegistryObject<Item> ORB_OF_ENDER_POWER = ITEMS.register("orb_of_ender_power",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.POOL_ORB_TYPE, "ender"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.typeKey("ender"), "ender", ChatFormatting.DARK_PURPLE));
 
     public static final RegistryObject<Item> ORB_OF_BLOOD_POWER = ITEMS.register("orb_of_blood_power",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.BURSTING_ORB_TYPE, "blood"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.typeKey("blood"), "blood", ChatFormatting.DARK_RED));
 
     public static final RegistryObject<Item> ORB_OF_NATURE_POWER = ITEMS.register("orb_of_nature_power",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.TERRAN_ORB_TYPE, "nature"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.typeKey("nature"), "nature", ChatFormatting.DARK_GREEN));
 
     public static final RegistryObject<Item> ORB_OF_ELDRITCH_POWER = ITEMS.register("orb_of_eldritch_power",
-            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.TERRAN_ORB_TYPE, "eldritch"));
+            () -> new BotanicalUpgradeOrbItem(new Item.Properties().stacksTo(1), BotanicalUpgradeOrbItem.typeKey("eldritch"), "eldritch", ChatFormatting.DARK_AQUA));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
