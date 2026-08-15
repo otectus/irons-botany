@@ -3,7 +3,7 @@
 ## Quick Reference
 - **Mod ID**: `ironsbotany`
 - **Package**: `com.ironsbotany`
-- **Version**: 1.9.0 (targets Iron's Spells 3.16+)
+- **Version**: 1.10.0 (targets Iron's Spells 3.16+)
 - **MC**: 1.20.1 | **Forge**: 47.4.16 | **Java**: 17
 - **Mappings**: Official
 

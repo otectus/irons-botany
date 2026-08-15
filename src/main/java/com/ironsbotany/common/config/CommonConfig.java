@@ -263,11 +263,15 @@ public class CommonConfig {
                 .defineInRange("runeScrollManaDiscount", 0.15, 0.0, 0.5);
 
         BIDIRECTIONAL_CONVERSION = BUILDER
+                .comment("[NOT IMPLEMENTED in 1.10.0 - this setting has no effect]",
+                         "See docs/SYSTEM-DECISIONS-1.10.0.md for why, and what replaced it.")
                 .comment("Allow converting ISS mana back to Botania mana",
                          "Only used in HYBRID mode")
                 .define("bidirectionalConversion", false);
         
         REVERSE_CONVERSION_RATIO = BUILDER
+                .comment("[NOT IMPLEMENTED in 1.10.0 - this setting has no effect]",
+                         "See docs/SYSTEM-DECISIONS-1.10.0.md for why, and what replaced it.")
                 .comment("How much ISS mana equals 1 Botania mana for reverse conversion",
                          "Only used when bidirectionalConversion is true")
                 .defineInRange("reverseConversionRatio", 800, 100, 10000);
@@ -326,6 +330,8 @@ public class CommonConfig {
                 .defineInRange("manaPoolSearchRadius", 8, 4, 16);
 
         MANA_PRIORITY_CHAIN = BUILDER
+                .comment("[NOT IMPLEMENTED in 1.10.0 - this setting has no effect]",
+                         "See docs/SYSTEM-DECISIONS-1.10.0.md for why, and what replaced it.")
                 .comment("Cross-bridge mana resource ordering. Sources are tried in",
                          "list order; absent mods are skipped. Tokens: botania, ars, iss.",
                          "(\"lp\" and \"aura\" are also accepted as forward-compat placeholders",
@@ -348,6 +354,8 @@ public class CommonConfig {
                 .defineInRange("botanicalPowerMultiplier", 1.0, 0.5, 2.0);
         
         ENABLE_BOTANICAL_SCHOOL = BUILDER
+                .comment("[NOT IMPLEMENTED in 1.10.0 - this setting has no effect]",
+                         "See docs/SYSTEM-DECISIONS-1.10.0.md for why, and what replaced it.")
                 .comment("Enable the Botanical spell school")
                 .define("enableBotanicalSchool", true);
         
@@ -672,10 +680,14 @@ public class CommonConfig {
 
         BUILDER.push("Balance");
         ENABLE_CROSS_LOOT = BUILDER
+                .comment("[NOT IMPLEMENTED in 1.10.0 - this setting has no effect]",
+                         "See docs/SYSTEM-DECISIONS-1.10.0.md for why, and what replaced it.")
                 .comment("Enable cross-mod loot injection")
                 .define("enableCrossLoot", true);
 
         UPGRADE_ORB_EFFECTIVENESS = BUILDER
+                .comment("[NOT IMPLEMENTED in 1.10.0 - this setting has no effect]",
+                         "See docs/SYSTEM-DECISIONS-1.10.0.md for why, and what replaced it.")
                 .comment("Effectiveness multiplier for Botanical Upgrade Orbs")
                 .defineInRange("upgradeOrbEffectiveness", 1.0, 0.5, 2.0);
 
@@ -694,6 +706,8 @@ public class CommonConfig {
                 .define("enableCastingChannels", true);
         
         CHANNEL_POWER_MULTIPLIER = BUILDER
+                .comment("[NOT IMPLEMENTED in 1.10.0 - this setting has no effect]",
+                         "See docs/SYSTEM-DECISIONS-1.10.0.md for why, and what replaced it.")
                 .comment("Global multiplier for casting channel effects")
                 .defineInRange("channelPowerMultiplier", 1.0, 0.1, 5.0);
         BUILDER.pop();
@@ -741,6 +755,8 @@ public class CommonConfig {
                 .defineInRange("flowerAuraStrengthMultiplier", 1.0, 0.1, 5.0);
         
         ALLOW_AURA_STACKING = BUILDER
+                .comment("[NOT IMPLEMENTED in 1.10.0 - this setting has no effect]",
+                         "See docs/SYSTEM-DECISIONS-1.10.0.md for why, and what replaced it.")
                 .comment("Allow multiple flower auras to stack")
                 .define("allowAuraStacking", true);
         
@@ -777,10 +793,14 @@ public class CommonConfig {
                 .define("enableCorporeaLogistics", true);
         
         AUTO_REQUEST_REAGENTS = BUILDER
+                .comment("[NOT IMPLEMENTED in 1.10.0 - this setting has no effect]",
+                         "See docs/SYSTEM-DECISIONS-1.10.0.md for why, and what replaced it.")
                 .comment("Automatically request spell reagents from Corporea")
                 .define("autoRequestReagents", true);
         
         CORPOREA_SEARCH_RADIUS = BUILDER
+                .comment("[NOT IMPLEMENTED in 1.10.0 - this setting has no effect]",
+                         "See docs/SYSTEM-DECISIONS-1.10.0.md for why, and what replaced it.")
                 .comment("Radius to search for Corporea Index")
                 .defineInRange("corporeaSearchRadius", 16, 4, 64);
         BUILDER.pop();
@@ -791,10 +811,14 @@ public class CommonConfig {
                 .define("enableAlfheimBoost", true);
         
         ALFHEIM_POWER_MULTIPLIER = BUILDER
+                .comment("[NOT IMPLEMENTED in 1.10.0 - this setting has no effect]",
+                         "See docs/SYSTEM-DECISIONS-1.10.0.md for why, and what replaced it.")
                 .comment("Power multiplier for spells cast in Alfheim")
                 .defineInRange("alfheimPowerMultiplier", 1.5, 1.0, 5.0);
         
         ENABLE_DUAL_SCHOOL_SCROLLS = BUILDER
+                .comment("[NOT IMPLEMENTED in 1.10.0 - this setting has no effect]",
+                         "See docs/SYSTEM-DECISIONS-1.10.0.md for why, and what replaced it.")
                 .comment("Enable dual-school scrolls crafted in Alfheim")
                 .define("enableDualSchoolScrolls", true);
         

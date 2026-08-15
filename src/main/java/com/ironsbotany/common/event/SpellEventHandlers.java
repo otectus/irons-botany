@@ -97,6 +97,7 @@ public final class SpellEventHandlers {
     @SubscribeEvent
     public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         CastTransactions.abort(event.getEntity(), "player logged out");
+        com.ironsbotany.common.flower.FlowerAuraRegistry.invalidateCache(event.getEntity().getUUID());
     }
 
     @SubscribeEvent
@@ -109,6 +110,9 @@ public final class SpellEventHandlers {
     @SubscribeEvent
     public static void onChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         CastTransactions.abort(event.getEntity(), "player changed dimension");
+        // Aura scans are per-dimension; a stale entry from the world just left must not answer a
+        // query in the new one.
+        com.ironsbotany.common.flower.FlowerAuraRegistry.invalidateCache(event.getEntity().getUUID());
     }
 
     /**
@@ -132,5 +136,6 @@ public final class SpellEventHandlers {
     @SubscribeEvent
     public static void onServerStopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
         CastTransactions.clearAll();
+        com.ironsbotany.common.flower.FlowerAuraRegistry.cleanupCache();
     }
 }

@@ -14,6 +14,77 @@ Caster (a functional flower that casts ISS spells autonomously — the v2.0
 signature), Corporea Scroll Rack with spell-aware request matcher, and a
 KubeJS plugin surface for downstream addons.
 
+## [1.10.0] - Stability, compatibility & correctness
+
+Fixes the crash that made 1.9.0 unusable alongside ISS-Scroll Descriptions and ISS-Restrictions,
+rebuilds mana routing as a single transactional path, and makes a dozen advertised features that
+did nothing actually do it. Read [`docs/UPGRADING-1.10.0.md`](docs/UPGRADING-1.10.0.md) before
+upgrading; back up your world.
+
+### Fixed — crashes and data loss
+
+- **Crash when a scroll add-on inspects a Botany spell.** The Botany school's display name carried
+  no colour, and Iron's Spells' `SchoolType#getTargetingColor()` dereferences that colour with no
+  null check. Iron's Spells' own `AbstractSpell` and roughly twenty further ISS classes call it, so
+  this was never add-on-only. Spell icons appearing "missing" was the same bug — the tooltip aborted
+  before drawing them. The icons were always present and valid; all 86 textures in the 1.9.0
+  artifact decode.
+- **Botania payment could never succeed with a single mana item, and over-counted with three or
+  more.** `ManaItemHandler.requestMana(stack, ...)` excludes the stack passed to it and searches
+  everything else; it was being used as a per-source query. The over-count let an unaffordable cast
+  pass the check, drain part of the player's mana, and then be refused anyway.
+- **A failed cast could cost mana and catalysts.** Mana was charged during `SpellPreCastEvent`,
+  catalysts were consumed near the top of `onCast`, and the reagent check that aborts the cast ran
+  after both.
+- **Same-tick casts could inherit each other's payment state,** and an unrelated mana debit could
+  absorb a refund, because routing was keyed on `(tick, spellId.hashCode(), cost)` with tick-only
+  payment flags and refunds applied through `ChangeManaEvent` — an event carrying no spell identity.
+- **Mana-generating weapons credited the wrong item.** They called `requestManaExact` with a
+  negative amount, relying on arithmetic that adds mana as a side effect, to an item other than the
+  one iterated, and fired particles without proving anything was accepted.
+
+### Fixed — features that did nothing
+
+- **Botany spell power and resistance** were registered but attached to no entity, so every Botany
+  bonus on every item was silently inert.
+- **Mana efficiency** had a maximum equal to its default, so every item's modifier was clamped away
+  — and no cost path read it.
+- **All eight school upgrade orbs** shared four orb types, so each applied another orb's attribute
+  and returned another orb when consumed; the tooltip had no case for any of them.
+- **Orb of Flora** boosted ISS Nature rather than this mod's own Botany school.
+- **Rune-scroll fusion** consumed a rune to write NBT nothing read.
+- **Livingwood Staff, Dreamwood Scepter and Daybloom Amulet** granted ISS Nature power only, which
+  no spell in this mod reads. They are now dual-school.
+- **Gaia's Blessing** charged a mana pool from a level *query*, so opening a spell book could cost
+  mana.
+
+### Changed
+
+- `/irons_botany reload` is now `/irons_botany flushcaches`; it never reloaded configuration. New
+  `/irons_botany diagnose` reports school metadata for every registered spell.
+- Botanical Ring's tooltip now says "All Spell Power", which is what it has always granted.
+- The flower-aura cache is keyed by player *and radius*, validated against dimension and position,
+  and its `maxActiveAuras` truncation ranks by strength and distance instead of block-iteration
+  order. Aura and mana-pool scans skip unloaded chunks instead of loading them.
+- Twelve config settings that never had an effect are labelled as such in the generated config.
+- `updateJSONURL` points at a real Forge update manifest instead of an HTML releases page.
+
+### Added
+
+- A `validateArtifact` build gate that decodes every PNG in the published JAR, checks spell-icon
+  dimensions, resolves every asset reference inside the archive, compares language files against
+  `en_us`, and prints the artifact SHA-256 and size.
+- A runtime spell integrity check that runs on every resource reload against the live spell registry.
+- 77 unit and contract tests where there were none.
+- `runeScrollManaDiscount` config key.
+- `docs/INVESTIGATION-1.10.0.md`, `docs/SYSTEM-DECISIONS-1.10.0.md`, `docs/UPGRADING-1.10.0.md`.
+
+### Known limitations
+
+The reported purple/black texture was **not reproduced and has no confirmed root cause**. Dual-school
+scroll NBT, `SpellDrivenAutomation`, the spell-triggered mana-network events and the progression
+unlock flags remain inert and default to off. See `docs/SYSTEM-DECISIONS-1.10.0.md`.
+
 ## [1.9.0] - Stability, correctness & the school-migration finish line
 
 A full-codebase audit pass. Two advertised features that never actually worked now do,

@@ -7,7 +7,9 @@ issueTrackerURL="https://github.com/ironsbotany/ironsbotany/issues"
 modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
-updateJSONURL="https://github.com/ironsbotany/ironsbotany/releases"
+# Forge expects an update MANIFEST here, not a web page. Through 1.9.0 this pointed at the
+# HTML releases page, which Forge fetches and fails to parse on every launch.
+updateJSONURL="https://raw.githubusercontent.com/ironsbotany/ironsbotany/main/update.json"
 displayURL="https://github.com/ironsbotany/ironsbotany"
 credits="Botania by Vazkii, Iron's Spells 'n Spellbooks by Iron431"
 authors="${mod_authors}"

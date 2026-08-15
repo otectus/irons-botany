@@ -1,0 +1,14 @@
+{
+  "homepage": "https://github.com/ironsbotany/ironsbotany",
+  "promos": {
+    "1.20.1-latest": "1.10.0",
+    "1.20.1-recommended": "1.10.0"
+  },
+  "1.20.1": {
+    "1.10.0": "Stability, compatibility and correctness release.\n\nFixes the crash when ISS-Scroll Descriptions or ISS-Restrictions inspect a Botany spell: the Botany school's display name had no colour, and Iron's Spells' SchoolType#getTargetingColor() dereferences that colour without a null check.\n\nRebuilds mana routing as a single per-cast transaction. A failed, cancelled or interrupted cast can no longer drain mana or consume catalysts, same-tick casts can no longer share payment state, and Botania payment now works for a player carrying a single mana item (it previously never could).\n\nEvery upgrade orb now applies its own attribute and returns its own item; rune-enhanced scrolls finally do something; Botany power, resistance and mana-efficiency attributes are attached to players and actually read.\n\nBACK UP YOUR WORLD BEFORE UPGRADING. See docs/UPGRADING-1.10.0.md.",
+    "1.9.0": "Custom Botany school, endgame items, audit fixes. Superseded by 1.10.0, which fixes a crash affecting scroll add-ons.",
+    "1.7.2": "Removed a duplicate Patchouli book entry.",
+    "1.7.1": "Post-1.7.0 bug patch.",
+    "1.7.0": "Polish and final release for the 1.7 line."
+  }
+}
