@@ -46,7 +46,9 @@ public class BotanicalRingItem extends Item implements ICurioItem {
         tooltip.add(Component.translatable("item.ironsbotany.botanical_ring.tooltip")
                 .withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("+" + MAX_MANA_BONUS + " Max Mana").withStyle(ChatFormatting.GREEN));
-        tooltip.add(Component.literal("+" + (int)(SPELL_POWER_BONUS * 100) + "% Nature Spell Power").withStyle(ChatFormatting.GREEN));
+        // Grants AttributeRegistry.SPELL_POWER, which applies to every school — the tooltip said
+        // "Nature Spell Power" through 1.9.0, describing a bonus the item does not grant.
+        tooltip.add(Component.literal("+" + (int)(SPELL_POWER_BONUS * 100) + "% All Spell Power").withStyle(ChatFormatting.GREEN));
         super.appendHoverText(stack, level, tooltip, flag);
     }
 

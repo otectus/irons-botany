@@ -31,6 +31,15 @@ public class DreamwoodScepterItem extends Item {
             ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
             builder.putAll(super.getDefaultAttributeModifiers(slot));
 
+            // Dual-school by design. This is a Botania-themed caster item, so it must power this
+            // mod's own Botany spells — through 1.9.0 it granted ISS Nature only, which did nothing
+            // for any spell this mod ships. The Nature grant is kept so players using it with ISS
+            // Nature spells are not silently downgraded. A spell reads exactly one school's power
+            // attribute, so granting both is not a stacking buff.
+            builder.put(com.ironsbotany.common.registry.IBAttributes.BOTANY_SPELL_POWER.get(),
+                    new AttributeModifier(SPELL_POWER_UUID, "Dreamwood Botany Spell Power",
+                            CommonConfig.DREAMWOOD_SCEPTER_SPELL_POWER.get(),
+                            AttributeModifier.Operation.MULTIPLY_TOTAL));
             builder.put(AttributeRegistry.NATURE_SPELL_POWER.get(),
                     new AttributeModifier(SPELL_POWER_UUID, "Dreamwood Spell Power",
                             CommonConfig.DREAMWOOD_SCEPTER_SPELL_POWER.get(),

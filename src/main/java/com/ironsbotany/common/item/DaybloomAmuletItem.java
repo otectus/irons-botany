@@ -1,5 +1,6 @@
 package com.ironsbotany.common.item;
 
+import com.ironsbotany.common.registry.IBAttributes;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
@@ -29,7 +30,7 @@ import java.util.UUID;
  *
  * <p>Stats while in daylight (sky visible + day):
  * <ul>
- *   <li>+15% Nature Spell Power</li>
+ *   <li>+15% Botany & Nature Spell Power</li>
  *   <li>+5% Cast Time Reduction</li>
  * </ul>
  *
@@ -63,6 +64,12 @@ public class DaybloomAmuletItem extends Item implements ICurioItem {
         if (entity.tickCount % 20 != 0) return;
 
         boolean inDaylight = entity.level().isDay() && entity.level().canSeeSky(entity.blockPosition());
+        // Dual-school. Botany is the school this mod's own spells read; granting only ISS Nature —
+        // as 1.9.0 did — meant this amulet powered none of the spells it ships alongside. Nature is
+        // retained so existing ISS Nature builds are not silently downgraded, and because a spell
+        // reads exactly one school's power attribute, granting both does not stack.
+        applyConditional(entity, IBAttributes.BOTANY_SPELL_POWER.get(),
+                DAY_NATURE_POWER_UUID, "Daybloom Amulet Botany Power", NATURE_POWER_DAY, inDaylight);
         applyConditional(entity, AttributeRegistry.NATURE_SPELL_POWER.get(),
                 DAY_NATURE_POWER_UUID, "Daybloom Amulet Nature Power", NATURE_POWER_DAY, inDaylight);
         applyConditional(entity, AttributeRegistry.CAST_TIME_REDUCTION.get(),
@@ -73,6 +80,8 @@ public class DaybloomAmuletItem extends Item implements ICurioItem {
     public void onUnequip(SlotContext slotContext, ItemStack newStack, ItemStack stack) {
         // Strip transient modifiers when removed.
         LivingEntity entity = slotContext.entity();
+        applyConditional(entity, IBAttributes.BOTANY_SPELL_POWER.get(),
+                DAY_NATURE_POWER_UUID, "Daybloom Amulet Botany Power", NATURE_POWER_DAY, false);
         applyConditional(entity, AttributeRegistry.NATURE_SPELL_POWER.get(),
                 DAY_NATURE_POWER_UUID, "Daybloom Amulet Nature Power", NATURE_POWER_DAY, false);
         applyConditional(entity, AttributeRegistry.CAST_TIME_REDUCTION.get(),
@@ -99,7 +108,7 @@ public class DaybloomAmuletItem extends Item implements ICurioItem {
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.ironsbotany.daybloom_amulet.tooltip")
                 .withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.literal("+15% Nature Spell Power (in daylight)").withStyle(ChatFormatting.YELLOW));
+        tooltip.add(Component.literal("+15% Botany & Nature Spell Power (in daylight)").withStyle(ChatFormatting.YELLOW));
         tooltip.add(Component.literal("+5% Cast Speed (in daylight)").withStyle(ChatFormatting.YELLOW));
         super.appendHoverText(stack, level, tooltip, flag);
     }

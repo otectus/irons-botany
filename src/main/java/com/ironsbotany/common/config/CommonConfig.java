@@ -29,6 +29,8 @@ public class CommonConfig {
     public static final ForgeConfigSpec.EnumValue<ManaUnificationMode> MANA_UNIFICATION_MODE;
     public static final ForgeConfigSpec.IntValue MANA_CONVERSION_RATIO;
     public static final ForgeConfigSpec.IntValue ELEMENTIUM_SCROLL_MANA_COST;
+    /** Botania cost discount granted by a rune-enhanced scroll; read by the cast transaction. */
+    public static final ForgeConfigSpec.DoubleValue RUNE_SCROLL_MANA_DISCOUNT;
     public static final ForgeConfigSpec.BooleanValue ENABLE_DUAL_COST_SPELLS;
     public static final ForgeConfigSpec.IntValue SPELL_RESERVOIR_CAPACITY;
     public static final ForgeConfigSpec.IntValue MANA_TRANSFER_RATE;
@@ -248,6 +250,17 @@ public class CommonConfig {
                          "the vanilla single-use way. Raised to conversionRatio*issCost for the rare",
                          "scroll whose spell does carry a mana cost.")
                 .defineInRange("elementiumScrollManaCost", 10000, 0, 1000000);
+
+        RUNE_SCROLL_MANA_DISCOUNT = BUILDER
+                .comment("Botania mana-cost discount a rune-enhanced scroll grants (0.15 = -15%).",
+                         "Scaled by the fused rune's tier: elemental runes x1, seasonal/thematic x1.5,",
+                         "Gaia/Pride/modded x2. The result is clamped to 50% and applied",
+                         "multiplicatively with every other discount, so no combination is free.",
+                         "Set to 0 to disable the rune-scroll fusion bonus entirely; the recipe still",
+                         "works but produces a purely cosmetic scroll.",
+                         "Before 1.10.0 the fusion recipe consumed a rune and wrote NBT that nothing",
+                         "read, so the upgrade had no mechanical effect at all.")
+                .defineInRange("runeScrollManaDiscount", 0.15, 0.0, 0.5);
 
         BIDIRECTIONAL_CONVERSION = BUILDER
                 .comment("Allow converting ISS mana back to Botania mana",

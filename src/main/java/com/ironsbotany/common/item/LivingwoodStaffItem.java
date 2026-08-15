@@ -33,6 +33,12 @@ public class LivingwoodStaffItem extends Item {
             ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
             builder.putAll(super.getDefaultAttributeModifiers(slot));
 
+            // Dual-school: see DreamwoodScepterItem. Botany is what this mod's own spells read;
+            // Nature is retained so existing ISS Nature builds are not silently downgraded.
+            builder.put(com.ironsbotany.common.registry.IBAttributes.BOTANY_SPELL_POWER.get(),
+                    new AttributeModifier(SPELL_POWER_UUID, "Livingwood Botany Spell Power",
+                            CommonConfig.LIVINGWOOD_STAFF_SPELL_POWER.get(),
+                            AttributeModifier.Operation.MULTIPLY_TOTAL));
             builder.put(AttributeRegistry.NATURE_SPELL_POWER.get(),
                     new AttributeModifier(SPELL_POWER_UUID, "Livingwood Spell Power",
                             CommonConfig.LIVINGWOOD_STAFF_SPELL_POWER.get(),

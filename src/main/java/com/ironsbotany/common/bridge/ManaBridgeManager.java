@@ -14,6 +14,7 @@ import com.ironsbotany.common.config.ConfigHelper;
 import com.ironsbotany.common.config.ManaUnificationMode;
 import com.ironsbotany.common.item.DreamwoodScepterItem;
 import com.ironsbotany.common.item.ElementiumScrollItem;
+import com.ironsbotany.common.item.RuneEnhancement;
 import com.ironsbotany.common.registry.IBAttributes;
 import com.ironsbotany.common.spell.AbstractBotanicalSpell;
 import com.ironsbotany.common.spell.config.BotanySpellConfig;
@@ -265,8 +266,22 @@ public final class ManaBridgeManager {
         return ManaCostComposer.compose(
                 base,
                 channelFactor(player, castingStack, spell),
-                manaEfficiency(player),
+                // Mana efficiency and a rune-enhanced scroll's discount are both fractional
+                // reductions of the same kind, so they combine multiplicatively via one factor
+                // rather than being summed.
+                combineDiscounts(manaEfficiency(player), RuneEnhancement.manaDiscount(castingStack)),
                 MageArmorSets.botaniaCostMultiplier(player));
+    }
+
+    /** Combine two fractional discounts without letting them sum past 100%. */
+    private static double combineDiscounts(double a, double b) {
+        double remaining = (1.0 - clamp01(a)) * (1.0 - clamp01(b));
+        return 1.0 - remaining;
+    }
+
+    private static double clamp01(double value) {
+        if (!Double.isFinite(value)) return 0.0;
+        return Math.max(0.0, Math.min(1.0, value));
     }
 
     /**
