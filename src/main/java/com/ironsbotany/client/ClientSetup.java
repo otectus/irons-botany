@@ -13,6 +13,7 @@ import com.ironsbotany.common.registry.IBEntities;
 import com.ironsbotany.common.registry.IBParticles;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -24,6 +25,18 @@ public class ClientSetup {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         IronsBotany.LOGGER.info("Iron's Botany client setup complete!");
+    }
+
+    /**
+     * Re-check every registered spell's icon and school metadata on each resource reload.
+     *
+     * <p>Registered as a reload listener rather than run once at setup so that {@code F3+T},
+     * joining a server, and enabling a resource pack all re-run it — a pack that shadows a spell
+     * icon with a broken file is exactly the kind of thing a one-shot startup check misses.
+     */
+    @SubscribeEvent
+    public static void registerReloadListeners(RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(new SpellIconIntegrityCheck());
     }
 
     @SubscribeEvent

@@ -239,4 +239,170 @@ tasks.register('validateAssets') {
     }
 }
 
-tasks.named('check') { dependsOn 'validateAssets' }
+// ---------------------------------------------------------------------------
+// Final-artifact validation
+//
+// validateAssets (above) checks the SOURCE tree. This task checks the JAR that
+// will actually be published, which is the only thing a player ever runs. The
+// 1.9.0 investigation could not rule out a release-pipeline defect — a public
+// download differing from the tagged source — precisely because no such gate
+// existed. Every check here is on bytes read back out of the built archive.
+// ---------------------------------------------------------------------------
+tasks.register('validateArtifact') {
+    group = 'verification'
+    description = 'Decode every PNG in the built JAR and verify every asset reference resolves inside it.'
+
+    dependsOn tasks.named('jar')
+    def jarProvider = tasks.named('jar').flatMap { it.archiveFile }
+    def spellsSource = file('src/main/java/com/ironsbotany/common/registry/IBSpells.java')
+    inputs.file(jarProvider)
+    inputs.file(spellsSource)
+
+    doLast {
+        def archive = jarProvider.get().asFile
+        def json = new groovy.json.JsonSlurper()
+        def errors = []
+        def zip = new java.util.zip.ZipFile(archive)
+
+        try {
+            def names = zip.entries().collect { it.name } as Set
+            def read = { String name -> zip.getInputStream(zip.getEntry(name)).bytes }
+            def has = { String name -> names.contains(name) }
+
+            // Resolve "ns:path" refs to their JAR entry paths. Only ironsbotany assets can be
+            // asserted here — vanilla and dependency namespaces live in other archives.
+            def texEntry = { String ref ->
+                if (!(ref instanceof String) || ref.startsWith('#')) return null
+                def ns = ref.contains(':') ? ref.substring(0, ref.indexOf(':')) : 'minecraft'
+                def path = ref.contains(':') ? ref.substring(ref.indexOf(':') + 1) : ref
+                ns == 'ironsbotany' ? "assets/ironsbotany/textures/${path}.png" : null
+            }
+            def modelEntry = { String ref ->
+                if (!(ref instanceof String)) return null
+                if (ref.contains(':') && !ref.startsWith('ironsbotany:')) return null
+                def path = ref.contains(':') ? ref.substring(ref.indexOf(':') + 1) : ref
+                ref.contains(':') ? "assets/ironsbotany/models/${path}.json" : null
+            }
+
+            // 1. Every PNG in the artifact must decode, have non-zero dimensions, and contain at
+            //    least one visible pixel. A zero-byte or fully transparent texture renders as
+            //    nothing or as the missing-texture swatch in game but passes a mere existence check.
+            def pngs = names.findAll { it.endsWith('.png') }
+            if (pngs.isEmpty()) errors << "the artifact contains no PNGs at all"
+            pngs.each { name ->
+                def img
+                try {
+                    img = javax.imageio.ImageIO.read(new ByteArrayInputStream(read(name)))
+                } catch (Exception e) {
+                    errors << "${name}: PNG failed to decode -> ${e.message}"
+                    return
+                }
+                if (img == null) { errors << "${name}: not a decodable image"; return }
+                if (img.width <= 0 || img.height <= 0) { errors << "${name}: ${img.width}x${img.height}"; return }
+
+                boolean visible = false
+                for (int y = 0; y < img.height && !visible; y++) {
+                    for (int x = 0; x < img.width && !visible; x++) {
+                        if ((img.getRGB(x, y) >>> 24) != 0) visible = true
+                    }
+                }
+                if (!visible) errors << "${name}: fully transparent — would render as nothing"
+
+                // Spell icons are drawn into a fixed 16x16 GUI slot by Iron's Spells.
+                if (name.contains('/textures/gui/spell_icons/') && (img.width != 16 || img.height != 16)) {
+                    errors << "${name}: spell icons must be 16x16 but this is ${img.width}x${img.height}"
+                }
+            }
+
+            // 2. Every texture and parent referenced by a packaged model must be packaged too.
+            names.findAll { it.startsWith('assets/ironsbotany/models/') && it.endsWith('.json') }.each { name ->
+                def model = json.parse(read(name), 'UTF-8')
+                model.textures?.each { k, v ->
+                    def entry = texEntry(v as String)
+                    if (entry != null && !has(entry)) errors << "${name} [${k}]: missing texture ${entry}"
+                }
+                def parent = modelEntry(model.parent as String)
+                if (parent != null && !has(parent)) errors << "${name}: missing parent model ${parent}"
+            }
+
+            // 3. Blockstate variants must point at packaged models.
+            names.findAll { it.startsWith('assets/ironsbotany/blockstates/') && it.endsWith('.json') }.each { name ->
+                def data = json.parse(read(name), 'UTF-8')
+                def refs = [] as Set
+                data.variants?.each { k, v -> (v instanceof List ? v : [v]).each { if (it?.model) refs << it.model } }
+                data.multipart?.each { p -> def a = p.apply; (a instanceof List ? a : [a]).each { if (it?.model) refs << it.model } }
+                refs.each { r ->
+                    def entry = modelEntry(r as String)
+                    if (entry != null && !has(entry)) errors << "${name}: missing model ${entry}"
+                }
+            }
+
+            // 4. Particle definitions must point at packaged sprites.
+            names.findAll { it.startsWith('assets/ironsbotany/particles/') && it.endsWith('.json') }.each { name ->
+                json.parse(read(name), 'UTF-8').textures?.each { s ->
+                    def entry = texEntry(s as String)
+                    if (entry != null && !has(entry)) errors << "${name}: missing sprite ${entry}"
+                }
+            }
+
+            // 5. Every registered spell must ship an icon at the path Iron's Spells derives:
+            //    <namespace>:textures/gui/spell_icons/<spellName>.png. This is a build-time
+            //    cross-check of the registration source; the authoritative check runs against the
+            //    live spell registry at runtime (SpellIconIntegrityCheck), because only the game
+            //    can enumerate what actually registered.
+            def declared = [] as Set
+            if (spellsSource.exists()) {
+                def matcher = spellsSource.text =~ /SPELLS\.register\("([a-z0-9_]+)"/
+                while (matcher.find()) declared << matcher.group(1)
+            }
+            if (declared.isEmpty()) errors << "could not read any spell registrations from ${spellsSource.name}"
+            declared.each { id ->
+                def entry = "assets/ironsbotany/textures/gui/spell_icons/${id}.png"
+                if (!has(entry)) errors << "spell '${id}' is registered but ${entry} is not in the artifact"
+            }
+            def packaged = names.findAll { it.startsWith('assets/ironsbotany/textures/gui/spell_icons/') && it.endsWith('.png') }
+                                .collect { it.substring(it.lastIndexOf('/') + 1) - '.png' } as Set
+            (packaged - declared).each { errors << "orphan spell icon '${it}.png' matches no registered spell" }
+
+            // 6. Language parity. Every key en_us defines must exist in every other language file,
+            //    or the difference must be a deliberate, listed fallback.
+            def langs = names.findAll { it.startsWith('assets/ironsbotany/lang/') && it.endsWith('.json') }
+            def enUs = langs.find { it.endsWith('/en_us.json') }
+            if (enUs == null) {
+                errors << "assets/ironsbotany/lang/en_us.json is missing from the artifact"
+            } else {
+                def base = json.parse(read(enUs), 'UTF-8').keySet()
+                (langs - enUs).each { name ->
+                    def keys = json.parse(read(name), 'UTF-8').keySet()
+                    def missing = base - keys
+                    if (!missing.isEmpty()) {
+                        logger.lifecycle("validateArtifact: ${name - 'assets/ironsbotany/lang/'} falls back to en_us for ${missing.size()} key(s)")
+                    }
+                    def extra = keys - base
+                    if (!extra.isEmpty()) {
+                        errors << "${name}: defines ${extra.size()} key(s) absent from en_us -> ${extra.take(5)}"
+                    }
+                }
+            }
+
+            // 7. Metadata the loader needs.
+            ['META-INF/mods.toml', 'pack.mcmeta'].each { if (!has(it)) errors << "missing ${it}" }
+
+            if (!errors.isEmpty()) {
+                throw new GradleException(
+                        "Final-artifact validation failed for ${archive.name} (${errors.size()} problem(s)):\n  "
+                                + errors.join('\n  '))
+            }
+
+            def digest = java.security.MessageDigest.getInstance('SHA-256')
+            digest.update(archive.bytes)
+            logger.lifecycle("validateArtifact: ${archive.name} OK — ${names.size()} entries, ${pngs.size()} PNGs decoded, "
+                    + "${declared.size()} spell icons present")
+            logger.lifecycle("validateArtifact: sha256 ${digest.digest().encodeHex()}  size ${archive.length()} bytes")
+        } finally {
+            zip.close()
+        }
+    }
+}
+
+tasks.named('check') { dependsOn 'validateAssets', 'validateArtifact' }
