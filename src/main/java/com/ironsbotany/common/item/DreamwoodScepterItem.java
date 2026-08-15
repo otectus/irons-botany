@@ -55,7 +55,9 @@ public class DreamwoodScepterItem extends Item {
         int percent = (int) (CommonConfig.DREAMWOOD_SCEPTER_SPELL_POWER.get() * 100);
         tooltip.add(Component.translatable("item.ironsbotany.dreamwood_scepter.spell_power", percent).withStyle(ChatFormatting.GREEN));
         int conversionPercent = (int) (CommonConfig.DREAMWOOD_CONVERSION_PERCENT.get() * 100);
-        // Conversion logic implemented in DreamwoodConversionHandler
+        // Conversion is a component of the cast transaction (ManaBridgeManager.preflight records it
+        // as issCreditOnCommit, credited only once the Botania debit succeeds). It used to live in a
+        // separate SpellPreCastEvent subscriber that raced the bridge at the same priority.
         tooltip.add(Component.translatable("item.ironsbotany.dreamwood_scepter.conversion", conversionPercent).withStyle(ChatFormatting.AQUA));
         super.appendHoverText(stack, level, tooltip, flag);
     }
