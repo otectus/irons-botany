@@ -14,6 +14,61 @@ Caster (a functional flower that casts ISS spells autonomously — the v2.0
 signature), Corporea Scroll Rack with spell-aware request matcher, and a
 KubeJS plugin surface for downstream addons.
 
+## [1.11.0] - Client HUD, transfer fairness & data hardening
+
+Completes the P2 performance and lifecycle work deferred from 1.10.0. Includes everything in
+1.10.0; the upgrade guidance in [`docs/UPGRADING-1.10.0.md`](docs/UPGRADING-1.10.0.md) still applies.
+
+### Fixed
+
+- **The mana HUD ran roughly fifteen times per frame.** `RenderGuiOverlayEvent.Post` fires once per
+  registered overlay and the handler never checked which one, so the full Botania capability sweep
+  and the bar draw repeated for every overlay in the game. It now draws once, on the hotbar overlay.
+- **The HUD double-counted mana.** Botania's item and accessory lists can surface the same physical
+  stack; both totals added it twice. Deduplicated by stack identity.
+- **The HUD recomputed capabilities every frame** to display a value that changes at most twenty
+  times a second. Totals are now cached and refreshed at most five times a second.
+- **`hudScale` was read from the config and never applied.** It is applied now, and the bar is kept
+  fully on screen at its drawn size so a large offset or a small window cannot push it out of view.
+- **The HUD fill was not clamped and summed into an `int`.** A stack reporting more mana than its
+  capacity drew past the end of the bar, and a large enough inventory could overflow the total to a
+  negative and invert it. Per-item values are clamped into their own capacity and totals accumulate
+  in `long`.
+- **Spell Reservoirs and Mana Conduits gave *each* nearby player a full transfer rate every tick,**
+  so the configured block rate was silently multiplied by the number of players standing nearby.
+  There is now one budget per tick, divided fairly, with the remainder rotated by the world clock so
+  no player is permanently favoured. Service order is by UUID rather than entity-list order.
+- **Block entities sent update packets for transfers that moved nothing** — once per nearby player
+  per tick, and on every `drainMana` call including no-ops. They now sync once, and only when the
+  stored value actually changed.
+- **Stored item mana was not clamped below zero, and `addMana` could overflow.** Malformed NBT
+  reporting negative mana subtracted from payment plans; a large enough `addMana` wrapped negative
+  and *zeroed* the item. Both are computed in `long` and clamped.
+- **Mana-network modifications expired against the overworld's clock** regardless of which dimension
+  they belonged to, and their static map was never cleared on server stop, so a single-player
+  session that loaded a different save inherited the previous world's pending modifications.
+- **The HUD's proximity indicator leaked across worlds.** Its static state was never reset on
+  disconnect, so a freshly joined world inherited the previous one's pulse until the next rescan.
+
+### Changed
+
+- The HUD proximity check iterates the block-entity maps of nearby chunks instead of walking 2,197
+  block positions, and skips chunks the client has not received.
+- New client option **`hudPulseNearby`** (default on). Turning it off keeps the nearby-block
+  indicator but draws it steady instead of animating — an accessibility option for motion
+  sensitivity.
+- `particleDensity` is labelled `[NOT IMPLEMENTED]` in the generated client config. Iron's Botany
+  spawns particles server-side via `sendParticles`, which chooses the count before the packet is
+  sent, so a client setting cannot influence it. Video Settings → Particles is the setting that
+  works, and the vanilla particle engine already honours it.
+
+### Added
+
+- `TransferBudget`, extracted so the fair-share arithmetic is unit-testable without a world, with
+  tests asserting the whole budget is distributed exactly once for every budget/recipient
+  combination up to 64×8.
+- 8 more tests (85 total).
+
 ## [1.10.0] - Stability, compatibility & correctness
 
 Fixes the crash that made 1.9.0 unusable alongside ISS-Scroll Descriptions and ISS-Restrictions,

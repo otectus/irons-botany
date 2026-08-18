@@ -26,6 +26,8 @@ This is that record. No entry is left as "still there, still silent".
 | **Botany power / resistance attributes** | **implement** | Registered but attached to no entity. ISS returns `1.0` for an absent attribute, so every Botany bonus on every item was silently inert. | Attached to players via `EntityAttributeModificationEvent`. |
 | **`mana_efficiency` attribute** | **implement** | `default 1.0, max 1.0` with every item adding *positive* modifiers to a value already at maximum, and no reader in the cost path. | Rebased to `default 0.0, max 0.75` and consumed once by the cost composition. Existing item values now mean exactly what their tooltips claimed. |
 | **`/irons_botany reload`** | **rename** | Named like vanilla `/reload` but only cleared the flower-aura cache, so an operator editing the TOML would see no change and blame the config. | Renamed `/irons_botany flushcaches`, reports what it cleared, and says explicitly that it does not re-read configuration. New `/irons_botany diagnose` reports school metadata. |
+| **Client mana HUD** | **implement** | Ran ~15x per frame (the overlay event was never filtered), double-counted stacks present in both Botania lists, ignored `hudScale`, did not clamp fill, summed into `int`, walked 2 197 block positions for its proximity check, and never reset on disconnect. | Draws once per frame on the hotbar overlay; totals cached and deduplicated by stack identity in `long`; scale applied and the bar kept on screen; fill clamped; chunk-aware proximity check; state reset on logout and dimension change; `hudPulseNearby` accessibility option. |
+| **Reservoir / conduit transfer** | **implement** | Each nearby player received a full transfer rate per tick, so the configured block rate was multiplied by the player count, and entity-list order decided who was served first. Update packets were sent for transfers that moved nothing. | One budget per tick via `TransferBudget`, divided fairly with a clock-rotated remainder, ordered by UUID, synced once and only on an actual change. |
 | **Flower aura cache** | **implement** | Keyed on player UUID only while callers request radius 8 and 16, so one radius' result served the other; no dimension check; `MAX_ACTIVE_AURAS` truncation decided by block-iteration order. | Keyed by `(player, radius)`, validated against dimension, time and position; candidates sorted by strength then distance then position before truncation; cleared on logout, dimension change and server stop. |
 
 ---
@@ -49,6 +51,8 @@ no-op any more**: each is either wired, or its comment now states plainly that i
 | `autoRequestReagents`, `corporeaSearchRadius` | **deprecate** | The Corporea reagent path validates and commits its plan; neither knob is consulted. |
 | `alfheimPowerMultiplier` | **deprecate** | The Alfheim proximity boost uses its own configured values. |
 | `enableDualSchoolScrolls` | **deprecate** | Dual-school scroll NBT is written but has no cast-time effect (see §1). |
+| `particleDensity` (client) | **deprecate** | Particle counts are chosen server-side by `sendParticles` before the packet is sent, so a client config cannot influence them. Video Settings → Particles is the working control and the vanilla engine already honours it for every mod. |
+| `hudPulseNearby` (client) | **new, implemented** | Added in 1.11.0. Accessibility option: keeps the nearby-block indicator but stops it animating. |
 
 ---
 

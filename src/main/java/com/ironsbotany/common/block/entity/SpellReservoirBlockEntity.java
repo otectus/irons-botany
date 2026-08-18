@@ -2,6 +2,7 @@ package com.ironsbotany.common.block.entity;
 
 import com.ironsbotany.common.compat.ArsNSpellsCompat;
 import com.ironsbotany.common.config.CommonConfig;
+import com.ironsbotany.common.util.TransferBudget;
 import com.ironsbotany.common.registry.IBBlockEntities;
 import com.ironsbotany.common.registry.IBParticles;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
@@ -18,6 +19,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class SpellReservoirBlockEntity extends BlockEntity {
@@ -73,24 +76,54 @@ public class SpellReservoirBlockEntity extends BlockEntity {
         AABB searchBox = new AABB(pos).inflate(TRANSFER_RADIUS);
         List<Player> nearbyPlayers = level.getEntitiesOfClass(Player.class, searchBox);
 
-        for (Player player : nearbyPlayers) {
+        if (nearbyPlayers.isEmpty() || blockEntity.storedISSMana <= 0) return;
+
+        // One budget per tick for the whole reservoir, shared fairly.
+        //
+        // Through 1.9.0 this loop granted each nearby player a FULL getTransferRate() every tick,
+        // so a reservoir next to four players drained four times its configured rate — the rate
+        // was per-player in practice while the config described it as the block's. It also
+        // followed the entity list's order, so whoever happened to be first was served first every
+        // tick and could starve the others when mana ran low.
+        List<Player> ordered = new ArrayList<>(nearbyPlayers);
+        ordered.sort(Comparator.comparing(Player::getUUID));
+
+        int budget = Math.min(getTransferRate(), blockEntity.storedISSMana);
+        if (budget <= 0) return;
+
+        int count = ordered.size();
+                        // Rotate who receives the remainder so the same player is not favoured every tick.
+        int rotation = TransferBudget.rotationFor(level.getGameTime(), count);
+
+        int transferredTotal = 0;
+        for (int i = 0; i < count && transferredTotal < budget; i++) {
+            Player player = ordered.get((i + rotation) % count);
+            int allowance = TransferBudget.shareFor(budget, count, i);
+            if (allowance <= 0) continue;
+
             MagicData magicData = MagicData.getPlayerMagicData(player);
-            if (magicData != null && blockEntity.storedISSMana > 0) {
-                float currentMana = magicData.getMana();
-                // Under ANS ARS_PRIMARY, getMana() is mixin-redirected to the
-                // Ars pool — use the matching max from the bridge so our
-                // clamp ceiling is in the same units.
-                float maxMana = ArsNSpellsCompat.getEffectiveMaxMana(player);
-                
-                if (currentMana < maxMana) {
-                    int toTransfer = Math.min(getTransferRate(), blockEntity.storedISSMana);
-                    toTransfer = Math.min(toTransfer, (int)(maxMana - currentMana));
-                    
-                    magicData.addMana(toTransfer);
-                    blockEntity.storedISSMana -= toTransfer;
-                    blockEntity.notifyChanged();
-                }
-            }
+            if (magicData == null) continue;
+
+            float currentMana = magicData.getMana();
+            // Under ANS ARS_PRIMARY, getMana() is mixin-redirected to the Ars pool — use the
+            // matching max from the bridge so our clamp ceiling is in the same units.
+            float maxMana = ArsNSpellsCompat.getEffectiveMaxMana(player);
+            if (currentMana >= maxMana) continue;
+
+            int room = (int) Math.max(0f, maxMana - currentMana);
+            int toTransfer = Math.min(Math.min(allowance, room), blockEntity.storedISSMana - transferredTotal);
+            if (toTransfer <= 0) continue;
+
+            magicData.addMana(toTransfer);
+            transferredTotal += toTransfer;
+        }
+
+        // Sync once, and only if the stored value actually moved. The old code called
+        // notifyChanged() inside the per-player loop, sending a block update packet per player per
+        // tick even when nothing had changed for that player.
+        if (transferredTotal > 0) {
+            blockEntity.storedISSMana -= transferredTotal;
+            blockEntity.notifyChanged();
         }
     }
 
@@ -116,7 +149,8 @@ public class SpellReservoirBlockEntity extends BlockEntity {
     }
 
     public int drainMana(int amount) {
-        int drained = Math.min(amount, this.storedISSMana);
+        int drained = Math.max(0, Math.min(amount, this.storedISSMana));
+        if (drained <= 0) return 0;   // nothing moved: do not sync an unchanged value
         this.storedISSMana -= drained;
         notifyChanged();
         return drained;

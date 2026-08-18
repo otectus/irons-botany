@@ -1,10 +1,11 @@
 {
   "homepage": "https://github.com/ironsbotany/ironsbotany",
   "promos": {
-    "1.20.1-latest": "1.10.0",
-    "1.20.1-recommended": "1.10.0"
+    "1.20.1-latest": "1.11.0",
+    "1.20.1-recommended": "1.11.0"
   },
   "1.20.1": {
+    "1.11.0": "Client HUD, per-tick transfer fairness, and data hardening.\n\nThe mana HUD ran its full capability sweep about fifteen times per frame (the overlay event was never filtered to a single overlay), double-counted stacks that appear in both Botania lists, ignored the configured HUD scale, and did not clamp its fill. All fixed, plus a hudPulseNearby accessibility option for motion sensitivity.\n\nSpell Reservoirs and Mana Conduits granted EACH nearby player a full transfer rate per tick, so the configured block rate was silently multiplied by the number of players standing nearby. There is now one budget per tick, divided fairly and rotated so nobody is permanently favoured.\n\nStored mana is clamped and computed in long throughout, so malformed NBT cannot report negative mana and a large top-up cannot wrap around to zero the item.\n\nIncludes everything in 1.10.0. BACK UP YOUR WORLD BEFORE UPGRADING. See docs/UPGRADING-1.10.0.md.",
     "1.10.0": "Stability, compatibility and correctness release.\n\nFixes the crash when ISS-Scroll Descriptions or ISS-Restrictions inspect a Botany spell: the Botany school's display name had no colour, and Iron's Spells' SchoolType#getTargetingColor() dereferences that colour without a null check.\n\nRebuilds mana routing as a single per-cast transaction. A failed, cancelled or interrupted cast can no longer drain mana or consume catalysts, same-tick casts can no longer share payment state, and Botania payment now works for a player carrying a single mana item (it previously never could).\n\nEvery upgrade orb now applies its own attribute and returns its own item; rune-enhanced scrolls finally do something; Botany power, resistance and mana-efficiency attributes are attached to players and actually read.\n\nBACK UP YOUR WORLD BEFORE UPGRADING. See docs/UPGRADING-1.10.0.md.",
     "1.9.0": "Custom Botany school, endgame items, audit fixes. Superseded by 1.10.0, which fixes a crash affecting scroll add-ons.",
     "1.7.2": "Removed a duplicate Patchouli book entry.",

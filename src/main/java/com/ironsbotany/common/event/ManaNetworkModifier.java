@@ -43,6 +43,21 @@ public class ManaNetworkModifier {
     }
 
     /**
+     * Clear every tracked modification when the server stops.
+     *
+     * <p>The map is static, so without this a single-player session that quits to the title screen
+     * and loads a different save would carry the previous world's pending modifications into it.
+     */
+    @SubscribeEvent
+    public static void onServerStopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+        int pending = ACTIVE_MODIFICATIONS.size();
+        ACTIVE_MODIFICATIONS.clear();
+        if (pending > 0) {
+            IronsBotany.LOGGER.debug("Cleared {} pending mana-network modification(s) on server stop", pending);
+        }
+    }
+
+    /**
      * Apply modifications to Botania block entities
      */
     @SubscribeEvent
@@ -58,15 +73,24 @@ public class ManaNetworkModifier {
             DimBlockPos key = entry.getKey();
             ActiveModification mod = entry.getValue();
 
-            // Check if modification expired
-            if (mod.isExpired(event.getServer().overworld().getGameTime())) {
+            // Resolve the record's own dimension first: expiry must be judged against the clock
+            // of the world the modification lives in, not the overworld's. Vanilla shares game
+            // time across dimensions, but a mod-added dimension need not, and 1.9.0 compared every
+            // record against overworld time regardless.
+            ServerLevel level = event.getServer().getLevel(key.dimension());
+            if (level == null) {
+                // The dimension is gone (unloaded, or removed from the pack). The record can never
+                // be applied or expire on its own clock again, so drop it rather than leak it.
                 iterator.remove();
                 continue;
             }
 
-            // Apply modification only to the correct dimension
-            ServerLevel level = event.getServer().getLevel(key.dimension());
-            if (level != null) {
+            if (mod.isExpired(level.getGameTime())) {
+                iterator.remove();
+                continue;
+            }
+
+            {
                 BlockEntity be = level.getBlockEntity(key.pos());
                 if (be != null) {
                     applyModification(be, mod);
