@@ -1,4 +1,7 @@
-# Iron's Botany 1.10.0 — agent handoff report
+# Iron's Botany 1.10.0 / 1.11.0 — agent handoff report
+
+> Updated for 1.11.0, which completed the P2 client-HUD, transfer-fairness and data-hardening work
+> that 1.10.0 deferred. Sections below reflect the 1.11.0 state.
 
 Structured to the seven points the brief requires at the end of each phase, aggregated across all
 phases. Verified facts are separated from inference throughout.
@@ -112,13 +115,14 @@ the artifact-provenance candidate could not be tested at all.
 
 **Run and passing:**
 
-- `gradlew test` — **77 tests, 0 failures.** Mana planning (including the exact three-partial-source
+- `gradlew test` — **85 tests, 0 failures.** Mana planning (including the exact three-partial-source
   over-count and the single-item case), cost composition (overflow, non-finite rejection, discount
   stacking), transaction state machine and per-cast identity, school metadata contract, NBT
-  migration fixtures, spell-config repair, upgrade-orb data identity.
+  migration fixtures, spell-config repair, upgrade-orb data identity, and fair transfer-budget division.
 - `gradlew build` — clean, including `validateAssets` and `validateArtifact`.
-- `validateArtifact` on the release candidate: **611 entries, 86/86 PNGs decoded, 9/9 spell icons
-  present and 16×16**, every asset reference resolves inside the archive.
+- `validateArtifact` on the 1.11.0 release candidate: **612 entries, 86/86 PNGs decoded, 9/9 spell
+  icons present and 16×16**, every asset reference resolves inside the archive.
+  `sha256 5b67b78fd0fc2bba484d46a0911ac2f647beeaee60490fb932a268ba86b9bada`, 669 541 bytes.
 
 **Two tests caught real bugs during development, which is the point of having them:**
 
@@ -151,14 +155,22 @@ counted rather than measured:
 
 | Path | Before | After |
 | --- | --- | --- |
+| Mana HUD | Full Botania capability sweep + bar draw once **per registered overlay**, i.e. ~15x per frame, every frame | Once per frame on the hotbar overlay; totals cached and refreshed 5x/second |
+| HUD proximity check | 13x13x13 = 2 197 `getBlockEntity` calls per second | Block-entity maps of chunks in range; unreceived chunks skipped |
+| Reservoir / conduit transfer | One full transfer rate **per nearby player** per tick, plus one block-update packet per player per tick | One budget per tick total, one packet, and only when the stored value changed |
 | Mana pool proximity lookup | `BlockPos.betweenClosed` over the full cuboid — at radius 8 that is 17×9×17 = 2 601 `getBlockEntity` calls per affordability check, and the check ran twice per cast (has + drain) | Iterates the block-entity maps of chunks in range; unloaded chunks skipped, never loaded. Cost is proportional to nearby block entities, not volume. Runs once per cast. |
 | Flower aura scan | 33×33×33 = 35 937 block reads at radius 16 | 33×13×33 = 14 157, vertical extent capped at ±6; unloaded chunks skipped |
 | Aura cache | Keyed on UUID only, so radius-8 and radius-16 callers shared one entry and thrashed it | Keyed by (player, radius), validated on dimension and position |
 | Gaia's Blessing | A 35 937-position cuboid scan per `ModifySpellLevelEvent` — including non-cast level queries | Folded into the cast transaction's source collection; no separate scan |
 
-**Not addressed, and honestly out of scope for this pass:** the client HUD still recomputes item
-capabilities per render frame and does not honour `HUD_SCALE` or `PARTICLE_DENSITY`. This is a P2 in
-the audit and is the largest remaining item.
+**Addressed in 1.11.0.** The HUD items listed here as outstanding after 1.10.0 are done: it draws
+once per frame instead of once per overlay, caches its totals, honours the HUD scale, and clamps its
+fill. `PARTICLE_DENSITY` was resolved by deprecation rather than implementation — particle counts are
+chosen server-side before the packet is sent, so a client config cannot influence them, and vanilla's
+Video Settings -> Particles already does. That reasoning is recorded in the decisions document.
+
+**Still not measured.** These are counted reductions in work done, not profiled timings; no running
+server was available to measure tick time, allocations or frame cost.
 
 ---
 
@@ -176,8 +188,9 @@ the audit and is the largest remaining item.
 4. **The long-cast commit path** — where sources change between reservation and commit — falls back
    to letting ISS charge normally. This is documented and conserves mana, but is the least-exercised
    branch.
-5. **Phase 4 is partially complete.** Aura caching, scan bounding and lifecycle clearing are done;
-   the HUD render-frame work and per-tick transfer budgets are not.
+5. **Phase 4 is complete as scoped.** Aura caching, scan bounding, lifecycle clearing, the HUD
+   render path and per-tick transfer budgets are all done. What remains unverified is the *effect*:
+   every performance claim is a reduction in counted work, not a profiled measurement.
 
 **Next smallest safe step:** assemble the minimum profile (Forge + Botania + Iron's Spells + Curios
 + this JAR), start a client, obtain all nine spells, and run `/irons_botany diagnose`. That single
