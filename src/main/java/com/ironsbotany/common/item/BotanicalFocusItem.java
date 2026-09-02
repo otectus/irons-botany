@@ -33,11 +33,13 @@ public class BotanicalFocusItem extends Item implements ICurioItem {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+        if (BotanicalFocusSiphon.equipsOnUse(player.isShiftKeyDown())) {
+            return InteractionResultHolder.pass(stack);
+        }
         if (!level.isClientSide) {
-            boolean current = stack.getOrCreateTag().getBoolean("siphonMode");
-            stack.getOrCreateTag().putBoolean("siphonMode", !current);
+            boolean enabled = BotanicalFocusSiphon.toggle(stack);
             player.displayClientMessage(
-                Component.translatable("item.ironsbotany.botanical_focus.siphon_" + (!current ? "on" : "off")),
+                Component.translatable("item.ironsbotany.botanical_focus.siphon_" + (enabled ? "on" : "off")),
                 true);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
@@ -60,7 +62,7 @@ public class BotanicalFocusItem extends Item implements ICurioItem {
         if (slotContext.entity().level().isClientSide()) return;
 
         // Siphon: convert Botania mana from inventory items to ISS mana (once per second)
-        if (stack.getOrCreateTag().getBoolean("siphonMode")) {
+        if (BotanicalFocusSiphon.isSiphonMode(stack)) {
             if (slotContext.entity() instanceof Player player) {
                 if (player.level().getGameTime() % 20 == 0) {
                     // Find a mana item in the player's inventory to siphon from
@@ -81,10 +83,12 @@ public class BotanicalFocusItem extends Item implements ICurioItem {
                 .withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("item.ironsbotany.botanical_focus.tooltip.2")
                 .withStyle(ChatFormatting.BLUE));
+        tooltip.add(Component.translatable("item.ironsbotany.botanical_focus.tooltip.3")
+                .withStyle(ChatFormatting.BLUE));
         tooltip.add(Component.literal("+50 Max Mana").withStyle(ChatFormatting.GREEN));
         tooltip.add(Component.literal("+10% Mana Regeneration").withStyle(ChatFormatting.GREEN));
 
-        boolean siphonMode = stack.getOrCreateTag().getBoolean("siphonMode");
+        boolean siphonMode = BotanicalFocusSiphon.isSiphonMode(stack);
         tooltip.add(Component.translatable("item.ironsbotany.botanical_focus.siphon_" + (siphonMode ? "on" : "off"))
                 .withStyle(siphonMode ? ChatFormatting.GREEN : ChatFormatting.RED));
 
@@ -93,6 +97,7 @@ public class BotanicalFocusItem extends Item implements ICurioItem {
 
     @Override
     public boolean canEquipFromUse(SlotContext slotContext, ItemStack stack) {
-        return true;
+        // Only sneaking equips; a plain right-click is reserved for the siphon toggle in use().
+        return slotContext.entity() instanceof Player p && BotanicalFocusSiphon.equipsOnUse(p.isShiftKeyDown());
     }
 }
