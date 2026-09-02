@@ -1,0 +1,16 @@
+{
+  "name": "Botanical Burst",
+  "icon": "ironsbotany:spell_petal",
+  "category": "ironsbotany:spells",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Botanical Burst$() fires a concentrated mana burst projectile at your target.$(br2)$(l)Max Level:$() 8$(br)$(l)Type:$() Attack$(br)$(l)Botania Mana Cost:$() 20,000 + 10,000/level$(br2)The projectile deals magic damage and leaves a trail of cherry leaf particles. At higher levels, damage increases significantly. Enhanced by the Velocity Lens and Bore Lens catalysts."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Scribing the Scroll",
+      "text": "Scrolls are not crafted at a table. Set a $(l)Scroll Forge$() with $(l)Uncommon Ink$() and a Botany focus — a $(l)Spell Petal$(), a $(l)Botanical Focus$(), or any item tagged $(t)#ironsbotany:focus/botany$() — then choose $(l)Botanical Burst$() from the spell list.$(br2)The ink rarity sets the highest spell level the forge will scribe, so richer ink is the only way to reach the upper levels of this spell."
+    }
+  ]
+}

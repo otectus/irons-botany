@@ -1,0 +1,15 @@
+{
+  "name": "Flower Auras",
+  "icon": "ironsbotany:spell_petal",
+  "category": "ironsbotany:deep_synergy",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Flower Auras$() are passive buffs provided by nearby Botania functional flowers when you cast spells.$(br2)$(l)Bellethorne$() (8-block range)$(br)Buffs shield/damage spells: +30% thorns, +20% damage$(br2)$(l)Jaded Amaranthus$() (10-block range)$(br)Buffs summon spells: +5s duration, +50% health, 30% extra summon chance$(br2)$(l)Heisei Dream$() (12-block range)$(br)Buffs illusion/mind spells: +40% damage, confusion effect"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Rannuncarpus$() (6-block range)$(br)Buffs ritual/continuous spells: +30% cast speed, -15% mana cost, auto-ritual placement$(br2)Aura strength decreases with distance. Stand closer to flowers for maximum effect. Multiple auras can stack (configurable, max 5 by default). Build a spell garden around your casting area for the best results!"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ plugins {
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
 
-version = '1.11.0'
+version = '2.0.1'
 group = 'com.ironsbotany'
 
 base {
@@ -63,6 +63,11 @@ minecraft {
     }
 }
 
+// Datagen output is on the resource path, but every asset this mod ships today is hand-written.
+// Nine item models deliberately use `minecraft:item/handheld` while IBItemModelProvider emits
+// `item/generated` for every item, so if `runData` is ever re-enabled the two sources will claim the
+// same paths. FAIL makes that collision a build error instead of a silent flattening to sprite-style
+// rendering; when datagen is revived, delete the hand-written file rather than relaxing this.
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
@@ -125,6 +130,7 @@ tasks.named('test', Test) {
 }
 
 tasks.named('processResources', ProcessResources).configure {
+    duplicatesStrategy = DuplicatesStrategy.FAIL
     var replaceProperties = [
             minecraft_version: '1.20.1',
             minecraft_version_range: '[1.20.1,1.21)',
@@ -175,12 +181,23 @@ tasks.register('validateAssets') {
             def path = ref.contains(':') ? ref.substring(ref.indexOf(':') + 1) : ref
             new File(assets, "textures/${path}.png")
         }
+        // Resolve a particle sprite id to its PNG. Vanilla's particles atlas is a directory source
+        // with source "particle" and an EMPTY prefix, so the id for
+        // assets/ironsbotany/textures/particle/foo.png is "ironsbotany:foo" - the "particle/"
+        // segment is not part of the id. Resolving these through texFile is what made the shipped
+        // definitions carry a prefix the atlas never publishes.
+        def particleFile = { String ref ->
+            if (ref == null) return null
+            def path = ref.contains(':') ? ref.substring(ref.indexOf(':') + 1) : ref
+            new File(assets, "textures/particle/${path}.png")
+        }
         // Resolve an "ironsbotany:<path>" model ref to its JSON file (skip vanilla/other namespaces).
         def modelFile = { String ref ->
             if (ref == null) return null
-            if (ref.contains(':') && !ref.startsWith('ironsbotany:')) return null
-            def path = ref.contains(':') ? ref.substring(ref.indexOf(':') + 1) : ref
-            new File(assets, "models/${path}.json")
+            // A namespace-less ref defaults to minecraft:, which lives in another archive - only
+            // this mod's own models can be asserted here.
+            if (!ref.startsWith('ironsbotany:')) return null
+            new File(assets, "models/${ref.substring(ref.indexOf(':') + 1)}.json")
         }
         def checkPng = { File png, String origin ->
             if (png == null) return
@@ -202,11 +219,21 @@ tasks.register('validateAssets') {
             }
         }
 
-        // 3. Particle definitions: every sprite in the textures[] list must resolve.
+        // 3. Particle definitions: every sprite in the textures[] list must resolve, under the id
+        //    scheme the particles atlas actually publishes.
         def pd = new File(assets, 'particles')
         if (pd.isDirectory()) {
             pd.listFiles({ f -> f.name.endsWith('.json') } as FileFilter).each { f ->
-                json.parse(f).textures?.each { s -> checkPng(texFile(s), "particles/${f.name}") }
+                json.parse(f).textures?.each { s ->
+                    def ref = s as String
+                    def path = ref.contains(':') ? ref.substring(ref.indexOf(':') + 1) : ref
+                    if (path.startsWith('particle/')) {
+                        errors << "particles/${f.name}: sprite ${ref} carries a 'particle/' prefix the " +
+                                  "particles atlas does not publish - drop it and name the file alone"
+                    } else {
+                        checkPng(particleFile(ref), "particles/${f.name}")
+                    }
+                }
             }
         }
 
@@ -229,6 +256,31 @@ tasks.register('validateAssets') {
             while (matcher.find()) {
                 def id = matcher.group(1)
                 checkPng(new File(assets, "textures/gui/spell_icons/${id}.png"), "IBSpells spell '${id}'")
+            }
+        }
+
+        // 6. Per-school Iron's Spells models. ISS's ClientSetup#registerSpecialModels iterates
+        //    EVERY registered SchoolType and registers `<ns>:item/scroll_<school>` and
+        //    `<ns>:item/affinity_ring_<school>` as additional models. No Item owns those paths, so
+        //    rules 1-4 above cannot see them go missing - and missing means the black-and-magenta
+        //    missing-model cube in game (ScrollModel's fallback compares against the shared missing
+        //    model, but a registered-but-absent model bakes to its own instance, so the check misses).
+        def schoolPaths = [] as Set
+        [new File(javaSrc, 'com/ironsbotany/common/registry/IBSchools.java'),
+         new File(javaSrc, 'com/ironsbotany/common/registry/BotanySchool.java')].each { f ->
+            if (!f.exists()) return
+            def m1 = f.text =~ /SCHOOLS\.register\("([a-z0-9_]+)"/
+            while (m1.find()) schoolPaths << m1.group(1)
+            def m2 = f.text =~ /String\s+PATH\s*=\s*"([a-z0-9_]+)"/
+            while (m2.find()) schoolPaths << m2.group(1)
+        }
+        if (schoolPaths.isEmpty()) errors << "could not read any school registration from IBSchools.java / BotanySchool.java"
+        schoolPaths.each { school ->
+            ['scroll', 'affinity_ring'].each { kind ->
+                def mf = new File(assets, "models/item/${kind}_${school}.json")
+                if (!mf.exists()) {
+                    errors << "school '${school}': Iron's Spells registers ironsbotany:item/${kind}_${school} for it, but ${mf} is missing"
+                }
             }
         }
 
@@ -255,8 +307,12 @@ tasks.register('validateArtifact') {
     dependsOn tasks.named('jar')
     def jarProvider = tasks.named('jar').flatMap { it.archiveFile }
     def spellsSource = file('src/main/java/com/ironsbotany/common/registry/IBSpells.java')
+    def schoolsSource = file('src/main/java/com/ironsbotany/common/registry/IBSchools.java')
+    def botanySchoolSource = file('src/main/java/com/ironsbotany/common/registry/BotanySchool.java')
     inputs.file(jarProvider)
     inputs.file(spellsSource)
+    inputs.file(schoolsSource)
+    inputs.file(botanySchoolSource)
 
     doLast {
         def archive = jarProvider.get().asFile
@@ -276,6 +332,23 @@ tasks.register('validateArtifact') {
                 def ns = ref.contains(':') ? ref.substring(0, ref.indexOf(':')) : 'minecraft'
                 def path = ref.contains(':') ? ref.substring(ref.indexOf(':') + 1) : ref
                 ns == 'ironsbotany' ? "assets/ironsbotany/textures/${path}.png" : null
+            }
+            // Particle sprites resolve differently from every other texture reference. Vanilla's
+            // particles atlas (assets/minecraft/atlases/particles.json) is a directory source with
+            // source "particle" and an EMPTY prefix, so the sprite id for
+            // assets/<ns>/textures/particle/foo.png is "<ns>:foo" — no "particle/" segment. Feeding
+            // such an id to texEntry would look for assets/<ns>/textures/foo.png and wrongly report
+            // it missing, which is how the shipped definitions came to carry a "particle/" prefix
+            // the atlas never publishes.
+            def particleEntry = { String ref ->
+                if (!(ref instanceof String)) return null
+                def ns = ref.contains(':') ? ref.substring(0, ref.indexOf(':')) : 'minecraft'
+                def path = ref.contains(':') ? ref.substring(ref.indexOf(':') + 1) : ref
+                if (ns != 'ironsbotany') return null
+                if (path.startsWith('particle/')) {
+                    return "PREFIXED:${ref}"
+                }
+                "assets/ironsbotany/textures/particle/${path}.png"
             }
             def modelEntry = { String ref ->
                 if (!(ref instanceof String)) return null
@@ -337,11 +410,18 @@ tasks.register('validateArtifact') {
                 }
             }
 
-            // 4. Particle definitions must point at packaged sprites.
+            // 4. Particle definitions must point at packaged sprites, named the way the particles
+            //    atlas actually publishes them.
             names.findAll { it.startsWith('assets/ironsbotany/particles/') && it.endsWith('.json') }.each { name ->
                 json.parse(read(name), 'UTF-8').textures?.each { s ->
-                    def entry = texEntry(s as String)
-                    if (entry != null && !has(entry)) errors << "${name}: missing sprite ${entry}"
+                    def entry = particleEntry(s as String)
+                    if (entry == null) return
+                    if (entry.startsWith('PREFIXED:')) {
+                        errors << "${name}: sprite ${entry - 'PREFIXED:'} carries a 'particle/' prefix the " +
+                                  "particles atlas does not publish — drop it and name the file alone"
+                    } else if (!has(entry)) {
+                        errors << "${name}: missing sprite ${entry}"
+                    }
                 }
             }
 
@@ -387,6 +467,62 @@ tasks.register('validateArtifact') {
 
             // 7. Metadata the loader needs.
             ['META-INF/mods.toml', 'pack.mcmeta'].each { if (!has(it)) errors << "missing ${it}" }
+
+            // 8. Per-school Iron's Spells models must be packaged. ISS registers
+            //    `<ns>:item/scroll_<school>` and `<ns>:item/affinity_ring_<school>` as additional
+            //    models for every registered school, and no Item owns either path, so rule 2 above
+            //    cannot notice them. Absent, the scroll and the affinity ring both render as the
+            //    missing-model cube - the purple/black report 1.10.0 could not reproduce.
+            def schools = [] as Set
+            [schoolsSource, botanySchoolSource].each { f ->
+                if (!f.exists()) return
+                def m1 = f.text =~ /SCHOOLS\.register\("([a-z0-9_]+)"/
+                while (m1.find()) schools << m1.group(1)
+                def m2 = f.text =~ /String\s+PATH\s*=\s*"([a-z0-9_]+)"/
+                while (m2.find()) schools << m2.group(1)
+            }
+            if (schools.isEmpty()) errors << "could not read any school registration from ${schoolsSource.name} / ${botanySchoolSource.name}"
+            schools.each { school ->
+                ['scroll', 'affinity_ring'].each { kind ->
+                    def entry = "assets/ironsbotany/models/item/${kind}_${school}.json"
+                    if (!has(entry)) {
+                        errors << "school '${school}' is registered but ${entry} is not in the artifact - Iron's Spells registers ironsbotany:item/${kind}_${school} for it"
+                    }
+                }
+            }
+
+            // 9. Patchouli 1.20 book layout. Patchouli removed `use_resource_pack: false` in 1.20:
+            //    its Book constructor now throws and the book is skipped unless the flag is true,
+            //    and the flag means every content file lives under assets/, leaving only book.json
+            //    in data/. Setting the flag without moving the content yields a book that loads
+            //    with no categories and no entries, which is worse than the original bug.
+            names.findAll { it ==~ /data\/[^\/]+\/patchouli_books\/[^\/]+\/book\.json/ }.each { name ->
+                def parts = name.split('/')
+                def ns = parts[1]
+                def book = parts[3]
+                if (!json.parse(read(name), 'UTF-8').use_resource_pack) {
+                    errors << "${name}: use_resource_pack must be true on 1.20 - Patchouli refuses the book otherwise"
+                }
+                def root = "assets/${ns}/patchouli_books/${book}/"
+                def cats = names.findAll { it.startsWith(root) && it.contains('/categories/') && it.endsWith('.json') }
+                def bookEntries = names.findAll { it.startsWith(root) && it.contains('/entries/') && it.endsWith('.json') }
+                if (cats.isEmpty()) errors << "${name}: no categories packaged under ${root}<lang>/categories/"
+                if (bookEntries.isEmpty()) errors << "${name}: no entries packaged under ${root}<lang>/entries/"
+                names.findAll {
+                    it.startsWith("data/${ns}/patchouli_books/${book}/") && it != name && !it.endsWith('/')
+                }.each {
+                    errors << "${it}: book content must live under assets/ since Patchouli 1.20, not data/"
+                }
+                def catIds = cats.collect {
+                    ns + ':' + (it.substring(it.indexOf('/categories/') + '/categories/'.length()) - '.json')
+                } as Set
+                bookEntries.each { bookEntry ->
+                    def category = json.parse(read(bookEntry), 'UTF-8').category as String
+                    if (category != null && category.startsWith(ns + ':') && !catIds.contains(category)) {
+                        errors << "${bookEntry}: category ${category} does not exist in the artifact"
+                    }
+                }
+            }
 
             if (!errors.isEmpty()) {
                 throw new GradleException(

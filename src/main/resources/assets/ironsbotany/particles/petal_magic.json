@@ -1,8 +1,8 @@
 {
   "textures": [
-    "ironsbotany:particle/petal_0",
-    "ironsbotany:particle/petal_1",
-    "ironsbotany:particle/petal_2",
-    "ironsbotany:particle/petal_3"
+    "ironsbotany:petal_0",
+    "ironsbotany:petal_1",
+    "ironsbotany:petal_2",
+    "ironsbotany:petal_3"
   ]
 }

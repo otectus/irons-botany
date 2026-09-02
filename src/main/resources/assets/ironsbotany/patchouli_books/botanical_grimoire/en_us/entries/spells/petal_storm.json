@@ -1,0 +1,16 @@
+{
+  "name": "Petal Storm",
+  "icon": "ironsbotany:spell_petal",
+  "category": "ironsbotany:spells",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Petal Storm$() unleashes a storm of razor-sharp petals that slice through all enemies in an area.$(br2)$(l)Max Level:$() 5$(br)$(l)Type:$() AoE Attack$(br)$(l)Botania Mana Cost:$() 25,000 + 12,000/level$(br2)Hits multiple targets in a radius around you with knockback. The petal projectiles can be enhanced by Bore Lens (pierce) and Velocity Lens (speed + range) catalysts."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Scribing the Scroll",
+      "text": "Scrolls are not crafted at a table. Set a $(l)Scroll Forge$() with $(l)Uncommon Ink$() and a Botany focus — a $(l)Spell Petal$(), a $(l)Botanical Focus$(), or any item tagged $(t)#ironsbotany:focus/botany$() — then choose $(l)Petal Storm$() from the spell list.$(br2)The ink rarity sets the highest spell level the forge will scribe, so richer ink is the only way to reach the upper levels of this spell."
+    }
+  ]
+}

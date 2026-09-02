@@ -1,0 +1,16 @@
+{
+  "name": "Mana Bloom",
+  "icon": "ironsbotany:spell_petal",
+  "category": "ironsbotany:spells",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Mana Bloom$() scatters mystical generating flowers across the battlefield.$(br2)$(l)Max Level:$() 5$(br)$(l)Type:$() Utility$(br)$(l)Botania Mana Cost:$() 10,000 + 10,000/level$(br2)At higher levels, more flowers are spawned across a wider area. The flowers are temporary and vanish after a short time, but they generate small amounts of Botania mana while active."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Scribing the Scroll",
+      "text": "Scrolls are not crafted at a table. Set a $(l)Scroll Forge$() with $(l)Common Ink$() and a Botany focus — a $(l)Spell Petal$(), a $(l)Botanical Focus$(), or any item tagged $(t)#ironsbotany:focus/botany$() — then choose $(l)Mana Bloom$() from the spell list.$(br2)The ink rarity sets the highest spell level the forge will scribe, so richer ink is the only way to reach the upper levels of this spell."
+    }
+  ]
+}

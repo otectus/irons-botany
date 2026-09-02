@@ -1,0 +1,16 @@
+{
+  "name": "Spark Swarm",
+  "icon": "ironsbotany:spell_petal",
+  "category": "ironsbotany:spells",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(l)Spark Swarm$() summons a swarm of combat Sparks that seek out and attack nearby enemies.$(br2)$(l)Max Level:$() 7$(br)$(l)Type:$() Summon$(br)$(l)Botania Mana Cost:$() 40,000 + 15,000/level$(br2)Summons 3-9 homing spark entities (scaling with level) that last 5-13 seconds. The sparks pulse with cyan energy and deal damage on contact."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Scribing the Scroll",
+      "text": "Scrolls are not crafted at a table. Set a $(l)Scroll Forge$() with $(l)Rare Ink$() and a Botany focus — a $(l)Spell Petal$(), a $(l)Botanical Focus$(), or any item tagged $(t)#ironsbotany:focus/botany$() — then choose $(l)Spark Swarm$() from the spell list.$(br2)The ink rarity sets the highest spell level the forge will scribe, so richer ink is the only way to reach the upper levels of this spell."
+    }
+  ]
+}

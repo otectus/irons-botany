@@ -3,7 +3,7 @@
 ## Quick Reference
 - **Mod ID**: `ironsbotany`
 - **Package**: `com.ironsbotany`
-- **Version**: 1.11.0 (targets Iron's Spells 3.16+)
+- **Version**: 2.0.1 (targets Iron's Spells 3.16+)
 - **MC**: 1.20.1 | **Forge**: 47.4.16 | **Java**: 17
 - **Mappings**: Official
 
@@ -15,7 +15,8 @@
 ## Roadmap
 - v1.5 (released) — bridge architecture, Botany SchoolType, Arcane Mana Altar
 - v1.6 (in development) — endgame items: Manasteel Staff, Terrasteel Spellbook, Arcane Codex, Elementium Scroll, 3 new curios, datagen revival
-- v2.0 (planned) — see [`PHASE_7_PLAN.md`](PHASE_7_PLAN.md): generating flowers, Verdant Caster (functional flower casts ISS spells), Corporea Scroll Rack, KubeJS surface
+- v2.0 (released) — Patchouli 1.20 book layout, the per-school ISS models, Scroll Forge citizenship
+- v3.0 (planned) — see [`PHASE_7_PLAN.md`](PHASE_7_PLAN.md), which still calls this work "v2.0": generating flowers, Verdant Caster (functional flower casts ISS spells), Corporea Scroll Rack, KubeJS surface
 
 ## Project Structure
 - `api/` — public API surface (stable across minor versions)

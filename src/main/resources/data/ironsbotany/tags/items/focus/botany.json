@@ -6,6 +6,10 @@
       "required": false
     },
     {
+      "id": "ironsbotany:spell_petal",
+      "required": false
+    },
+    {
       "id": "botania:mana_pearl",
       "required": false
     },

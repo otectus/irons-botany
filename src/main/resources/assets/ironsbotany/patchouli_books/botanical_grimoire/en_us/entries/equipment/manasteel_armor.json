@@ -1,0 +1,26 @@
+{
+  "name": "Manasteel Wizard Armor",
+  "icon": "ironsbotany:manasteel_wizard_chestplate",
+  "category": "ironsbotany:equipment",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The $(l)Manasteel Wizard Armor$() combines the protective properties of Manasteel with the arcane enhancements of wizard robes.$(br2)Each piece provides significant spell power and mana bonuses."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:manasteel_wizard_helmet",
+      "recipe2": "ironsbotany:manasteel_wizard_chestplate"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "ironsbotany:manasteel_wizard_leggings",
+      "recipe2": "ironsbotany:manasteel_wizard_boots"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Set Bonus",
+      "text": "$(l)Per Piece:$()$(br)• +15% All Spell Power$(br)• +150 Max Mana$(br2)$(l)Full Set (4 pieces):$()$(br)• $(l)Mana Shield:$() Absorbs 50% of incoming damage by consuming Botania mana$(br)• Cost: 10,000 Botania mana per heart absorbed$(br2)$(o)Keep your Mana Tablets charged!$()"
+    }
+  ]
+}

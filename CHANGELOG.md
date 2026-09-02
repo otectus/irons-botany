@@ -5,14 +5,162 @@ All notable changes to Iron's Botany will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — v2.0 planning
+## [Unreleased] — v3.0 planning
 
-The forward-looking v2.0 roadmap is captured in
-[`PHASE_7_PLAN.md`](PHASE_7_PLAN.md) at the project root. Headline features:
-six ISS-school generating flowers (mana feedback from spell casts), the Verdant
-Caster (a functional flower that casts ISS spells autonomously — the v2.0
-signature), Corporea Scroll Rack with spell-aware request matcher, and a
-KubeJS plugin surface for downstream addons.
+The forward-looking feature roadmap is captured in
+[`PHASE_7_PLAN.md`](PHASE_7_PLAN.md) at the project root, which still writes it
+up as "v2.0"; that number was taken by the integration release below, so the
+feature work now targets **3.0**. Headline features: six ISS-school generating
+flowers (mana feedback from spell casts), the Verdant Caster (a functional
+flower that casts ISS spells autonomously — the signature feature), Corporea
+Scroll Rack with spell-aware request matcher, and a KubeJS plugin surface for
+downstream addons.
+
+## [2.0.1] - Custom particles and custom sounds actually play
+
+Both defects were reported by the client log on every start of the Towns & Dragons pack and were
+silent in game: a purple-and-black checkerboard where a particle should be, and nothing at all where
+a sound should be. No gameplay, ids, or balance change here.
+
+### Fixed
+
+- **All three custom particles rendered as the missing-texture sprite.** The particle definitions
+  named their sprites `ironsbotany:particle/<name>`, but vanilla's `particles.json` atlas source
+  declares `"prefix": ""` — the sprite id for `textures/particle/foo.png` is `namespace:foo`, with no
+  `particle/` segment. Every one of the twelve frames behind `botanical_burst`, `mana_transfer` and
+  `petal_magic` therefore resolved to the missing sprite, which the log reported each start as
+  `Missing particle sprites: ironsbotany:particle/botanical_spark_0,...`. The three definition files
+  now use the ids the atlas actually publishes. The textures themselves never moved, and the two
+  block-entity renderers that blit `textures/particle/soft_glow_0.png` by file path are unaffected.
+- **All four custom sound events were silent.** `sounds.json` pointed at four vanilla sound *files*
+  that do not exist — `block/beacon/power_select`, `block/enchantment_table/use`, `block/grass/place`
+  and `entity/lightning_bolt/thunder` are the names of vanilla sound *events*, and each one is backed
+  by differently-named files. The client dropped all four with
+  `File minecraft:sounds/... does not exist, cannot add it to event ironsbotany:...`, leaving
+  `mana_conversion`, `botanical_cast`, `flower_bloom` and `spark_summon` registered but empty. They
+  now list the real files behind those vanilla events (`beacon/power1-3`,
+  `enchantment_table/enchant1-3`, `step/grass1-4`, `ambient/weather/thunder1-3`), which also gives
+  each event the variation the vanilla event has. Volume and pitch are unchanged, which is why the
+  files are referenced directly rather than redirected with `"type": "event"` — an event redirect
+  would discard both.
+- **The artifact check that should have caught the particle bug had the same bug.** Step 4 of the
+  `jarcheck` task resolved particle sprite ids with `texEntry`, the generic
+  `ns:path -> assets/ns/textures/path.png` rule, so `ironsbotany:petal_0` looked like a missing
+  texture and prefixing the ids with `particle/` was what made the check pass. It now resolves them
+  through the particles atlas's own rule and fails the build on an id that carries a `particle/`
+  prefix, so the shape that shipped here cannot ship again.
+
+## [2.0.0] - The Botanical Grimoire, the missing school assets, and Scroll Forge citizenship
+
+Everything a player needed to actually *reach* Botany content was broken in a different way, and each
+break was silent — a log line, a slot that refused an item, a model that resolved to the missing-model
+cube. Nothing here removes gameplay: the recipes deleted below had never once loaded, and every item
+id is unchanged.
+
+This closes the last open row from the 1.10.0 investigation (O-2, "purple/black render — not
+reproduced, no named root cause"). It had a root cause; it was simply not where anyone had looked.
+
+Major version because Botany scrolls and Mana Inks change from decorative to functional at the Scroll
+Forge, which changes what a Botany playthrough can do.
+
+### Fixed
+
+- **The Botanical Grimoire never opened.** Patchouli 1.20 removed `use_resource_pack: false`, and the
+  book omitted the flag entirely — which Patchouli reads as `false` — so it refused the book outright
+  and every load logged `Failed to load book ironsbotany:botanical_grimoire, skipping`. The flag is
+  now set, and the book's 28 content files (categories, entries and their subfolders) have moved from
+  `data/ironsbotany/patchouli_books/` to `assets/ironsbotany/patchouli_books/`, leaving only
+  `book.json` on the data side. That is the layout every Patchouli book that loads on 1.20.1 uses.
+
+- **Nine scroll recipes used a recipe type that does not exist.** They declared
+  `"type": "irons_spellbooks:scroll_forge"`; in Iron's Spellbooks 3.16.3 `scroll_forge` is a block id,
+  not a recipe serializer, and that mod's own `scroll_forge.json` is an ordinary
+  `minecraft:crafting_shaped` recipe *for* the block. Scroll creation is driven entirely by the spell
+  registry — school, focus tag, ink rarity and `allowCrafting()` — so all nine files were rejected on
+  every load and contributed nothing. They are removed. The one affordance they did describe is kept:
+  `ironsbotany:spell_petal` is now a member of `#ironsbotany:focus/botany`, so it works as a Scroll
+  Forge focus alongside `botanical_focus`. The nine Grimoire pages that pointed at those recipes were
+  crafting pages showing an empty grid; each is now a text page naming the ink rarity that spell needs
+  and the foci that satisfy the school.
+
+- **Botany scrolls and Botany affinity rings rendered as the purple-and-black missing-model cube.**
+  Iron's Spells' `ClientSetup#registerSpecialModels` walks *every* registered `SchoolType` and
+  registers two extra models per school — `<namespace>:item/scroll_<school>` and
+  `<namespace>:item/affinity_ring_<school>`. Iron's Botany shipped neither, because no `Item` owns
+  either path and so nothing in the asset gate could see them missing. `ScrollModel` does attempt a
+  fallback, but it identity-compares against the shared missing model while a registered-but-absent
+  model is baked under its own `BakedCacheKey` and is therefore a different instance — the comparison
+  misses. `AffinityRingRenderer` makes no attempt at all. `scroll_botany` and `affinity_ring_botany`
+  now ship with their own 16×16 sprites, and both `validateAssets` and `validateArtifact` fail the
+  build if a registered school is ever missing either one. This is also the "spell scrolls have no
+  icon" half of the earlier reports: the spell icons were always present and correct, but the scroll
+  carrying them was a missing-model cube.
+
+- **A Botany focus could not be placed in a Scroll Forge, so no Botany scroll could be made at all.**
+  The forge's focus slot filters on `#irons_spellbooks:school_focus`, a tag-of-tags listing Iron's
+  Spells' nine focus tags, and `#ironsbotany:focus/botany` was not a member. Added by additive tag
+  merge, the same way `#irons_spellbooks:can_be_upgraded` was already extended. Without this the
+  removal of the nine dead scroll recipes above would have left Botany spells with no crafting path.
+
+- **The three Mana Inks were rejected by the Scroll Forge.** The ink slot filters on
+  `instanceof InkItem`, not on a tag, and Minor/Greater/Prime Mana Ink were plain items that merely
+  looked the part — while their tooltips, the Grimoire and the Lexica Botania entry all said they
+  scribed scrolls. They now extend Iron's Spells' `InkItem` at Uncommon, Rare and Epic, matching the
+  rarity ladder their tooltips already advertised.
+
+- **The Elementium Scroll's Elven Trade recipe could never match, and would have been useless if it
+  had.** It required `#irons_spellbooks:scrolls`, a tag that does not exist in Iron's Spellbooks 3.16;
+  it is repointed at `#ironsbotany:spell_scrolls`, which ships in this mod, contains
+  `irons_spellbooks:scroll`, and was plainly written for this recipe — nothing had referenced it.
+  Separately, Botania's stock elven-trade serializer builds its output from stacks fixed in the JSON
+  and never looks at what was thrown in, so the trade consumed a spell-bound scroll and returned a
+  blank Elementium Scroll — an item with no spell and no way to ever get one, since the Scroll Forge
+  outputs Iron's Spells' scroll and not this one. The trade now runs through
+  `ironsbotany:elementium_scroll_trade`, which carries the bound spell across exactly as the Grimoire
+  has always described. This uses Botania's public recipe API rather than working around it:
+  `ElvenTradeRecipe#getOutputs(List)` receives the matched inputs for this purpose, and Botania's own
+  `LexiconElvenTradeRecipe` derives its output the same way. Ingredients stay data-driven and matching
+  follows Botania's algorithm unchanged.
+
+- **The Elementium Scroll never showed its own name.** `Scroll#getName` delegates to
+  `SpellData#getDisplayName`, which appends `ItemRegistry.SCROLL`'s description id — hardcoded, so
+  every subclass renders as "&lt;Spell&gt; Scroll" and `item.ironsbotany.elementium_scroll` was dead
+  weight in all 23 language files. A bound scroll now reads "&lt;Spell&gt; Elementium Scroll", and a
+  bare one — the creative-tab entry, which previously showed the empty spell's placeholder — reads
+  "Elementium Scroll".
+
+- **Botany kills printed a raw translation key.** The damage type's `message_id` is
+  `ironsbotany.botany`, so the game looks up `death.attack.ironsbotany.botany`; the language files
+  defined the bare `ironsbotany.botany` instead, which nothing reads. Renamed, with a `.player`
+  variant added to match Iron's Spells' own convention.
+
+- **`getSpellPower` and `getSpellCooldown` could throw on the client.** Both read `ForgeConfigSpec`
+  values — the global multipliers directly and the per-spell ones through the nine subclasses — with
+  no guard, and both are among the handful of methods a description or restriction add-on calls on an
+  arbitrary spell. Reached before the common config has loaded, `ConfigValue#get()` throws. They now
+  fall back to 1.0, matching how `BotanySpellConfig#resolveBotaniaCost` already handled the same
+  hazard. The spell integrity check and the `/irons_botany diagnose` command likewise no longer
+  dereference an unresolved `RegistryObject`; in the check's case that could have aborted a resource
+  reload from what is documented as a diagnostic.
+
+### Changed
+
+- The spell integrity check now also resolves the two per-school models through the live resource
+  manager, so a resource pack that shadows one is reported on the next `F3+T` rather than in a
+  screenshot.
+- `validateArtifact` gained a Patchouli rule: a packaged `book.json` with `use_resource_pack` true
+  must have at least one category and one entry under `assets/`, no content left behind under
+  `data/`, and no entry naming a category that is not in the artifact. This is the gate that would
+  have caught shipping the flag without the content.
+- Removed `data/irons_spellbooks/damage_type/nature_magic.json`, a byte-identical shadow copy of
+  Iron's Spells' own damage type inside its namespace. Unlike the tag merges it was a whole-file
+  override that would silently win or lose by datapack order the moment that file changed upstream.
+- `pack.mcmeta` dropped `forge:resource_pack_format` and `forge:data_pack_format`. Forge 1.20.1 reads
+  neither key — it builds `forge:client_resources_pack_format` / `forge:server_data_pack_format` from
+  the `PackType` name — so they were inert, but the value left in them was the 1.19 data-pack number
+  and would have declared an incompatible pack the moment anyone "corrected" the names.
+- Language files: added the two missing entity names, and dropped a duplicated
+  `attribute.ironsbotany.mana_efficiency` key.
 
 ## [1.11.0] - Client HUD, transfer fairness & data hardening
 

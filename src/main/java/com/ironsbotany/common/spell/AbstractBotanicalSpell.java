@@ -83,17 +83,39 @@ public abstract class AbstractBotanicalSpell extends AbstractSpell {
         return 1.0;
     }
 
+    /**
+     * Evaluate a spell-scaling multiplier, falling back to {@code 1.0} if it cannot be read.
+     *
+     * <p>{@link #getSpellPower} and {@link #getSpellCooldown} are two of the handful of methods a
+     * description or restriction add-on calls on an arbitrary spell, and both read
+     * {@code ForgeConfigSpec} values — the global ones here and the per-spell ones inside
+     * {@link #perSpellPowerMultiplier()} / {@link #perSpellCooldownMultiplier()}. Reached on the
+     * client before the common config has loaded, {@code ConfigValue#get()} throws
+     * {@link IllegalStateException}, which would take down a tooltip render. Iron's Botany already
+     * guards its other cross-mod read path this way in {@code BotanySpellConfig#resolveBotaniaCost};
+     * this keeps the two consistent, and wrapping the per-spell call as well means the nine
+     * subclasses need no guard of their own.
+     */
+    private static double safeMultiplier(java.util.function.DoubleSupplier supplier) {
+        try {
+            double value = supplier.getAsDouble();
+            return Double.isFinite(value) ? value : 1.0;
+        } catch (Throwable t) {
+            return 1.0;
+        }
+    }
+
     @Override
     public float getSpellPower(int spellLevel, net.minecraft.world.entity.Entity sourceEntity) {
-        double mult = com.ironsbotany.common.config.CommonConfig.BOTANICAL_SPELL_POWER_MULTIPLIER.get()
-                * perSpellPowerMultiplier();
+        double mult = safeMultiplier(com.ironsbotany.common.config.CommonConfig.BOTANICAL_SPELL_POWER_MULTIPLIER::get)
+                * safeMultiplier(this::perSpellPowerMultiplier);
         return (float) (super.getSpellPower(spellLevel, sourceEntity) * mult);
     }
 
     @Override
     public int getSpellCooldown() {
-        double mult = com.ironsbotany.common.config.CommonConfig.SPELL_COOLDOWN_MULTIPLIER.get()
-                * perSpellCooldownMultiplier();
+        double mult = safeMultiplier(com.ironsbotany.common.config.CommonConfig.SPELL_COOLDOWN_MULTIPLIER::get)
+                * safeMultiplier(this::perSpellCooldownMultiplier);
         return Math.max(0, (int) Math.round(super.getSpellCooldown() * mult));
     }
 

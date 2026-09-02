@@ -91,7 +91,7 @@ public final class IronsBotanyCommands {
                 problems.add(spell.getSpellId() + ": no school");
                 continue;
             }
-            if (school != IBSchools.BOTANY.get()) {
+            if (IBSchools.BOTANY.isPresent() && school != IBSchools.BOTANY.get()) {
                 problems.add(spell.getSpellId() + ": resolved school is " + school.getId()
                         + " (expected " + BotanySchool.ID_STRING
                         + ") — check config/irons_spellbooks/spells/ironsbotany/");

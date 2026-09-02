@@ -51,6 +51,10 @@ public final class SpellIconIntegrityCheck implements ResourceManagerReloadListe
             checkSchoolMetadata(spell, problems);
         }
 
+        if (IBSchools.BOTANY.isPresent()) {
+            checkSchoolModels(resourceManager, IBSchools.BOTANY.get(), problems);
+        }
+
         if (problems.isEmpty()) {
             IronsBotany.LOGGER.info("Spell integrity check: {} spell(s) OK — icons resolve and school metadata is complete",
                     checked);
@@ -147,15 +151,43 @@ public final class SpellIconIntegrityCheck implements ResourceManagerReloadListe
             if (school.getCastSound() == null) {
                 problems.add(spell.getSpellId() + ": school " + school.getId() + " has no cast sound");
             }
+
+            // Every spell this mod registers should belong to this mod's school. A mismatch means a
+            // stale generated ISS spell config is overriding it, which is worth naming precisely.
+            // Kept inside the guard: this runs on the resource-reload thread, and an unresolved
+            // RegistryObject must not be able to abort a reload from a diagnostic.
+            if (IBSchools.BOTANY.isPresent() && school != IBSchools.BOTANY.get()) {
+                problems.add(spell.getSpellId() + ": resolved school is " + school.getId()
+                        + " rather than ironsbotany:botany — check config/irons_spellbooks/spells/ironsbotany/");
+            }
         } catch (RuntimeException e) {
             problems.add(spell.getSpellId() + ": school accessor threw " + e);
         }
+    }
 
-        // Every spell this mod registers should belong to this mod's school. A mismatch means a
-        // stale generated ISS spell config is overriding it, which is worth naming precisely.
-        if (school != IBSchools.BOTANY.get()) {
-            problems.add(spell.getSpellId() + ": resolved school is " + school.getId()
-                    + " rather than ironsbotany:botany — check config/irons_spellbooks/spells/ironsbotany/");
+    /**
+     * Resolve the two item models Iron's Spells derives from a school id and registers for every
+     * school in {@code ClientSetup#registerSpecialModels}:
+     * {@code <ns>:item/scroll_<school>} and {@code <ns>:item/affinity_ring_<school>}.
+     *
+     * <p>Missing either one is not a soft failure. {@code ScrollModel} tries to fall back by
+     * identity-comparing against the shared missing model, but a registered-but-absent model is
+     * baked under its own {@code BakedCacheKey} and so is a <em>different</em> instance — the
+     * comparison misses and the scroll renders as the missing-model cube.
+     * {@code AffinityRingRenderer} does not attempt a fallback at all. That is the black-and-magenta
+     * swatch players reported against 1.9.0, and it is invisible to any check that only looks at
+     * items this mod registers, because no {@code Item} owns either path.
+     */
+    private static void checkSchoolModels(ResourceManager resourceManager, SchoolType school, List<String> problems) {
+        ResourceLocation id = school.getId();
+        for (String prefix : new String[]{"scroll_", "affinity_ring_"}) {
+            ResourceLocation model = new ResourceLocation(
+                    id.getNamespace(), "models/item/" + prefix + id.getPath() + ".json");
+            if (resourceManager.getResource(model).isEmpty()) {
+                problems.add("school " + id + ": Iron's Spells registers " + id.getNamespace() + ":item/"
+                        + prefix + id.getPath() + " for this school but " + model
+                        + " does not resolve — it will render as the missing-model swatch");
+            }
         }
     }
 

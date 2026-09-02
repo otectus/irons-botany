@@ -1,8 +1,8 @@
 {
   "textures": [
-    "ironsbotany:particle/soft_glow_0",
-    "ironsbotany:particle/soft_glow_1",
-    "ironsbotany:particle/soft_glow_2",
-    "ironsbotany:particle/soft_glow_3"
+    "ironsbotany:soft_glow_0",
+    "ironsbotany:soft_glow_1",
+    "ironsbotany:soft_glow_2",
+    "ironsbotany:soft_glow_3"
   ]
 }

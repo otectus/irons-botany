@@ -167,7 +167,7 @@ Default conversion ratio: 1000 Botania mana = 1 ISS mana (configurable from 100 
 ## Discovery & Progression
 
 - **12 Advancements** guide you through the mod's systems — from your first Botanical Focus through catalysts, flower auras, armor set bonuses, Corporea logistics, and casting in Alfheim.
-- **Botanical Grimoire** (Patchouli guidebook) — Comprehensive in-game reference with 18 entries covering all spells, equipment, catalysts, flower auras, casting channels, mana systems, and advanced integration.
+- **Botanical Grimoire** (Patchouli guidebook) — Comprehensive in-game reference with 23 entries covering all spells, equipment, catalysts, flower auras, casting channels, mana systems, and advanced integration.
 - **Loot Integration** — Mod items appear in vanilla structure chests: Spell Petals in villages, Botanical Crystals in mineshafts, the Grimoire in stronghold libraries, and Orbs of Terran Might in end cities (toggleable).
 
 ---

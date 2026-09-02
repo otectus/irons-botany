@@ -1,5 +1,10 @@
 # Phase 7 / v2.0 — Implementation Plan
 
+> **Version note (2.0.0):** the release that shipped the Patchouli 1.20 book layout, the
+> per-school Iron's Spells models and Scroll Forge citizenship took the 2.0.0 number. The
+> feature work described below therefore targets **3.0**; every "v2.0" in this document
+> refers to that feature set, not to the released 2.0.0.
+
 **Status**: planning · **Target version**: 2.0.0 · **Estimated scope**: 6–9 months across multiple sessions
 
 This is the long-deferred v2.0 headline release: the *"mana network as caster"* arc from

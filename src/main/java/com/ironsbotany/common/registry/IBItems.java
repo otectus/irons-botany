@@ -2,6 +2,8 @@ package com.ironsbotany.common.registry;
 
 import com.ironsbotany.IronsBotany;
 import com.ironsbotany.common.item.*;
+import io.redspace.ironsspellbooks.api.spells.SpellRarity;
+import io.redspace.ironsspellbooks.registries.FluidRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -137,15 +139,21 @@ public class IBItems {
     public static final RegistryObject<Item> BOTANICAL_GRIMOIRE = ITEMS.register("botanical_grimoire",
             () -> new com.ironsbotany.common.item.BotanicalGrimoireItem(new Item.Properties().stacksTo(1)));
 
-    // Mana Inks (Phase 2B) — petal apothecary outputs that replace vanilla ink for ISS scroll forging
+    // Mana Inks (Phase 2B) — petal apothecary outputs that replace vanilla ink for ISS scroll forging.
+    // These must extend ISS's InkItem: the Scroll Forge's ink slot filters on
+    // `instanceof InkItem`, not on a tag, so a look-alike item is rejected outright.
+    // The SpellRarity is what caps the scribable spell level, so it has to match the tooltip.
     public static final RegistryObject<Item> MINOR_MANA_INK = ITEMS.register("minor_mana_ink",
-            () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.minor_mana_ink.tooltip"));
+            () -> new ManaInkItem(SpellRarity.UNCOMMON, FluidRegistry.UNCOMMON_INK, new Item.Properties(),
+                    "item.ironsbotany.minor_mana_ink.tooltip"));
 
     public static final RegistryObject<Item> GREATER_MANA_INK = ITEMS.register("greater_mana_ink",
-            () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.greater_mana_ink.tooltip"));
+            () -> new ManaInkItem(SpellRarity.RARE, FluidRegistry.RARE_INK, new Item.Properties(),
+                    "item.ironsbotany.greater_mana_ink.tooltip"));
 
     public static final RegistryObject<Item> PRIME_MANA_INK = ITEMS.register("prime_mana_ink",
-            () -> new TooltipItem(new Item.Properties(), "item.ironsbotany.prime_mana_ink.tooltip"));
+            () -> new ManaInkItem(SpellRarity.EPIC, FluidRegistry.EPIC_INK, new Item.Properties(),
+                    "item.ironsbotany.prime_mana_ink.tooltip"));
 
     // School-tied upgrade orbs (Phase 2C) — runic altar outputs, one per ISS school's spell-power attribute
     public static final RegistryObject<Item> ORB_OF_FIRE_POWER = ITEMS.register("orb_of_fire_power",

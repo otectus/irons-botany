@@ -156,7 +156,7 @@ All stages are individually toggleable. Use `bareBonesMode` to disable everythin
 
 ### Patchouli Documentation
 
-Iron's Botany ships a 24+ entry Patchouli book (*Botanical Grimoire*) covering every system. v2.0+ entries are organized under categories: Getting Started, Spells, Equipment, Advanced Systems, Deep Synergy.
+Iron's Botany ships a 23-entry Patchouli book (*Botanical Grimoire*) covering every system, organized under five categories: Getting Started, Spells, Equipment, Advanced Systems, Deep Synergy. Since Patchouli 1.20 the entries live under `assets/`; only `book.json` stays in `data/`.
 
 A 5-page Iron's Botany entry is also injected into the **Lexica Botania** itself — visible from inside Botania's own guidebook.
 
@@ -263,7 +263,8 @@ src/main/java/com/ironsbotany/
 
 - **v1.5** *(released)* — Bridge architecture, Botany SchoolType, Arcane Mana Altar, recipe content
 - **v1.6** *(in development)* — Manasteel Staff, Terrasteel Spellbook, Arcane Codex, Elementium Scroll, 3 new curios, datagen revival
-- **v2.0** *(planned)* — see [`PHASE_7_PLAN.md`](PHASE_7_PLAN.md): six ISS-school generating flowers, the Verdant Caster (functional flower casts ISS spells), Corporea Scroll Rack, KubeJS surface
+- **v2.0** *(released)* — Patchouli 1.20 book layout, the two per-school Iron's Spells models, Scroll Forge citizenship for the Botany focus and the Mana Inks
+- **v3.0** *(planned)* — see [`PHASE_7_PLAN.md`](PHASE_7_PLAN.md), which still labels this work "v2.0": six ISS-school generating flowers, the Verdant Caster (functional flower casts ISS spells), Corporea Scroll Rack, KubeJS surface
 
 ## Credits
 
